@@ -1,68 +1,92 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NextAI - Your digital assistant helping in work, communication, and daily life.">
   <title>NextAI - Twój Cyfrowy Partner</title>
-  <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTTXREp2zqsm0Q8tLoNT1ZgZsJcHJKP4yQX/hm7N+6BtRnpZHzpXKv5Fa4R+KzMweAc9lw5h2g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="header">
-    <h1 class="logo glitch" data-text="AgentAI">NextAI</h1>
-    <p class="subtitle">Twój osobisty asystent nowej generacji</p>
+
+  <!-- HERO -->
+  <header class="hero-section">
+    <div class="hero-content">
+      <h1 class="logo glitch" data-text="NextAI">⧉NextAI</h1>
+      <p>Twój cyfrowy partner – teraz jeszcze mądrzejszy.</p>
+      <a href="#features" class="hero-button">Poznaj możliwości</a>
+    </div>
   </header>
-    <!-- Panel Social Media -->
-    <div class="social-panel">
-      <a href="https://instagram.com/NextAI" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-      <a href="https://facebook.com/NextAI" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-      <a href="https://linkedin.com/NextAI" target="_blank" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-      <a href="https://youtube.com/NextAI" target="_blank" class="social-icon"><i class="fab fa-youtube"></i></a>
-    </div>  
 
-  <section class="hero">
-    <h2>Witaj w przyszłości interakcji</h2>
-    <p>Agenci AI pomagają Ci w pracy, komunikacji i życiu codziennym.</p>
-    <button class="cta">Zacznij teraz</button>
-  </section>
+  <!-- NAVIGATION -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">NextAI</a>
+      <button class="nav-toggle" aria-label="Otwórz menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#features">Funkcje</a></li>
+        <li class="nav-item"><a href="#packages">Pakiety</a></li>
+        <li class="nav-item"><a href="#contact">Kontakt</a></li>
+        <div class="nav-indicator"></div>
+      </ul>
+    </div>
+  </nav>
 
-  <section class="features">
-    <div class="feature-card">
-      <h3>🧠 Inteligencja</h3>
-      <p>Rozumie Twoje potrzeby i kontekst.</p>
-    </div>
-    <div class="feature-card">
-      <h3>⚡ Szybkość</h3>
-      <p>Reaguje natychmiast i precyzyjnie.</p>
-    </div>
-    <div class="feature-card">
-      <h3>🔒 Bezpieczeństwo</h3>
-      <p>Działa lokalnie lub chmurowo z pełnym szyfrowaniem.</p>
-    </div>
-  </section>
-
-  <!-- <section class="why">
-    <h2>Dlaczego warto?</h2>
-    <div class="why-grid">
-      <div class="why-card">
-        <h4>🚀 Automatyzacja</h4>
-        <p>Oszczędzaj czas dzięki inteligentnym agentom, które działają za Ciebie.</p>
+  <!-- FEATURES SECTION -->
+  <section id="features" class="features">
+    <h2 class="glitch" data-text="Dlaczego AI?">Dlaczego AI?</h2>
+    <div class="feature-cards">
+      <div class="feature-card">
+        <h3>🧠 Inteligencja</h3>
+        <p>Rozumie Twoje potrzeby i kontekst.</p>
       </div>
-      <div class="why-card">
-        <h4>💬 Komunikacja</h4>
-        <p>Naturalny język, intuicyjna obsługa i płynna integracja z systemami.</p>
+      <div class="feature-card">
+        <h3>⚡ Szybkość</h3>
+        <p>Reaguje natychmiast i precyzyjnie.</p>
       </div>
-      <div class="why-card">
-        <h4>🌐 Wszechstronność</h4>
-        <p>Od pracy zdalnej po obsługę klienta – zastosuj tam, gdzie chcesz.</p>
+      <div class="feature-card">
+        <h3>🔒 Bezpieczeństwo</h3>
+        <p>Działa lokalnie lub chmurowo z pełnym szyfrowaniem.</p>
       </div>
     </div>
   </section>
 
-  <section class="packages">
-    <h2>Rodzaje pakietów</h2>
+  <!-- AGENTS SECTION -->
+  <section class="power spotlight">
+    <h2 class="glitch" data-text="Co dają Agenci AI?">Co dają Agenci AI?</h2>
+    <div class="card-slider">
+      <div class="card left">
+        <i class="fas fa-brain"></i>
+        <h4>Analiza i Wnioskowanie</h4>
+        <p>Agent NextAI przetwarza dane szybciej niż człowiek — podejmuje trafne decyzje w czasie rzeczywistym.</p>
+      </div>
+      <div class="card center">
+        <i class="fas fa-robot"></i>
+        <h4>W pełni zautomatyzowane procesy</h4>
+        <p>Bez klikania, bez stresu – Agenci NextAI wykonują zadania samodzielnie, od A do Z.</p>
+      </div>
+      <div class="card right">
+        <i class="fas fa-sync-alt"></i>
+        <h4>Integracja bez granic</h4>
+        <p>Z systemami ERP, CRM, API – NextAI pasuje wszędzie, gdzie tylko chcesz.</p>
+      </div>
+    </div>
+    <div class="slider-controls">
+      <button class="slider-prev">&#10094;</button>
+      <button class="slider-next">&#10095;</button>
+    </div>
+  </section>
+
+  <!-- PACKAGES -->
+  <section id="packages" class="packages">
+    <h2 class="glitch" data-text="Rodzaje pakietów">Rodzaje pakietów</h2>
     <div class="package-grid">
-      <div class="package-card">
+      <div class="package-card start">
         <h3>Start</h3>
         <p>Idealny na początek. Do 3 agentów, 1 integracja, 24/7 wsparcie mailowe.</p>
         <span class="price">49 zł / mies.</span>
@@ -72,36 +96,33 @@
         <p>Dla wymagających. Do 10 agentów, API, integracje premium, wsparcie live.</p>
         <span class="price">129 zł / mies.</span>
       </div>
-      <div class="package-card">
+      <div class="package-card enterprise">
         <h3>Enterprise</h3>
         <p>Nieograniczona moc. Wszystkie funkcje, SLA, support dedykowany, white-label.</p>
         <span class="price">Indywidualna wycena</span>
       </div>
     </div>
-  </section> -->
+  </section>
 
-  <section class="contact">
-    <h2>Skontaktuj się z nami</h2>
+  <!-- CONTACT -->
+  <section id="contact" class="contact spotlight">
+    <h2 class="glitch" data-text="Skontaktuj się z nami">Skontaktuj się z nami</h2>
     <form class="contact-form">
-      <input type="text" name="name" placeholder="Imię" required />
-      <input type="email" name="email" placeholder="Email" required />
-      <textarea name="message" placeholder="Wiadomość" required></textarea>
+      <label for="name">Imię</label>
+      <input id="name" type="text" name="name" placeholder="Imię" required>
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" placeholder="Email" required>
+      <label for="message">Wiadomość</label>
+      <textarea id="message" name="message" placeholder="Wiadomość" required></textarea>
       <button type="submit">Wyślij</button>
     </form>
   </section>
 
-  <div id="form-modal" class="modal">
-    <div class="modal-content">
-      <span id="form-modal-icon" class="modal-icon">🤖</span>
-      <p id="form-modal-text">Wiadomość została wysłana!</p>
-      <button id="form-modal-button">Zamknij</button>
-    </div>
-  </div>
-
+  <!-- FOOTER -->
   <footer>
     <p>&copy; 2025 NextAI. Wszystkie prawa zastrzeżone.</p>
   </footer>
 
-  <script src="contact.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
