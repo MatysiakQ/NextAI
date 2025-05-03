@@ -1,45 +1,73 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="NextAI - Your digital assistant helping in work, communication, and daily life.">
-  <title>NextAI - Twój Cyfrowy Partner</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTTXREp2zqsm0Q8tLoNT1ZgZsJcHJKP4yQX/hm7N+6BtRnpZHzpXKv5Fa4R+KzMweAc9lw5h2g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NextAI – Twój cyfrowy partner w pracy, komunikacji i codzienności." />
+  <title>NextAI – Twój Cyfrowy Partner</title>
+
+  <!-- Hacker‑style font -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap"
+    rel="stylesheet"
+  />
+  <!-- FontAwesome 6.4.0 -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-KBMHUJCM8xvQNVf+DagUpvXtSnkVwdm0iXMj5HcTzuzM5IeeL7TntiKlNnPgkuxndKXSH+Yo9E7cCmuY3GD65A=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="background-grid"></div>
 
-  <!-- HERO -->
   <header class="hero-section">
     <div class="hero-content">
-      <h1 class="logo glitch" data-text="NextAI">⧉NextAI</h1>
+      <h1 class="logo typewriter">NextAI</h1>
       <p>Twój cyfrowy partner – teraz jeszcze mądrzejszy.</p>
       <a href="#features" class="hero-button">Poznaj możliwości</a>
     </div>
   </header>
 
-  <!-- NAVIGATION -->
+  <div class="social-panel">
+    <a href="https://instagram.com/PrintWall" target="_blank" class="social-icon">
+      <i class="fab fa-instagram"></i>
+    </a>
+    <a href="https://facebook.com/PrintWall" target="_blank" class="social-icon">
+      <i class="fab fa-facebook-f"></i>
+    </a>
+    <a href="https://linkedin.com/in/PrintWall" target="_blank" class="social-icon">
+      <i class="fab fa-linkedin-in"></i>
+    </a>
+    <a href="https://youtube.com/PrintWall" target="_blank" class="social-icon">
+      <i class="fab fa-youtube"></i>
+    </a>
+  </div>
+
   <nav class="navbar">
     <div class="nav-container">
       <a href="#" class="nav-logo">NextAI</a>
-      <button class="nav-toggle" aria-label="Otwórz menu">
+      <button class="nav-toggle">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
       <ul class="nav-menu">
-        <li class="nav-item"><a href="#features">Funkcje</a></li>
+        <li class="nav-indicator"></li>
+        <li class="nav-item"><a href="#features" class="active">Funkcje</a></li>
+        <li class="nav-item"><a href="#agents">Agenci</a></li>
         <li class="nav-item"><a href="#packages">Pakiety</a></li>
         <li class="nav-item"><a href="#contact">Kontakt</a></li>
-        <div class="nav-indicator"></div>
       </ul>
     </div>
   </nav>
 
-  <!-- FEATURES SECTION -->
   <section id="features" class="features">
-    <h2 class="glitch" data-text="Dlaczego AI?">Dlaczego AI?</h2>
+    <h2 class="section-title glitch" data-text="Dlaczego AI?">Dlaczego AI?</h2>
     <div class="feature-cards">
       <div class="feature-card">
         <h3>🧠 Inteligencja</h3>
@@ -56,9 +84,8 @@
     </div>
   </section>
 
-  <!-- AGENTS SECTION -->
-  <section class="power spotlight">
-    <h2 class="glitch" data-text="Co dają Agenci AI?">Co dają Agenci AI?</h2>
+  <section id="agents" class="power spotlight">
+    <h2 class="section-title glitch" data-text="Co dają Agenci AI?">Co dają Agenci AI?</h2>
     <div class="card-slider">
       <div class="card left">
         <i class="fas fa-brain"></i>
@@ -82,45 +109,42 @@
     </div>
   </section>
 
-  <!-- PACKAGES -->
   <section id="packages" class="packages">
-    <h2 class="glitch" data-text="Rodzaje pakietów">Rodzaje pakietów</h2>
+    <h2 class="section-title glitch" data-text="Rodzaje pakietów">Rodzaje pakietów</h2>
     <div class="package-grid">
       <div class="package-card start">
         <h3>Start</h3>
-        <p>Idealny na początek. Do 3 agentów, 1 integracja, 24/7 wsparcie mailowe.</p>
-        <span class="price">49 zł / mies.</span>
+        <p>Idealny na początek. Do 3 agentów, 1 integracja, wsparcie mailowe 24/7.</p>
+        <span class="price">49 zł / mies.</span>
       </div>
       <div class="package-card premium">
         <h3>Pro</h3>
-        <p>Dla wymagających. Do 10 agentów, API, integracje premium, wsparcie live.</p>
-        <span class="price">129 zł / mies.</span>
+        <p>Dla wymagających. Do 10 agentów, API, integracje premium, wsparcie live.</p>
+        <span class="price">129 zł / mies.</span>
       </div>
       <div class="package-card enterprise">
         <h3>Enterprise</h3>
-        <p>Nieograniczona moc. Wszystkie funkcje, SLA, support dedykowany, white-label.</p>
+        <p>Nieograniczona moc. Wszystkie funkcje, SLA, support dedykowany, white‑label.</p>
         <span class="price">Indywidualna wycena</span>
       </div>
     </div>
   </section>
 
-  <!-- CONTACT -->
   <section id="contact" class="contact spotlight">
-    <h2 class="glitch" data-text="Skontaktuj się z nami">Skontaktuj się z nami</h2>
+    <h2 class="section-title glitch" data-text="Skontaktuj się z nami">Skontaktuj się z nami</h2>
     <form class="contact-form">
       <label for="name">Imię</label>
-      <input id="name" type="text" name="name" placeholder="Imię" required>
+      <input id="name" type="text" name="name" placeholder="Imię" required />
       <label for="email">Email</label>
-      <input id="email" type="email" name="email" placeholder="Email" required>
+      <input id="email" type="email" name="email" placeholder="Email" required />
       <label for="message">Wiadomość</label>
       <textarea id="message" name="message" placeholder="Wiadomość" required></textarea>
       <button type="submit">Wyślij</button>
     </form>
   </section>
 
-  <!-- FOOTER -->
   <footer>
-    <p>&copy; 2025 NextAI. Wszystkie prawa zastrzeżone.</p>
+    <p>&copy; 2025 NextAI. Wszystkie prawa zastrzeżone.</p>
   </footer>
 
   <script src="main.js"></script>
