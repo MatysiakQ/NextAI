@@ -1,70 +1,93 @@
+// main.js
 document.addEventListener('DOMContentLoaded', () => {
-  // Navigation toggle and indicator
-  const toggle = document.querySelector('.nav-toggle');
-  const menu = document.querySelector('.nav-menu');
-  toggle.addEventListener('click', () => menu.classList.toggle('show'));
+  // NAVIGATION
+  const toggle     = document.querySelector('.nav-toggle');
+  const menu       = document.querySelector('.nav-menu');
+  const items      = document.querySelectorAll('.nav-item');
+  const indicator  = document.querySelector('.nav-indicator');
 
-  const navItems = document.querySelectorAll('.nav-item');
-  const indicator = document.querySelector('.nav-indicator');
-  function updateIndicator(el) {
-    const link = el.querySelector('a');
-    indicator.style.width = link.offsetWidth + 'px';
-    indicator.style.left = link.offsetLeft + 'px';
-    indicator.style.background = window.getComputedStyle(link).color;
-  }
-  navItems.forEach(item => item.addEventListener('mouseenter', () => updateIndicator(item)));
-  document.querySelector('.nav-menu').addEventListener('mouseleave', () => {
-    const active = document.querySelector('.nav-item a.active')?.parentElement;
-    active ? updateIndicator(active) : indicator.style.width = '0';
+  toggle?.addEventListener('click', () => {
+    menu.classList.toggle('show');
   });
 
-  // Smooth scroll & active link
-  const sections = document.querySelectorAll('section[id], .hero-section');
-  document.querySelectorAll('.nav-item a').forEach(link => {
+  function updateIndicator(el) {
+    const link = el?.querySelector('a');
+    if (!link || !indicator) return;
+    indicator.style.width      = link.offsetWidth + 'px';
+    indicator.style.left       = link.offsetLeft + 'px';
+    indicator.style.background = window.getComputedStyle(link).color;
+  }
+
+  // initial position
+  const activeItem = document.querySelector('.nav-item a.active')?.parentElement;
+  if (activeItem) updateIndicator(activeItem);
+
+  items.forEach(item => {
+    item.addEventListener('mouseenter', () => updateIndicator(item));
+  });
+  menu?.addEventListener('mouseleave', () => {
+    if (activeItem) updateIndicator(activeItem);
+    else indicator.style.width = '0';
+  });
+
+  // SMOOTH SCROLL & ACTIVE LINK ON SCROLL
+  const links    = document.querySelectorAll('.nav-item a');
+  const sections= document.querySelectorAll('section[id], .hero-section');
+
+  links.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
-      const target = document.querySelector(link.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      const href = link.getAttribute('href');
+      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
       menu.classList.remove('show');
     });
   });
+
   window.addEventListener('scroll', () => {
-    let pos = window.scrollY + 150;
+    const pos = window.scrollY + 150;
     sections.forEach(sec => {
-      const id = sec.id || 'hero';
-      const link = document.querySelector(`.nav-item a[href="#${id}"]`);
+      if (!sec.id) return;
+      const link = document.querySelector(`.nav-item a[href="#${sec.id}"]`);
       if (!link) return;
       if (pos >= sec.offsetTop && pos < sec.offsetTop + sec.offsetHeight) {
-        document.querySelectorAll('.nav-item a').forEach(a => a.classList.remove('active'));
+        links.forEach(a => a.classList.remove('active'));
         link.classList.add('active');
         updateIndicator(link.parentElement);
       }
     });
   });
 
-  // Slider
-  let current = 0;
-  const cards = document.querySelectorAll('.card');
-  const total = cards.length;
-  let interval;
+  // SLIDER
+  let current = 0, interval;
+  const cards   = document.querySelectorAll('.card');
+  const total   = cards.length;
+  const nextBtn = document.querySelector('.slider-next');
+  const prevBtn = document.querySelector('.slider-prev');
+
   function updateCards() {
-    cards.forEach((c,i) => c.className = 'card ' + (
-      i === current ? 'center' :
-      i === (current+1)%total ? 'right' :
-      i === (current-1+total)%total ? 'left' : ''
-    ));
+    cards.forEach((c,i) => {
+      c.className = 'card ' + (
+        i === current ? 'center' :
+        i === (current+1)%total ? 'right' :
+        i === (current-1+total)%total ? 'left' : ''
+      );
+    });
   }
   function next() { current = (current+1)%total; updateCards(); }
   function prev() { current = (current-1+total)%total; updateCards(); }
-  document.querySelector('.slider-next').addEventListener('click', () => { next(); reset(); });
-  document.querySelector('.slider-prev').addEventListener('click', () => { prev(); reset(); });
-  function reset() { clearInterval(interval); interval = setInterval(next, 5000); }
-  updateCards(); reset();
+  function reset() {
+    clearInterval(interval);
+    interval = setInterval(next, 3000);
+  }
+  nextBtn?.addEventListener('click', () => { next(); reset(); });
+  prevBtn?.addEventListener('click', () => { prev(); reset(); });
+  if (cards.length) { updateCards(); reset(); }
 
-  // Periodic glitch animation – co 3 sekundy
-  const glitches = document.querySelectorAll('.glitch');
+  // GLITCH every 3 seconds
   setInterval(() => {
-    glitches.forEach(el => el.classList.add('glitch-animate'));
-    setTimeout(() => glitches.forEach(el => el.classList.remove('glitch-animate')), 1500);
+    document.querySelectorAll('.glitch').forEach(el => {
+      el.classList.add('glitch-active');
+      setTimeout(() => el.classList.remove('glitch-active'), 300);
+    });
   }, 3000);
 });
