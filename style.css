@@ -102,7 +102,10 @@ body {
   background: var(--accent-default);
   color: #000;
 }
-
+/* .social-icon:nth-child(1) {  }
+.social-icon:nth-child(2) {  }
+.social-icon:nth-child(3) {  }
+.social-icon:nth-child(4) {  } */
 /* Navigation */
 .navbar {
   position: sticky;
@@ -321,39 +324,65 @@ section {
 
 /* Packages */
 .package-grid {
+  width: 90%;
+  margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 0;
 }
 
 .package-card {
-  background: #111;
-  padding: 20px;
-  border-radius: 8px;
-  width: 280px;
+  width: 33.3333%;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   text-align: center;
-  border: 3px solid var(--accent-default);
-  transition: transform .3s, box-shadow .3s;
+  min-height: 100%;
+  box-sizing: border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.package-card.start {
-  --accent: var(--accent-default);
+.package-card ul {
+  flex-grow: 1;
+  padding: 0;
+  margin: 20px 0;
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  list-style: none;
 }
-
-.package-card.premium {
-  --accent: var(--accent-premium);
-  border-color: var(--accent);
-}
-
-.package-card.enterprise {
-  --accent: var(--accent-enterprise);
-  border-color: var(--accent);
-}
-
 .package-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 20px var(--accent);
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+}
+.package-card.enterprise h3 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.package-card.enterprise {
+  background: linear-gradient(135deg, #2e2e2e, #d4af37);
+  color: #fff;
+  border: 3px solid #d4af37;
+  font-weight: 500;
+}
+.package-card li {
+  margin: 5px 0;
+}
+
+.package-card .price-header {
+  font-size: 1.3rem;
+  margin-top: 10px;
+  color: var(--accent-default);
+}
+
+.package-card hr {
+  border: 1px solid var(--accent-default);
+  margin: 10px 0;
 }
 
 /* Contact */
@@ -449,8 +478,6 @@ section {
   stroke-width: 2;
   marker-end: url(#arrow);
 }
-
-
 
 
 #chat-widget {
@@ -700,4 +727,163 @@ footer {
 .glitch.glitch-active::after {
   animation: glitch-2 .3s steps(2) both;
   color: var(--accent-enterprise);
+}
+
+.triangle-box {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.triangle-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px var(--accent-default);
+}
+
+/* Modal style */
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #111;
+  border: 2px solid var(--accent-default);
+  padding: 40px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px; /* wcześniej 400px */
+  max-height: 80vh;
+  overflow-y: auto;
+  color: var(--accent-default);
+  text-align: left;
+  font-size: 1.2rem;
+  box-shadow: 0 0 25px var(--accent-default);
+  position: relative;
+  animation: popUp 0.3s ease forwards;
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popUp {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--accent-default);
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.3s;
+}
+
+.close-button:hover {
+  color: #fff;
+}
+
+/* Styl przycisku przełączania płatności */
+.billing-toggle {
+  margin-bottom: 20px;
+}
+
+#billing-switch {
+  padding: 10px 20px;
+  background-color: var(--accent-default); 
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background 0.3s, transform 0.3s;
+}
+#billing-switch:hover {
+  background-color: rgba(0, 255, 255, 0.8);
+  transform: scale(1.05);
+}
+
+
+/* Basic – styl niebieski */
+.package-card.start {
+  background: #0a0a0a;
+  border: 2px solid var(--accent-default);
+  color: var(--accent-default);
+}
+
+/* Pro – styl fioletowy */
+.package-card.premium {
+  background: linear-gradient(135deg, #2a003f, #8A2BE2);
+  border: 2px solid var(--accent-premium);
+  color: #fff;
+}
+.subscribe-button {
+  padding: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+  margin-top: 15px;
+}
+
+/* Basic – niebieski */
+.package-card.start .subscribe-button {
+  background-color: var(--accent-default);
+  color: #000;
+}
+.package-card.start .subscribe-button:hover {
+  background-color: rgba(0, 255, 255, 0.8);
+}
+
+/* Pro – fioletowy */
+.package-card.premium .subscribe-button {
+  background-color: var(--accent-premium);
+  color: #fff;
+}
+.package-card.premium .subscribe-button:hover {
+  background-color: #a347ff;
+}
+
+/* Enterprise – złoty */
+.package-card.enterprise .subscribe-button {
+  background-color: var(--accent-enterprise);
+  color: #000;
+}
+.package-card.enterprise .subscribe-button:hover {
+  background-color: #e6c200;
+}
+.hidden {
+  display: none !important;
+}
+#success-modal .modal-content {
+  font-size: 1.6rem;
+  text-align: center;
+  animation: glitch-1 1s infinite;
+  background: #111;
+  color: var(--accent-default);
 }
