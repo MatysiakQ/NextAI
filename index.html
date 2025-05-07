@@ -6,20 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="NextAI – Twój cyfrowy partner w pracy, komunikacji i codzienności." />
   <title>NextAI – Twój Cyfrowy Partner</title>
-
-  <!-- Hacker‑style font -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap"
-    rel="stylesheet"
-  />
-  <!-- FontAwesome 6.4.0 -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     integrity="sha512-KBMHUJCM8xvQNVf+DagUpvXtSnkVwdm0iXMj5HcTzuzM5IeeL7TntiKlNnPgkuxndKXSH+Yo9E7cCmuY3GD65A=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"
+    integrity="sha512-pvN9U+lrjMwEy7Xr+X0bfHt4X/bT+I/UqgmOKTk8xRy0jvVwKCa5Nd5JhkEUcwCBb43G4QMf0Gr2/aZdG+nu0A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -28,22 +21,22 @@
   <header class="hero-section">
     <div class="hero-content">
       <h1 class="logo typewriter">NextAI</h1>
-      <p>Twój cyfrowy partner – teraz jeszcze mądrzejszy.</p>
+      <p>Twój cyfrowy partner – teraz jeszcze mądrzejszy!</p>
       <a href="#features" class="hero-button">Poznaj możliwości</a>
     </div>
   </header>
 
   <div class="social-panel">
-    <a href="https://instagram.com/PrintWall" target="_blank" class="social-icon">
+    <a href="https://instagram.com/PrintWall" target="_blank" aria-label="Instagram" class="social-icon">
       <i class="fab fa-instagram"></i>
     </a>
-    <a href="https://facebook.com/PrintWall" target="_blank" class="social-icon">
+    <a href="https://facebook.com/PrintWall" target="_blank" aria-label="Facebook" class="social-icon">
       <i class="fab fa-facebook-f"></i>
     </a>
-    <a href="https://linkedin.com/in/PrintWall" target="_blank" class="social-icon">
+    <a href="https://linkedin.com/corporate/NextAI" target="_blank" aria-label="LinkedIn" class="social-icon">
       <i class="fab fa-linkedin-in"></i>
     </a>
-    <a href="https://youtube.com/PrintWall" target="_blank" class="social-icon">
+    <a href="https://youtube.com/PrintWall" target="_blank" aria-label="YouTube" class="social-icon">
       <i class="fab fa-youtube"></i>
     </a>
   </div>
@@ -51,15 +44,15 @@
   <nav class="navbar">
     <div class="nav-container">
       <a href="#" class="nav-logo">NextAI</a>
-      <button class="nav-toggle">
+      <button class="nav-toggle" aria-label="Toggle navigation">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
       <ul class="nav-menu">
-        <li class="nav-indicator"></li>
         <li class="nav-item"><a href="#features" class="active">Funkcje</a></li>
         <li class="nav-item"><a href="#agents">Agenci</a></li>
+        <li class="nav-item"><a href="#jak-wspolpraca">Współpraca</a></li>
         <li class="nav-item"><a href="#packages">Pakiety</a></li>
         <li class="nav-item"><a href="#contact">Kontakt</a></li>
       </ul>
@@ -108,23 +101,49 @@
       <button class="slider-next">&#10095;</button>
     </div>
   </section>
+  <h2 class="section-title glitch" data-text="Jak wygląda współpraca?">Jak wygląda współpraca?</h2>
+  <div class="cooperation-container triangle-layout">
+    <div class="triangle-box box-1">2</div>
+    <div class="triangle-box box-2">1</div>
+    <div class="triangle-box box-3">3</div>
+  
+    <svg class="triangle-arrows" viewBox="0 0 700 550">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent-default)" />
+        </marker>
+      </defs>
+    
+      <!-- Strzałka 1 → 2 -->
+      <line x1="350" y1="90" x2="110" y2="450" marker-end="url(#arrow)" />
+    
+      <!-- Strzałka 2 → 3 -->
+      <line x1="110" y1="450" x2="590" y2="450" marker-end="url(#arrow)" />
+    
+      <!-- Strzałka 3 → 1 -->
+      <line x1="590" y1="450" x2="350" y2="90" marker-end="url(#arrow)" />
+    </svg>
+    
+  </div>
+  
+  
 
   <section id="packages" class="packages">
     <h2 class="section-title glitch" data-text="Rodzaje pakietów">Rodzaje pakietów</h2>
     <div class="package-grid">
       <div class="package-card start">
-        <h3>Start</h3>
-        <p>Idealny na początek. Do 3 agentów, 1 integracja, wsparcie mailowe 24/7.</p>
-        <span class="price">49 zł / mies.</span>
+        <h3>Basic</h3>
+        <p>Idealny na początek. Do 3 agentów, 1 integracja, wsparcie mailowe 24/7.</p>
+        <span class="price">599 zł / mies.</span>
       </div>
       <div class="package-card premium">
         <h3>Pro</h3>
-        <p>Dla wymagających. Do 10 agentów, API, integracje premium, wsparcie live.</p>
-        <span class="price">129 zł / mies.</span>
+        <p>Dla wymagających. Do 10 agentów, API, integracje premium, wsparcie live.</p>
+        <span class="price">1199 zł / mies.</span>
       </div>
       <div class="package-card enterprise">
         <h3>Enterprise</h3>
-        <p>Nieograniczona moc. Wszystkie funkcje, SLA, support dedykowany, white‑label.</p>
+        <p>Nieograniczona moc. Wszystkie funkcje, SLA, support dedykowany, white-label.</p>
         <span class="price">Indywidualna wycena</span>
       </div>
     </div>
@@ -143,8 +162,21 @@
     </form>
   </section>
 
+  <button id="chat-toggle" aria-label="Otwórz czat">💬</button>
+  <div id="chat-widget">
+    <div id="chat-header">
+      <span>🤖 Wirtualny Asystent 🤖</span>
+      <button id="chat-close" aria-label="Zamknij czat">&times;</button>
+    </div>
+    <div id="chat-body"></div>
+    <div id="chat-input">
+      <input type="text" id="chat-question" placeholder="Zadaj pytanie..." />
+      <button id="chat-send" aria-label="Wyślij wiadomość">➤</button>
+    </div>
+  </div>
+
   <footer>
-    <p>&copy; 2025 NextAI. Wszystkie prawa zastrzeżone.</p>
+    <p>&copy; 2025 NextAI. Wszystkie prawa zastrzeżone.</p>
   </footer>
 
   <script src="main.js"></script>
