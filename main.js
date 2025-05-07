@@ -161,3 +161,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
+  // Modale dla kwadratów współpracy
+  const boxModals = {
+    '1': document.getElementById('modal-1'),
+    '2': document.getElementById('modal-2'),
+    '3': document.getElementById('modal-3')
+  };
+
+  document.querySelectorAll('.triangle-box').forEach(box => {
+    box.addEventListener('click', () => {
+      const number = box.textContent.trim();
+      const modal = boxModals[number];
+      if (modal) modal.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.close-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modalId = btn.getAttribute('data-modal');
+      document.getElementById(`modal-${modalId}`).classList.add('hidden');
+    });
+  });
+
+  // Kliknięcie poza modalem — zamyka
+  Object.values(boxModals).forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.add('hidden');
+    });
+  });
+  const billingBtn = document.getElementById('billing-switch');
+  const monthlyPrices = document.querySelectorAll('.price.monthly');
+  const yearlyPrices = document.querySelectorAll('.price.yearly');
+  const priceHeaders = document.querySelectorAll('.price-header');
+  
+  let yearly = false;
+  
+  billingBtn.addEventListener('click', () => {
+    yearly = !yearly;
+  
+    // Przełącz widoczność cen
+    monthlyPrices.forEach(p => p.classList.toggle('hidden', yearly));
+    yearlyPrices.forEach(p => p.classList.toggle('hidden', !yearly));
+  
+    // Zmień nagłówek „Cena/msc” na „Cena/rok”
+    priceHeaders.forEach(h => {
+      h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
+    });
+  
+    billingBtn.textContent = yearly
+      ? 'Przełącz na płatność miesięczną'
+      : 'Przełącz na płatność roczną';
+  });
+  
+  fetch('contact.php', { method: 'POST', body: new FormData(form) })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('success-modal').classList.remove('hidden');
+    } else {
+      alert('Błąd: ' + data.message);
+    }
+  });
