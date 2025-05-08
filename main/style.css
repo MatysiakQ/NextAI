@@ -371,7 +371,18 @@ section {
   font-weight: 500;
 }
 .package-card li {
-  margin: 5px 0;
+  position: relative;
+  padding-left: 20px; 
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.package-card li::before {
+  content: "– ";          /* myślnik zamiast kropki */
+  position: absolute;
+  left: 0;
+  color: var(--accent-default); /* neonowy akcent */
 }
 
 .package-card .price-header {
