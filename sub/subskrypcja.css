@@ -1,0 +1,374 @@
+:root {
+    --accent-default: #0ff;
+    --accent-premium: #8A2BE2;
+    --background-dark: #000;
+    --text-light: #eee;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    background: var(--background-dark);
+    font-family: 'Source Code Pro', monospace;
+    color: var(--text-light);
+    min-height: 100vh;
+    padding: 40px 20px;
+    position: relative;
+  }
+  
+  .background-grid {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    background-image:
+      linear-gradient(0deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 60s linear infinite;
+    z-index: -1;
+  }
+  
+  @keyframes gridMove {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 100px 100px;
+    }
+  }
+  
+  .packages {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #111;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+    border: 2px solid var(--accent-default);
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+    color: var(--accent-default);
+  }
+  
+  .section-title.glitch::before,
+  .section-title.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    color: var(--accent-premium);
+    clip: rect(0, 0, 0, 0);
+  }
+  
+  .section-title.glitch::before {
+    animation: glitch-1 1s infinite;
+  }
+  
+  .section-title.glitch::after {
+    animation: glitch-2 1s infinite;
+  }
+  
+  @keyframes glitch-1 {
+    0% {
+      clip: rect(0, 9999px, 0, 0);
+    }
+    10% {
+      clip: rect(2px, 9999px, 10px, 0);
+      transform: translate(-2px, -1px);
+    }
+    20% {
+      clip: rect(15px, 9999px, 20px, 0);
+      transform: translate(2px, 0);
+    }
+    30% {
+      clip: rect(5px, 9999px, 10px, 0);
+      transform: translate(-1px, 2px);
+    }
+    100% {
+      clip: rect(0, 9999px, 0, 0);
+      transform: none;
+    }
+  }
+  
+  @keyframes glitch-2 {
+    0% {
+      clip: rect(0, 9999px, 0, 0);
+    }
+    10% {
+      clip: rect(8px, 9999px, 16px, 0);
+      transform: translate(1px, 1px);
+    }
+    20% {
+      clip: rect(3px, 9999px, 14px, 0);
+      transform: translate(-1px, 1px);
+    }
+    30% {
+      clip: rect(5px, 9999px, 10px, 0);
+      transform: translate(2px, -2px);
+    }
+    100% {
+      clip: rect(0, 9999px, 0, 0);
+      transform: none;
+    }
+  }
+  
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .contact-form label {
+    font-size: 0.95rem;
+    color: var(--accent-default);
+  }
+  
+  .contact-form input,
+  .contact-form select {
+    padding: 10px;
+    background: #111;
+    border: 1px solid var(--accent-default);
+    border-radius: 4px;
+    color: #fff;
+  }
+  
+  .stripe-input {
+    padding: 12px;
+    background: #111;
+    border: 1px solid var(--accent-default);
+    border-radius: 4px;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  
+  #card-errors {
+    color: #ff5c5c;
+    font-size: 0.9rem;
+  }
+  
+  .subscribe-button {
+    padding: 12px;
+    background-color: var(--accent-premium);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  
+  .subscribe-button:hover {
+    background-color: #a347ff;
+    transform: scale(1.03);
+  }
+  .hidden {
+    display: none;
+  }
+  
+  .loader {
+    margin: 20px auto 0;
+    border: 4px solid rgba(0, 255, 255, 0.2);
+    border-top: 4px solid var(--accent-default);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .form-success {
+    margin-top: 20px;
+    text-align: center;
+    color: var(--accent-default);
+    font-weight: bold;
+    font-size: 1.1rem;
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in {
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+    animation-delay: 0.3s;
+  }
+  .invoice-fields {
+    display: grid;
+    gap: 12px;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    opacity: 1;
+  }
+  
+  .invoice-fields.hidden {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  
+  input[type="checkbox"] {
+    accent-color: var(--accent-default);
+    transform: scale(1.1);
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  
+  /* === Loader === */
+  .hidden {
+    display: none;
+  }
+  
+  .loader {
+    margin: 20px auto 0;
+    border: 4px solid rgba(0, 255, 255, 0.2);
+    border-top: 4px solid var(--accent-default);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* === Sukces === */
+  .form-success {
+    margin-top: 20px;
+    text-align: center;
+    color: var(--accent-default);
+    font-weight: bold;
+    font-size: 1.1rem;
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* === Animacja wejścia formularza === */
+  .animate-fade-in {
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+    animation-delay: 0.3s;
+  }
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-main-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .form-main-fields label,
+  .form-main-fields input,
+  .form-main-fields select {
+    grid-column: span 2;
+  }
+  
+  #card-element {
+    grid-column: span 2;
+  }
+  
+  .button-wrapper {
+    text-align: center;
+  }
+  
+  .subscribe-button {
+    padding: 12px 24px;
+    background-color: var(--accent-premium);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  
+  .subscribe-button:hover {
+    background-color: #a347ff;
+    transform: scale(1.05);
+  }
+  
+  .invoice-fields.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.98);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .invoice-fields {
+    opacity: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  /* Layout na dwie kolumny */
+.contact-form.two-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  transition: max-width 0.3s ease;
+}
+
+.contact-form.two-column.expanded {
+  grid-template-columns: 1fr 1fr;
+  max-width: 900px;
+}
+
+/* Lewa strona (główne pola) */
+.form-left {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Prawa strona (faktura) */
+.form-right {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Przycisk */
+.button-wrapper {
+  text-align: center;
+}
+
+/* Checkbox */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent-default);
+  transform: scale(1.1);
+}
+      
