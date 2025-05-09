@@ -3,6 +3,7 @@
  * Shared functions: env_load, sign_p24, register_p24, verify_p24,
  * createInvoiceFakturownia, sendInvoiceEmail, and simple mapping.
  */
+
 require __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
@@ -19,7 +20,7 @@ function sign_p24(array \$p24) {
 }
 
 function register_p24(array \$p24) {
-    \$ch = curl_init('https://secure.przelewy24.pl/api/v1/transaction/register');
+    \$ch = curl_init('https://sandbox.przelewy24.pl/api/v1/transaction/register');
     curl_setopt_array(\$ch, [CURLOPT_POST=>true, CURLOPT_POSTFIELDS=>json_encode(\$p24), CURLOPT_RETURNTRANSFER=>true, CURLOPT_HTTPHEADER=>['Content-Type:application/json']]);
     \$res = json_decode(curl_exec(\$ch), true);
     curl_close(\$ch);
@@ -39,7 +40,7 @@ function verify_status_p24(array \$input) {
         'sessionId'=>\$input['sessionId'], 'amount'=>\$input['amount'], 'currency'=>\$input['currency']
     ];
     \$verify['sign'] = hash('sha384', implode('|', array_merge(array_values(\$verify), [getenv('P24_CRC_KEY')])));
-    \$ch = curl_init('https://secure.przelewy24.pl/api/v1/transaction/verify');
+    \$ch = curl_init('https://sanbox.przelewy24.pl/api/v1/transaction/verify');
     curl_setopt_array(\$ch, [CURLOPT_POST=>true, CURLOPT_POSTFIELDS=>json_encode(\$verify), CURLOPT_RETURNTRANSFER=>true, CURLOPT_HTTPHEADER=>['Content-Type:application/json']]);
     \$res = json_decode(curl_exec(\$ch), true);
     curl_close(\$ch);
