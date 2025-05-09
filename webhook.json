@@ -1,9 +1,0 @@
-{
-  "merchantId": "5",
-  "posId":      "5",
-  "sessionId":  "p24_5f2e3c",
-  "amount":     9900,
-  "currency":   "PLN",
-  "status":     "success",
-  "sign":       "dowolny_bo_w_test_mode_zawsze_true"
-}
