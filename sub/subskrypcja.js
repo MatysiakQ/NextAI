@@ -1,32 +1,62 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-  const stripe = Stripe("pk_test_..."); // Uzupełnij kluczem publicznym z Stripe
+  const stripeKey = document.querySelector('meta[name="stripe-pk"]')?.content || "pk_test_placeholder";
+  const stripe = Stripe(stripeKey);
   const elements = stripe.elements();
-  const card = elements.create("card", {
-    style: {
-      base: {
-        iconColor: "#0ff",
-        color: "#fff",
-        fontFamily: "'Source Code Pro', monospace",
-        fontSize: "16px",
-        "::placeholder": {
-          color: "#888"
-        }
+
+  const style = {
+    base: {
+      iconColor: "#0ff",
+      color: "#fff",
+      fontFamily: "'Source Code Pro', monospace",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#888",
       },
-      invalid: {
-        color: "#ff5c5c"
-      }
-    }
-  });
-  card.mount("#card-element");
-  
-  // Obsługa pokazywania pól do faktury
+    },
+    invalid: {
+      color: "#ff5c5c",
+    },
+  };
+
+  const cardNumber = elements.create("cardNumber", { style });
+  const cardExpiry = elements.create("cardExpiry", { style });
+  const cardCvc = elements.create("cardCvc", { style });
+
+  cardNumber.mount("#card-number-element");
+  cardExpiry.mount("#card-expiry-element");
+  cardCvc.mount("#card-cvc-element");
+
   const invoiceToggle = document.getElementById("want-invoice");
   const invoiceFields = document.getElementById("invoice-fields");
-  
+  const form = document.getElementById("subscription-form");
+
+  // 🔄 Przywracanie danych z localStorage
+  const savedData = JSON.parse(localStorage.getItem("subscriptionForm")) || {};
+  for (const key in savedData) {
+    const field = document.getElementById(key);
+    if (field) {
+      if (field.type === "checkbox") {
+        field.checked = savedData[key];
+      } else {
+        field.value = savedData[key];
+      }
+    }
+  }
+  if (invoiceToggle.checked) {
+    invoiceFields.classList.remove("hidden");
+    form.classList.add("expanded");
+  }
+
+  // 🔐 Zapisywanie zmian do localStorage
+  form.querySelectorAll("input, select").forEach(field => {
+    field.addEventListener("input", () => {
+      const current = JSON.parse(localStorage.getItem("subscriptionForm")) || {};
+      current[field.id] = field.type === "checkbox" ? field.checked : field.value;
+      localStorage.setItem("subscriptionForm", JSON.stringify(current));
+    });
+  });
+
   invoiceToggle.addEventListener("change", () => {
-    const form = document.getElementById("subscription-form");
-  
     if (invoiceToggle.checked) {
       invoiceFields.classList.remove("hidden");
       form.classList.add("expanded");
@@ -35,67 +65,126 @@ document.addEventListener("DOMContentLoaded", function () {
       form.classList.remove("expanded");
     }
   });
-  
-  
-  document.getElementById("subscription-form").addEventListener("submit", async (e) => {
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
-    const email = document.getElementById("email").value;
+
+    const submitBtn = document.querySelector(".subscribe-button");
+    const loader = document.getElementById("form-loader");
+    const success = document.getElementById("form-success");
+    const errorBox = document.getElementById("card-errors");
+
+    form.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
+    errorBox.textContent = "";
+
+    const emailField = document.getElementById("email");
+    const cardNameField = document.getElementById("card-name");
+    const email = emailField.value.trim();
     const plan = document.getElementById("plan").value;
-    
-    const invoiceData = invoiceToggle.checked
-    ? {
-      company_name: document.getElementById("company-name").value,
-      company_nip: document.getElementById("company-nip").value,
-      company_address: document.getElementById("company-address").value,
-      company_zip: document.getElementById("company-zip").value,
-      company_city: document.getElementById("company-city").value,
+    const cardName = cardNameField.value.trim();
+
+    let hasError = false;
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      markError(emailField, "Wprowadź poprawny adres e-mail.");
+      hasError = true;
     }
-    : {};
-    
+
+    if (!cardName || cardName.length < 2) {
+      markError(cardNameField, "Podaj imię i nazwisko do płatności.");
+      hasError = true;
+    }
+
+    let invoiceData = {};
+    if (invoiceToggle.checked) {
+      const fields = {
+        company_name: document.getElementById("company-name"),
+        company_nip: document.getElementById("company-nip"),
+        company_address: document.getElementById("company-address"),
+        company_zip: document.getElementById("company-zip"),
+        company_city: document.getElementById("company-city"),
+      };
+
+      for (const [key, field] of Object.entries(fields)) {
+        const value = field.value.trim();
+
+        if (!value) {
+          markError(field, "Uzupełnij wszystkie dane do faktury.");
+          hasError = true;
+        }
+
+        if (key === "company_nip" && !/^\d{10}$/.test(value)) {
+          markError(field, "NIP powinien mieć dokładnie 10 cyfr.");
+          hasError = true;
+        }
+
+        if (key === "company_zip" && !/^\d{2}-\d{3}$/.test(value)) {
+          markError(field, "Kod pocztowy powinien mieć format XX-XXX.");
+          hasError = true;
+        }
+
+        invoiceData[key] = value;
+      }
+    }
+
+    if (hasError) return;
+
     const formData = new URLSearchParams({
       email,
       plan,
-      ...invoiceData
+      ...invoiceData,
     });
-    
-    document.getElementById("form-loader").classList.remove("hidden");
-    document.getElementById("card-errors").textContent = "";
-    document.getElementById("form-success").classList.add("hidden");
-    
-    // Krok 1: utwórz subskrypcję
-    const res = await fetch("payment.php", {
-      method: "POST",
-      body: formData
-    });
-    
-    const data = await res.json();
-    
-    if (!data.success) {
-      document.getElementById("card-errors").textContent = data.message;
-      document.getElementById("form-loader").classList.add("hidden");
-      return;
-    }
-    
-    // Krok 2: potwierdź płatność
-    const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-      payment_method: {
-        card,
-        billing_details: {
-          email
-        }
+
+    loader.classList.remove("hidden");
+    success.classList.add("hidden");
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch("payment.php", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        errorBox.textContent = data.message || "Wystąpił błąd przy tworzeniu subskrypcji.";
+        return;
       }
-    });
-    
-    if (error) {
-      document.getElementById("card-errors").textContent = error.message;
-      document.getElementById("form-loader").classList.add("hidden");
-    } else if (paymentIntent.status === "succeeded") {
-      document.getElementById("form-success").classList.remove("hidden");
-      document.getElementById("subscription-form").reset();
-      card.clear();
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: {
+          card: cardNumber,
+          billing_details: {
+            name: cardName,
+            email,
+          },
+        },
+      });
+
+      if (error) {
+        errorBox.textContent = error.message;
+      } else if (paymentIntent.status === "succeeded") {
+        success.classList.remove("hidden");
+        form.reset();
+        localStorage.removeItem("subscriptionForm");
+        cardNumber.clear();
+        cardExpiry.clear();
+        cardCvc.clear();
+        invoiceFields.classList.add("hidden");
+        form.classList.remove("expanded");
+      }
+    } catch (err) {
+      console.error(err);
+      errorBox.textContent = "Błąd połączenia z serwerem. Spróbuj ponownie.";
+    } finally {
+      loader.classList.add("hidden");
+      submitBtn.disabled = false;
     }
-    
-    document.getElementById("form-loader").classList.add("hidden");
   });
+
+  function markError(field, message) {
+    field.classList.add("field-error");
+    document.getElementById("card-errors").textContent = message;
+  }
 });

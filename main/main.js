@@ -161,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
+document.addEventListener('DOMContentLoaded', () => {
+  // ... (pozostaw cały istniejący kod wewnątrz DOMContentLoaded)
+
   // Modale dla kwadratów współpracy
   const boxModals = {
     '1': document.getElementById('modal-1'),
@@ -189,6 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === modal) modal.classList.add('hidden');
     });
   });
+
+  // Przełącznik płatności
   const billingBtn = document.getElementById('billing-switch');
   const monthlyPrices = document.querySelectorAll('.price.monthly');
   const yearlyPrices = document.querySelectorAll('.price.yearly');
@@ -196,29 +201,39 @@ document.addEventListener('DOMContentLoaded', () => {
   
   let yearly = false;
   
-  billingBtn.addEventListener('click', () => {
-    yearly = !yearly;
-  
-    // Przełącz widoczność cen
-    monthlyPrices.forEach(p => p.classList.toggle('hidden', yearly));
-    yearlyPrices.forEach(p => p.classList.toggle('hidden', !yearly));
-  
-    // Zmień nagłówek „Cena/msc” na „Cena/rok”
-    priceHeaders.forEach(h => {
-      h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
+  if (billingBtn) {
+    billingBtn.addEventListener('click', () => {
+      yearly = !yearly;
+    
+      // Przełącz widoczność cen
+      monthlyPrices.forEach(p => p.classList.toggle('hidden', yearly));
+      yearlyPrices.forEach(p => p.classList.toggle('hidden', !yearly));
+    
+      // Zmień nagłówek
+      priceHeaders.forEach(h => {
+        h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
+      });
+    
+      billingBtn.textContent = yearly
+        ? 'Przełącz na płatność miesięczną'
+        : 'Przełącz na płatność roczną';
     });
-  
-    billingBtn.textContent = yearly
-      ? 'Przełącz na płatność miesięczną'
-      : 'Przełącz na płatność roczną';
+  }
+
+  // Obsługa przycisków subskrypcji
+  document.querySelectorAll('.subscribe-button').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Określ typ pakietu
+      const card = this.closest('.package-card');
+      let packageType = 'basic';
+      
+      if (card.classList.contains('premium')) packageType = 'pro';
+      if (card.classList.contains('enterprise')) packageType = 'enterprise';
+      
+      // Przekierowanie z parametrem
+      window.location.href = '../sub/subskrypcja.html?package=' + packageType;
+    });
   });
-  
-  fetch('contact.php', { method: 'POST', body: new FormData(form) })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      document.getElementById('success-modal').classList.remove('hidden');
-    } else {
-      alert('Błąd: ' + data.message);
-    }
-  });
+});

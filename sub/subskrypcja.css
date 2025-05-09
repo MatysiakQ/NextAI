@@ -43,10 +43,10 @@
   }
   
   .packages {
-    max-width: 480px;
+    max-width: 840px;
+    padding: 40px;
     margin: 0 auto;
     background: #111;
-    padding: 30px;
     border-radius: 10px;
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
     border: 2px solid var(--accent-default);
@@ -214,7 +214,6 @@
   .invoice-fields {
     display: grid;
     gap: 12px;
-    margin-top: 10px;
     transition: all 0.3s ease;
     opacity: 1;
   }
@@ -338,7 +337,7 @@
 
 .contact-form.two-column.expanded {
   grid-template-columns: 1fr 1fr;
-  max-width: 900px;
+  max-width: 100%;
 }
 
 /* Lewa strona (główne pola) */
@@ -371,4 +370,77 @@ input[type="checkbox"] {
   accent-color: var(--accent-default);
   transform: scale(1.1);
 }
+.credit-card-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.credit-card {
+  background: linear-gradient(135deg, #1f1f1f, #3a3a3a);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  border: 2px solid var(--accent-default);
+  animation: glitch-border 1.5s infinite;
+  overflow: hidden;
+}
+.card-top input,
+.card-middle .stripe-input,
+.card-bottom .stripe-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--accent-default);
+  color: #fff;
+  font-size: 1rem;
+  padding: 6px 0;
+  font-family: 'Source Code Pro', monospace;
+  width: 100%;
+}
+
+.mastercard-logo {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 50px;
+  height: auto;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.15));
+}
+.card-bottom {
+  display: flex;
+  gap: 20px;
+}
+
+.glitch-border {
+  animation: glitch-border 1.5s infinite;
+}
+
+@keyframes glitch-border {
+  0%, 100% { box-shadow: 0 0 0 transparent; }
+  20% { box-shadow: 0 0 4px #0ff; }
+  40% { box-shadow: -2px 0 5px #8A2BE2; }
+  60% { box-shadow: 2px 0 5px #0ff; }
+  80% { box-shadow: 0 0 8px #8A2BE2; }
+}
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.field-error {
+  border-color: #ff5c5c !important;
+  box-shadow: 0 0 5px #ff5c5c;
+  animation: shake 0.3s ease-in-out;
+}
+
       
