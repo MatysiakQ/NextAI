@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
   <meta charset="UTF-8">
   <title>Subskrypcja – NextAI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- <meta name="stripe-pk" content="Tu trzeba klucz wrzucić jak co"> <-- Giga kurwa ważne!!!! -->
+  <meta name="stripe-pk"
+    content="pk_test_51RLkHqH55SekC08VIpRzgEPAGhPp9TUfVZrIVwbKFiiJ4WUMHZFDWXCk7R8Ia9QFktpoBNQxfl4wtTwMLxaj5deA00RqMemh8b">
   <link rel="stylesheet" href="subskrypcja.css">
   <script src="https://js.stripe.com/v3/"></script>
 
 </head>
+
 <body>
   <div class="background-grid"></div>
 
@@ -28,7 +31,8 @@
 
         <div class="credit-card-container">
           <div class="credit-card glitch-border">
-            <img class="mastercard-logo" src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="Mastercard">
+            <img class="mastercard-logo" src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
+              alt="Mastercard">
             <div class="card-top">
               <input type="text" id="card-name" placeholder="IMIĘ I NAZWISKO">
             </div>
@@ -41,7 +45,6 @@
             </div>
           </div>
         </div>
-        
 
         <div id="card-errors" role="alert"></div>
 
@@ -79,4 +82,5 @@
 
   <script src="subskrypcja.js"></script>
 </body>
+
 </html>

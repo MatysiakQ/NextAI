@@ -80,6 +80,23 @@ try {
         ]
     ]);
 
+    \Stripe\Customer::update($customer->id, [
+        'name'       => $companyName,
+        'address'    => [
+            'line1'       => $companyAddress,
+            'postal_code' => $companyZip,
+            'city'        => $companyCity,
+            'country'     => 'PL',
+        ],
+    ]);
+
+    \Stripe\TaxId::create([
+        'customer' => $customer->id,
+        'type'     => 'eu_vat',
+        'value'    => $companyNip,
+    ]);
+
+
     $subscription = Subscription::create([
         'customer' => $customer->id,
         'items' => [[ 'price' => $priceMap[$plan] ]],

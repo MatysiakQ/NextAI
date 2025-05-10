@@ -195,8 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Przełącznik płatności
   const billingBtn = document.getElementById('billing-switch');
-  const monthlyPrices = document.querySelectorAll('.price.monthly');
-  const yearlyPrices = document.querySelectorAll('.price.yearly');
+  const monthlyPrices = document.querySelectorAll('.price .monthly');
+  const yearlyPrices = document.querySelectorAll('.price .yearly');
   const priceHeaders = document.querySelectorAll('.price-header');
   
   let yearly = false;

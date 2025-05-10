@@ -128,9 +128,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (hasError) return;
-
+    
     const formData = new URLSearchParams({
-      email,  
+      email,
       plan,
       ...invoiceData,
     });
