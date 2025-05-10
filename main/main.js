@@ -236,4 +236,14 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '../sub/subskrypcja.html?package=' + packageType;
     });
   });
+
+  // Link do regulaminu
+  const termsLink = document.getElementById('terms-link');
+  if (termsLink) {
+    termsLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = '../main/Regulamin_NextAi.pdf';
+    });
+  }
+
 });
