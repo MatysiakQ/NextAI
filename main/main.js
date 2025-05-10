@@ -166,16 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Modale dla kwadratów współpracy
   const boxModals = {
-    '1': document.getElementById('modal-1'),
-    '2': document.getElementById('modal-2'),
-    '3': document.getElementById('modal-3')
+    'Krok 1': document.getElementById('modal-1'),
+    'Krok 2': document.getElementById('modal-2'),
+    'Krok 3': document.getElementById('modal-3')
   };
-
   document.querySelectorAll('.triangle-box').forEach(box => {
     box.addEventListener('click', () => {
       const number = box.textContent.trim();
       const modal = boxModals[number];
-      if (modal) modal.classList.remove('hidden');
+      if (modal) {
+         modal.classList.remove('hidden');
+         document.body.classList.add('modal-open');
+        }
     });
   });
 
@@ -183,13 +185,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const modalId = btn.getAttribute('data-modal');
       document.getElementById(`modal-${modalId}`).classList.add('hidden');
+           
     });
   });
 
   // Kliknięcie poza modalem — zamyka
   Object.values(boxModals).forEach(modal => {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.add('hidden');
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+      }
     });
   });
 
