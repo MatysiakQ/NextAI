@@ -9,6 +9,7 @@ use Dotenv\Dotenv;
 use Stripe\Stripe;
 use Stripe\Customer;
 use Stripe\Subscription;
+use Stripe\TaxId;
 
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -28,7 +29,7 @@ try {
     exit;
 }
 
-// Tylko POST
+// Sprawdzenie metody
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Tylko metoda POST jest dozwolona']);
@@ -38,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Dane z formularza
 $email = trim($_POST['email'] ?? '');
 $plan = trim($_POST['plan'] ?? '');
-
 $companyName = trim($_POST['company_name'] ?? '');
 $companyNip = trim($_POST['company_nip'] ?? '');
 $companyAddress = trim($_POST['company_address'] ?? '');
@@ -57,21 +57,22 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// Mapowanie pakietów
+// Cennik
 $priceMap = [
     'basic' => $_ENV['STRIPE_PRICE_BASIC'],
     'pro' => $_ENV['STRIPE_PRICE_PRO']
 ];
-
 if (!isset($priceMap[$plan])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Nieznany pakiet subskrypcji']);
     exit;
 }
 
+// Stripe
 Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
 
 try {
+    // Tworzenie klienta
     $customer = Customer::create([
         'email' => $email,
         'metadata' => [
@@ -80,23 +81,27 @@ try {
         ]
     ]);
 
-    \Stripe\Customer::update($customer->id, [
-        'name'       => $companyName,
-        'address'    => [
-            'line1'       => $companyAddress,
+    // Uzupełnienie danych adresowych
+    Customer::update($customer->id, [
+        'name' => $companyName ?: $email,
+        'address' => [
+            'line1' => $companyAddress,
             'postal_code' => $companyZip,
-            'city'        => $companyCity,
-            'country'     => 'PL',
-        ],
+            'city' => $companyCity,
+            'country' => 'PL'
+        ]
     ]);
 
-    \Stripe\TaxId::create([
-        'customer' => $customer->id,
-        'type'     => 'eu_vat',
-        'value'    => $companyNip,
-    ]);
+    // Tylko jeśli podano NIP
+    if ($companyNip) {
+        TaxId::create([
+            'customer' => $customer->id,
+            'type' => 'eu_vat',
+            'value' => $companyNip
+        ]);
+    }
 
-
+    // Subskrypcja
     $subscription = Subscription::create([
         'customer' => $customer->id,
         'items' => [[ 'price' => $priceMap[$plan] ]],
@@ -104,7 +109,7 @@ try {
         'expand' => ['latest_invoice.payment_intent']
     ]);
 
-    // Zapis do bazy
+    // Zapis do bazy: subscriptions
     $stmt = $pdo->prepare("
         INSERT INTO subscriptions 
         (email, stripe_customer_id, stripe_subscription_id, plan, status, created_at) 
@@ -112,7 +117,7 @@ try {
     ");
     $stmt->execute([$email, $customer->id, $subscription->id, $plan]);
 
-    // Zapis faktury (jeśli podano)
+    // Zapis do bazy: invoices (jeśli faktura)
     if ($companyName) {
         $stmt2 = $pdo->prepare("
             INSERT INTO invoices 
@@ -138,3 +143,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Błąd podczas tworzenia subskrypcji']);
 }
+?>
