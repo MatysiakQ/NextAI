@@ -1,31 +1,25 @@
 // main.js
 document.addEventListener('DOMContentLoaded', () => {
   // NAVIGATION
-  const toggle = document.querySelector('.nav-toggle');
   const menu = document.querySelector('.nav-menu');
-  const items = document.querySelectorAll('.nav-item');
   const links = document.querySelectorAll('.nav-item a');
   const sections = document.querySelectorAll('section[id], .hero-section');
   const indicator = document.createElement('div');
   indicator.classList.add('nav-indicator');
   menu.appendChild(indicator);
 
-  toggle?.addEventListener('click', () => {
-    menu.classList.toggle('show');
-  });
-
-  function updateIndicator(el) {
-    if (!el) return;
-    const link = el.querySelector('a');
+  function updateIndicator(link) {
     if (!link) return;
-    indicator.style.width = `${link.offsetWidth}px`;
-    indicator.style.left = `${link.offsetLeft}px`;
-    indicator.style.backgroundColor = link.classList.contains('active') ? 'blue' : 'inherit';
+    const rect = link.getBoundingClientRect();
+    const menuRect = menu.getBoundingClientRect();
+
+    // Ustaw pozycję i szerokość wskaźnika
+    indicator.style.width = `${rect.width}px`;
+    indicator.style.transform = `translateX(${rect.left - menuRect.left}px)`;
   }
 
-  // Aktualizacja aktywnej sekcji na scroll
-  window.addEventListener('scroll', () => {
-    const scrollPosition = window.scrollY + 150; // Dodajemy offset
+  function setActiveSection() {
+    const scrollPosition = window.scrollY + 150; // Offset dla lepszej detekcji
     let activeSection = null;
 
     sections.forEach(section => {
@@ -38,35 +32,45 @@ document.addEventListener('DOMContentLoaded', () => {
       const href = link.getAttribute('href');
       if (activeSection && href === `#${activeSection.id}`) {
         link.classList.add('active');
-        updateIndicator(link.parentElement);
+        updateIndicator(link);
       } else {
         link.classList.remove('active');
       }
     });
-  });
+  }
 
-  // Animacja wskaźnika na hover
+  // Ustaw wskaźnik na aktywny element przy załadowaniu strony
+  const activeLink = document.querySelector('.nav-item a.active');
+  if (activeLink) updateIndicator(activeLink);
+
+  // Aktualizacja wskaźnika na scroll
+  window.addEventListener('scroll', setActiveSection);
+
+  // Aktualizacja wskaźnika na hover
   links.forEach(link => {
-    link.addEventListener('mouseenter', () => updateIndicator(link.parentElement));
+    link.addEventListener('mouseenter', () => updateIndicator(link));
     link.addEventListener('mouseleave', () => {
       const activeLink = document.querySelector('.nav-item a.active');
-      if (activeLink) updateIndicator(activeLink.parentElement);
+      if (activeLink) updateIndicator(activeLink);
     });
   });
 
-  // Ustawienie wskaźnika na aktywną sekcję przy załadowaniu strony
-  const activeLink = document.querySelector('.nav-item a.active');
-  if (activeLink) updateIndicator(activeLink.parentElement);
-
-  // SMOOTH SCROLL
+  // Obsługa kliknięcia w linki nawigacji
   links.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
       const href = link.getAttribute('href');
       document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-      menu.classList.remove('show');
+
+      // Ustaw aktywny link po kliknięciu
+      links.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      updateIndicator(link);
     });
   });
+
+  // Ustaw aktywną sekcję na początku
+  setActiveSection();
 
   // SLIDER
   let current = 0;

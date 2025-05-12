@@ -214,9 +214,10 @@ a:hover {
   position: absolute;
   bottom: 0;
   height: 3px;
-  color: var(--accent-default);
-  transition: all 0.3s ease;
+  background-color: var(--accent-default); /* Kolor wskaźnika */
+  transition: transform 0.3s ease, width 0.3s ease; /* Płynne przesuwanie */
   z-index: 1;
+  width: 0; /* Domyślnie brak szerokości */
 }
 
 /* Styl aktywnego linku */
@@ -225,7 +226,7 @@ a:hover {
   font-weight: bold;
 }
 
-/* Styl linków na hover */
+/* Usuń efekty hover, które mogą powodować znikanie */
 .nav-item a:hover {
   color: var(--accent-default);
 }
