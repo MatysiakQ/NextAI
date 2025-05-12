@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (hasError) return;
-    
+
     const formData = new URLSearchParams({
       email,
       plan,
@@ -140,68 +140,91 @@ document.addEventListener("DOMContentLoaded", function () {
     submitBtn.disabled = true;
 
     try {
-      const res = await fetch("payment.php", {
-        method: "POST",
-        body: formData,
+      // // NA CZAS TESTÓW
+      // try {
+      //   const res = await fetch("http://localhost:5678/webhook-test/invoice", {
+      //     method: "POST",
+      //     body: formData,
+      //   });
+
+      //   if (!res.ok) {
+      //     throw new Error("Błąd połączenia z webhookiem");
+      //   }
+
+      //   const resultText = await res.text();
+      //   console.log("Wysłano dane do webhooka:", resultText);
+
+      //   document.getElementById("subscription-success").style.display = "block";
+      //   form.reset();
+      //   invoiceFields.style.display = "none";
+
+      // } catch (error) {
+      //   console.error("Błąd podczas wysyłki do n8n:", error);
+      //   document.getElementById("subscription-error").style.display = "block";
+      // }
+
+          const res = await fetch("payment.php", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await res.json();
+
+          if (!data.success) {
+            errorBox.textContent = data.message || "Wystąpił błąd przy tworzeniu subskrypcji.";
+            return;
+          }
+
+          const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+            payment_method: {
+              card: cardNumber,
+              billing_details: {
+                name: cardName,
+                email,
+              },
+            },
+          });
+
+          if (error) {
+            errorBox.textContent = error.message;
+          } else if (paymentIntent.status === "succeeded") {
+            success.classList.remove("hidden");
+            form.reset();
+            localStorage.removeItem("subscriptionForm");
+            cardNumber.clear();
+            cardExpiry.clear();
+            cardCvc.clear();
+            invoiceFields.classList.add("hidden");
+            form.classList.remove("expanded");
+          }
+        } catch (err) {
+          console.error(err);
+          errorBox.textContent = "Błąd połączenia z serwerem. Spróbuj ponownie.";
+        } finally {
+          loader.classList.add("hidden");
+          submitBtn.disabled = false;
+        }
       });
 
-      const data = await res.json();
-
-      if (!data.success) {
-        errorBox.textContent = data.message || "Wystąpił błąd przy tworzeniu subskrypcji.";
-        return;
+      function markError(field, message) {
+        field.classList.add("field-error");
+        document.getElementById("card-errors").textContent = message;
       }
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: {
-          card: cardNumber,
-          billing_details: {
-            name: cardName,
-            email,
-          },
-        },
-      });
-
-      if (error) {
-        errorBox.textContent = error.message;
-      } else if (paymentIntent.status === "succeeded") {
-        success.classList.remove("hidden");
-        form.reset();
-        localStorage.removeItem("subscriptionForm");
-        cardNumber.clear();
-        cardExpiry.clear();
-        cardCvc.clear();
-        invoiceFields.classList.add("hidden");
-        form.classList.remove("expanded");
+      // Funkcja do odczytania parametrów URL
+      function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
       }
-    } catch (err) {
-      console.error(err);
-      errorBox.textContent = "Błąd połączenia z serwerem. Spróbuj ponownie.";
-    } finally {
-      loader.classList.add("hidden");
-      submitBtn.disabled = false;
-    }
-  });
 
-  function markError(field, message) {
-    field.classList.add("field-error");
-    document.getElementById("card-errors").textContent = message;
-  }
+      // Odczytaj parametr "package" z URL
+      const selectedPackage = getQueryParam("package");
 
-  // Funkcja do odczytania parametrów URL
-  function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-  }
-
-  // Odczytaj parametr "package" z URL
-  const selectedPackage = getQueryParam("package");
-
-  // Ustaw domyślny pakiet na podstawie parametru
-  if (selectedPackage) {
-    const planSelect = document.getElementById("plan");
-    if (planSelect) {
-      planSelect.value = selectedPackage; // Ustaw odpowiednią wartość w selekcie
-    }
-  }
-});
+      // Ustaw domyślny pakiet na podstawie parametru
+      if (selectedPackage) {
+        const planSelect = document.getElementById("plan");
+        if (planSelect) {
+          planSelect.value = selectedPackage; // Ustaw odpowiednią wartość w selekcie
+        }
+      }
+    });
