@@ -209,8 +209,24 @@ a:hover {
   transition: color .3s;
 }
 
-.nav-item a:hover,
+/* Styl wskaźnika */
+.nav-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  color: var(--accent-default);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* Styl aktywnego linku */
 .nav-item a.active {
+  color: var(--accent-default);
+  font-weight: bold;
+}
+
+/* Styl linków na hover */
+.nav-item a:hover {
   color: var(--accent-default);
 }
 
@@ -220,7 +236,7 @@ a:hover {
   }
 
   .nav-menu {
-    flex-direction: column;
+    flex-direction: column; 
     background: #111;
     max-height: 0;
     overflow: hidden;

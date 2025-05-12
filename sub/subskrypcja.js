@@ -187,4 +187,21 @@ document.addEventListener("DOMContentLoaded", function () {
     field.classList.add("field-error");
     document.getElementById("card-errors").textContent = message;
   }
+
+  // Funkcja do odczytania parametrów URL
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  // Odczytaj parametr "package" z URL
+  const selectedPackage = getQueryParam("package");
+
+  // Ustaw domyślny pakiet na podstawie parametru
+  if (selectedPackage) {
+    const planSelect = document.getElementById("plan");
+    if (planSelect) {
+      planSelect.value = selectedPackage; // Ustaw odpowiednią wartość w selekcie
+    }
+  }
 });

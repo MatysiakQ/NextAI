@@ -443,4 +443,38 @@ input[type="checkbox"] {
   animation: shake 0.3s ease-in-out;
 }
 
-      
+/* Stylowanie <select> */
+#plan {
+  display: block; /* Upewnij się, że select jest widoczny */
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(90deg, #0ff, #8A2BE2, #ff5c5c);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border: 2px solid var(--accent-default);
+  border-radius: 6px;
+  appearance: none; /* Ukrywa natywne strzałki */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-size: 200%;
+  animation: gradient-move 3s infinite;
+}
+
+/* Stylowanie opcji */
+#plan option {
+  background: #111;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Animacja gradientu */
+@keyframes gradient-move {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 100%;
+  }
+}
+

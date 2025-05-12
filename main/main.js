@@ -4,56 +4,67 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.querySelector('.nav-toggle');
   const menu = document.querySelector('.nav-menu');
   const items = document.querySelectorAll('.nav-item');
-  const indicator = document.querySelector('.nav-indicator');
+  const links = document.querySelectorAll('.nav-item a');
+  const sections = document.querySelectorAll('section[id], .hero-section');
+  const indicator = document.createElement('div');
+  indicator.classList.add('nav-indicator');
+  menu.appendChild(indicator);
 
   toggle?.addEventListener('click', () => {
     menu.classList.toggle('show');
   });
 
   function updateIndicator(el) {
-    const link = el?.querySelector('a');
-    if (!link || !indicator) return;
-    indicator.style.width = link.offsetWidth + 'px';
-    indicator.style.left = link.offsetLeft + 'px';
-    indicator.style.background = window.getComputedStyle(link).color;
+    if (!el) return;
+    const link = el.querySelector('a');
+    if (!link) return;
+    indicator.style.width = `${link.offsetWidth}px`;
+    indicator.style.left = `${link.offsetLeft}px`;
+    indicator.style.backgroundColor = link.classList.contains('active') ? 'blue' : 'inherit';
   }
 
-  // initial position
-  const activeItem = document.querySelector('.nav-item a.active')?.parentElement;
-  if (activeItem) updateIndicator(activeItem);
+  // Aktualizacja aktywnej sekcji na scroll
+  window.addEventListener('scroll', () => {
+    const scrollPosition = window.scrollY + 150; // Dodajemy offset
+    let activeSection = null;
 
-  items.forEach(item => {
-    item.addEventListener('mouseenter', () => updateIndicator(item));
+    sections.forEach(section => {
+      if (scrollPosition >= section.offsetTop && scrollPosition < section.offsetTop + section.offsetHeight) {
+        activeSection = section;
+      }
+    });
+
+    links.forEach(link => {
+      const href = link.getAttribute('href');
+      if (activeSection && href === `#${activeSection.id}`) {
+        link.classList.add('active');
+        updateIndicator(link.parentElement);
+      } else {
+        link.classList.remove('active');
+      }
+    });
   });
-  menu?.addEventListener('mouseleave', () => {
-    if (activeItem) updateIndicator(activeItem);
-    else indicator.style.width = '0';
+
+  // Animacja wskaźnika na hover
+  links.forEach(link => {
+    link.addEventListener('mouseenter', () => updateIndicator(link.parentElement));
+    link.addEventListener('mouseleave', () => {
+      const activeLink = document.querySelector('.nav-item a.active');
+      if (activeLink) updateIndicator(activeLink.parentElement);
+    });
   });
 
-  // SMOOTH SCROLL & ACTIVE LINK ON SCROLL
-  const links = document.querySelectorAll('.nav-item a');
-  const sections = document.querySelectorAll('section[id], .hero-section');
+  // Ustawienie wskaźnika na aktywną sekcję przy załadowaniu strony
+  const activeLink = document.querySelector('.nav-item a.active');
+  if (activeLink) updateIndicator(activeLink.parentElement);
 
+  // SMOOTH SCROLL
   links.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
       const href = link.getAttribute('href');
       document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
       menu.classList.remove('show');
-    });
-  });
-
-  window.addEventListener('scroll', () => {
-    const pos = window.scrollY + 150;
-    sections.forEach(sec => {
-      if (!sec.id) return;
-      const link = document.querySelector(`.nav-item a[href="#${sec.id}"]`);
-      if (!link) return;
-      if (pos >= sec.offsetTop && pos < sec.offsetTop + sec.offsetHeight) {
-        links.forEach(a => a.classList.remove('active'));
-        link.classList.add('active');
-        updateIndicator(link.parentElement);
-      }
     });
   });
 
@@ -247,18 +258,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Obsługa przycisków subskrypcji
   document.querySelectorAll('.subscribe-button').forEach(button => {
-    button.addEventListener('click', function(e) {
+    button.addEventListener('click', function (e) {
       e.preventDefault();
-      
+
       // Określ typ pakietu
       const card = this.closest('.package-card');
-      let packageType = 'basic';
-      
+      let packageType = 'basic'; // Domyślnie ustawiamy na "basic"
+
       if (card.classList.contains('premium')) packageType = 'pro';
-      if (card.classList.contains('enterprise')) packageType = 'enterprise';
-      
+
       // Przekierowanie z parametrem
-      window.location.href = '../sub/subskrypcja.html?package=' + packageType;
+      window.location.href = `../sub/subskrypcja.html?package=${packageType}`;
     });
   });
 
@@ -270,5 +280,4 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '../main/Regulamin_NextAi.pdf';
     });
   }
-
 });
