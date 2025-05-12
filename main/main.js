@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // SLIDER
-  let current = 0, interval;
+  let current = 0;
   const cards = document.querySelectorAll('.card');
   const total = cards.length;
   const nextBtn = document.querySelector('.slider-next');
@@ -73,15 +73,36 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     });
   }
-  function next() { current = (current + 1) % total; updateCards(); }
-  function prev() { current = (current - 1 + total) % total; updateCards(); }
+
+  function next() {
+    current = (current + 1) % total;
+    updateCards();
+  }
+
+  function prev() {
+    current = (current - 1 + total) % total;
+    updateCards();
+  }
+
   function reset() {
     clearInterval(interval);
     interval = setInterval(next, 5000);
   }
+
+  // Dodanie obsługi kliknięcia na kartę
+  cards.forEach((card, index) => {
+    card.addEventListener('click', () => {
+      if (index === current) return; // Jeśli kliknięta karta jest już na środku, nic nie rób
+      current = index; // Ustaw klikniętą kartę jako główną
+      updateCards();
+      reset(); // Zresetuj automatyczne przesuwanie
+    });
+  });
+
+  let interval = setInterval(next, 5000); // Automatyczne przesuwanie co 5 sekund
   nextBtn?.addEventListener('click', () => { next(); reset(); });
   prevBtn?.addEventListener('click', () => { prev(); reset(); });
-  if (cards.length) { updateCards(); reset(); }
+  if (cards.length) updateCards();
 
   // GLITCH every 3 seconds
   setInterval(() => {
@@ -160,9 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
-});
-document.addEventListener('DOMContentLoaded', () => {
-  // ... (pozostaw cały istniejący kod wewnątrz DOMContentLoaded)
 
   // Modale dla kwadratów współpracy
   const boxModals = {
@@ -170,14 +188,15 @@ document.addEventListener('DOMContentLoaded', () => {
     'Krok 2': document.getElementById('modal-2'),
     'Krok 3': document.getElementById('modal-3')
   };
+
   document.querySelectorAll('.triangle-box').forEach(box => {
     box.addEventListener('click', () => {
       const number = box.textContent.trim();
       const modal = boxModals[number];
       if (modal) {
-         modal.classList.remove('hidden');
-         document.body.classList.add('modal-open');
-        }
+        modal.classList.remove('hidden');
+        document.body.classList.add('modal-open'); // Dodanie klasy blokującej scroll
+      }
     });
   });
 
@@ -185,15 +204,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const modalId = btn.getAttribute('data-modal');
       document.getElementById(`modal-${modalId}`).classList.add('hidden');
-           
+      document.body.classList.remove('modal-open'); // Usunięcie klasy blokującej scroll
     });
   });
 
-  // Kliknięcie poza modalem — zamyka
+  // Kliknięcie poza modalem — zamyka modal
   Object.values(boxModals).forEach(modal => {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.classList.add('hidden');
+        document.body.classList.remove('modal-open'); // Usunięcie klasy blokującej scroll
       }
     });
   });
