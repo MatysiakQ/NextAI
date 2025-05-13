@@ -163,87 +163,88 @@ document.addEventListener("DOMContentLoaded", function () {
       //   document.getElementById("subscription-error").style.display = "block";
       // }
 
-          const res = await fetch("payment.php", {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await res.json();
-
-          if (!data.success) {
-            errorBox.textContent = data.message || "Wystąpił błąd przy tworzeniu subskrypcji.";
-            return;
-          }
-
-          const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-            payment_method: {
-              card: cardNumber,
-              billing_details: {
-                name: cardName,
-                email,
-              },
-            },
-          });
-
-          if (error) {
-            errorBox.textContent = error.message;
-          } else if (paymentIntent.status === "succeeded") {
-            success.classList.remove("hidden");
-            form.reset();
-            localStorage.removeItem("subscriptionForm");
-            cardNumber.clear();
-            cardExpiry.clear();
-            cardCvc.clear();
-            invoiceFields.classList.add("hidden");
-            form.classList.remove("expanded");
-          }
-        } catch (err) {
-          console.error(err);
-          errorBox.textContent = "Błąd połączenia z serwerem. Spróbuj ponownie.";
-        } finally {
-          loader.classList.add("hidden");
-          submitBtn.disabled = false;
-        }
+      const res = await fetch("payment.php", {
+        method: "POST",
+        body: formData,
       });
 
-      function markError(field, message) {
-        field.classList.add("field-error");
-        document.getElementById("card-errors").textContent = message;
+      const data = await res.json();
+
+      if (!data.success) {
+        errorBox.textContent = data.message || "Wystąpił błąd przy tworzeniu subskrypcji.";
+        return;
       }
 
-      // Funkcja do odczytania parametrów URL
-      function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
+      const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: {
+          card: cardNumber,
+          billing_details: {
+            name: cardName,
+            email,
+          },
+        },
+      });
+
+      if (error) {
+        errorBox.textContent = error.message;
+      } else if (paymentIntent.status === "succeeded") {
+        success.classList.remove("hidden");
+        form.reset();
+        localStorage.removeItem("subscriptionForm");
+        cardNumber.clear();
+        cardExpiry.clear();
+        cardCvc.clear();
+        invoiceFields.classList.add("hidden");
+        form.classList.remove("expanded");
       }
+    } catch (err) {
+      console.error(err);
+      errorBox.textContent = "Błąd połączenia z serwerem. Spróbuj ponownie.";
+    } finally {
+      loader.classList.add("hidden");
+      submitBtn.disabled = false;
+    }
+  });
 
-      // Odczytaj parametr "package" z URL
-      const selectedPackage = getQueryParam("package");
+  function markError(field, message) {
+    field.classList.add("field-error");
+    document.getElementById("card-errors").textContent = message;
+  }
 
-      // Ustaw domyślny pakiet na podstawie parametru
-      if (selectedPackage) {
-        const planSelect = document.getElementById("plan");
-        if (planSelect) {
-          planSelect.value = selectedPackage; // Ustaw odpowiednią wartość w selekcie
-        }
-      }
+  // Funkcja do odczytania parametrów URL
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
 
-      // Nowa funkcjonalność: Ustawienie domyślnego pakietu i typu płatności
-      const selectedPackageDefault = getQueryParam('package') || 'basic';
-      const billingType = getQueryParam('billing') || 'monthly';
+  // Odczytaj parametr "package" z URL
+  const selectedPackage = getQueryParam("package");
 
-      // Ustaw domyślny pakiet w selekcie
-      if (planSelect) {
-        planSelect.value = selectedPackageDefault;
-      }
+  // Ustaw domyślny pakiet na podstawie parametru
+  if (selectedPackage) {
+    const planSelect = document.getElementById("plan");
+    if (planSelect) {
+      planSelect.value = selectedPackage; // Ustaw odpowiednią wartość w selekcie
+    }
+  }
 
-      // Wyświetl odpowiedni typ płatności
-      const billingInfo = document.createElement('p');
-      billingInfo.textContent = billingType === 'yearly'
-        ? 'Wybrano płatność roczną (oszczędzasz 20%)'
-        : 'Wybrano płatność miesięczną';
-      billingInfo.style.fontWeight = 'bold';
-      billingInfo.style.color = 'green';
+  // Nowa funkcjonalność: Ustawienie domyślnego pakietu i typu płatności
+  const selectedPackageDefault = getQueryParam('package') || 'basic';
+  const billingType = getQueryParam('billing') || 'monthly';
 
-      form.insertBefore(billingInfo, form.firstChild);
-    });
+  // Ustaw domyślny pakiet w selekcie
+  if (planSelect) {
+    planSelect.value = selectedPackageDefault;
+  }
+
+  // Wyświetl odpowiedni typ płatności
+  const billingInfo = document.createElement('p');
+  billingInfo.textContent = billingType === 'yearly'
+    ? 'Wybrano płatność roczną (oszczędzasz 20%)'
+    : 'Wybrano płatność miesięczną';
+  billingInfo.style.fontWeight = 'bold';
+  billingInfo.style.color = 'green';
+
+  form.insertBefore(billingInfo, form.firstChild);
+});
+

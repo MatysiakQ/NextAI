@@ -32,9 +32,11 @@ body {
   overflow-x: hidden;
   position: relative;
 }
+
 body.modal-open {
   overflow: hidden;
 }
+
 a {
   color: var(--accent-default);
   text-decoration: none;
@@ -131,6 +133,12 @@ a:hover {
   padding: 10px;
   z-index: 1100;
 }
+.fa-brands {
+  color: var(--accent-default);
+  transition: color .3s;
+  font-size: 1.5rem;
+}
+
 
 .social-icon {
   width: 40px;
@@ -214,10 +222,13 @@ a:hover {
   position: absolute;
   bottom: 0;
   height: 3px;
-  background-color: var(--accent-default); /* Kolor wskaźnika */
-  transition: transform 0.3s ease, width 0.3s ease; /* Płynne przesuwanie */
+  background-color: var(--accent-default);
+  /* Kolor wskaźnika */
+  transition: transform 0.3s ease, width 0.3s ease;
+  /* Płynne przesuwanie */
   z-index: 1;
-  width: 0; /* Domyślnie brak szerokości */
+  width: 0;
+  /* Domyślnie brak szerokości */
 }
 
 /* Styl aktywnego linku */
@@ -237,7 +248,7 @@ a:hover {
   }
 
   .nav-menu {
-    flex-direction: column; 
+    flex-direction: column;
     background: #111;
     max-height: 0;
     overflow: hidden;
@@ -389,7 +400,6 @@ section {
   margin-bottom: 15px;
   text-align: left;
   position: relative;
-  /* wyrownaj tekst aby nie bylo go pod "-" */
   padding-left: 1.2rem;
 
 }
@@ -475,7 +485,7 @@ section {
   y2: 100px;
 }
 
-.triangle-box-info{
+.triangle-box-info {
   color: #7c7171;
   font-style: italic;
 }
@@ -488,6 +498,7 @@ section {
   color: var(--accent-default);
   margin-bottom: 50px;
 }
+
 .chat-hint {
   color: #ccc;
   font-size: 1rem;
@@ -503,6 +514,7 @@ section {
   text-align: center;
   box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
 }
+
 .chat-hint strong {
   color: var(--accent-default);
 }
@@ -528,10 +540,12 @@ section {
   border-radius: 8px;
   transition: transform .3s ease, box-shadow .3s ease;
 }
+
 .pro-recomendation {
   color: #818181;
-  font-style:italic;
+  font-style: italic;
 }
+
 .package-card.premium h3 {
   margin-top: -1.3rem;
 }
@@ -619,10 +633,12 @@ section {
   font-size: 1rem;
   color: green;
   font-weight: bold;
-  transform: rotate(-10deg); /* Tekst na skos */
+  transform: rotate(-10deg);
+  /* Tekst na skos */
   text-align: center;
   margin-top: 10px;
-  background: yellow; /* Wyróżnienie tła */
+  background: yellow;
+  /* Wyróżnienie tła */
   padding: 5px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -681,7 +697,7 @@ section {
 }
 
 .package-card.enterprise .price.monthly {
-  font-size: 1.2rem; 
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
@@ -737,8 +753,9 @@ section {
   right: 20px;
   width: 360px;
   max-height: 480px;
-  background: linear-gradient(135deg, #0d0d1a, #1a1a2e); 
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Delikatna ramka */
+  background: linear-gradient(135deg, #0d0d1a, #1a1a2e);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Delikatna ramka */
   box-shadow: 0 0 15px var(--accent-premium);
   display: flex;
   flex-direction: column;
@@ -770,6 +787,7 @@ section {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
 }
+
 #chat-header .powered-by {
   font-size: 0.7rem;
   color: #aaa;
@@ -779,7 +797,7 @@ section {
 
 #chat-close {
   position: absolute;
-  border-radius: 40%; 
+  border-radius: 40%;
   width: 30px;
   height: 30px;
   top: 3px;
@@ -840,7 +858,8 @@ section {
   font-size: 18px;
   cursor: pointer;
   transition: background .3s;
-  border-radius: 0 0 16px 0; /* Zaokrąglenie prawego dolnego rogu */
+  border-radius: 0 0 16px 0;
+  /* Zaokrąglenie prawego dolnego rogu */
 }
 
 #chat-input button:hover {
@@ -1072,10 +1091,11 @@ section {
   background: rgba(0, 255, 255, 0.8);
   transform: scale(1.05);
 }
+
 /*=========================================
   FOOTER  
 =========================================*/
-.site-footer  p{
+.site-footer p {
   color: #5f5f5f;
   padding: 10px;
   text-align: center;
@@ -1118,6 +1138,7 @@ section {
   line-height: 1.5;
   margin-top: -10px;
 }
+
 .body .modal-open {
   overflow: block;
 }

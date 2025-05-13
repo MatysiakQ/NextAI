@@ -328,3 +328,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Zapisz ceny w localStorage
   localStorage.setItem("planPrices", JSON.stringify(planPrices));
 });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const chatbotLink = document.getElementById("open-chatbot");
+    const chatToggle = document.getElementById("chat-toggle");
+    const chatWidget = document.getElementById("chat-widget");
+
+    if (chatbotLink && chatToggle && chatWidget) {
+      chatbotLink.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (!chatWidget.classList.contains("open")) {
+          chatToggle.click();
+        }
+      });
+    }
+  });
