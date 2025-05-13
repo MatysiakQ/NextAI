@@ -1,0 +1,1 @@
+INSERT INTO faq (Question, Answer) VALUES ('Na czym polega szkolenie bota','Nasz proces szkolenia bota polega na tym, że gdy bot nie zna odpowiedzi na pytanie, zapisuje je do bazy wiedzy. Następnie, w oparciu o te pytania, tworzymy odpowiedzi, które są następnie dodawane do bazy wiedzy. W ten sposób bot uczy się na bieżąco i staje się coraz bardziej inteligentny.');

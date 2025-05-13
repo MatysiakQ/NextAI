@@ -488,6 +488,25 @@ section {
   color: var(--accent-default);
   margin-bottom: 50px;
 }
+.chat-hint {
+  color: #ccc;
+  font-size: 1rem;
+  margin: -30px auto 30px;
+  margin-top: 60px;
+  margin-bottom: -60px;
+  max-width: 1000px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px 20px;
+  border: 1px dashed var(--accent-default);
+  border-radius: 8px;
+  font-style: italic;
+  text-align: center;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+}
+.chat-hint strong {
+  color: var(--accent-default);
+}
+
 .package-grid {
   width: 90%;
   max-width: 1200px;
