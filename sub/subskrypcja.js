@@ -227,4 +227,23 @@ document.addEventListener("DOMContentLoaded", function () {
           planSelect.value = selectedPackage; // Ustaw odpowiednią wartość w selekcie
         }
       }
+
+      // Nowa funkcjonalność: Ustawienie domyślnego pakietu i typu płatności
+      const selectedPackageDefault = getQueryParam('package') || 'basic';
+      const billingType = getQueryParam('billing') || 'monthly';
+
+      // Ustaw domyślny pakiet w selekcie
+      if (planSelect) {
+        planSelect.value = selectedPackageDefault;
+      }
+
+      // Wyświetl odpowiedni typ płatności
+      const billingInfo = document.createElement('p');
+      billingInfo.textContent = billingType === 'yearly'
+        ? 'Wybrano płatność roczną (oszczędzasz 20%)'
+        : 'Wybrano płatność miesięczną';
+      billingInfo.style.fontWeight = 'bold';
+      billingInfo.style.color = 'green';
+
+      form.insertBefore(billingInfo, form.firstChild);
     });

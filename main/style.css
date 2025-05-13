@@ -578,6 +578,37 @@ section {
   margin-left: 0.5em;
 }
 
+.crossed-price {
+  font-size: 1rem;
+  color: red;
+  text-decoration: line-through;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.yearly-price {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--accent-default);
+  text-align: center;
+}
+
+.savings-text {
+  display: block;
+  font-size: 1rem;
+  color: green;
+  font-weight: bold;
+  transform: rotate(-10deg); /* Tekst na skos */
+  text-align: center;
+  margin-top: 10px;
+  background: yellow; /* Wyróżnienie tła */
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 /* Subscribe button variants */
 .subscribe-button {
   margin-top: 15px;

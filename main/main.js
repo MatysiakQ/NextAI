@@ -238,22 +238,56 @@ document.addEventListener('DOMContentLoaded', () => {
   const monthlyPrices = document.querySelectorAll('.price .monthly');
   const yearlyPrices = document.querySelectorAll('.price .yearly');
   const priceHeaders = document.querySelectorAll('.price-header');
-  
+  const savingsText = document.createElement('span'); // Element do wyświetlania oszczędności
+  savingsText.classList.add('savings-text');
+
   let yearly = false;
-  
+
   if (billingBtn) {
     billingBtn.addEventListener('click', () => {
       yearly = !yearly;
-    
+
       // Przełącz widoczność cen
-      monthlyPrices.forEach(p => p.classList.toggle('hidden', yearly));
-      yearlyPrices.forEach(p => p.classList.toggle('hidden', !yearly));
-    
+      monthlyPrices.forEach(p => {
+        if (yearly) {
+          const monthlyPrice = parseInt(p.textContent, 10);
+          const yearlyPrice = Math.round(monthlyPrice * 12 * 0.8); // 20% zniżki
+          const parent = p.parentElement;
+
+          // Dodaj przekreśloną cenę miesięczną
+          const crossedPrice = document.createElement('span');
+          crossedPrice.classList.add('crossed-price');
+          crossedPrice.textContent = `${monthlyPrice * 12} PLN`;
+          crossedPrice.style.color = 'red';
+          crossedPrice.style.textDecoration = 'line-through';
+
+          // Dodaj cenę roczną i oszczędności
+          const yearlyPriceElement = document.createElement('span');
+          yearlyPriceElement.classList.add('yearly-price');
+          yearlyPriceElement.textContent = `${yearlyPrice} PLN`;
+
+          // Dodaj tekst oszczędności
+          savingsText.textContent = 'OSZCZĘDZASZ 20%';
+
+          // Wyczyść poprzednie ceny i dodaj nowe
+          parent.innerHTML = '';
+          parent.appendChild(crossedPrice);
+          parent.appendChild(yearlyPriceElement);
+          parent.appendChild(savingsText);
+        } else {
+          // Przywróć miesięczne ceny
+          const parent = p.parentElement;
+          parent.innerHTML = '';
+          parent.appendChild(p);
+          savingsText.remove();
+        }
+      });
+
       // Zmień nagłówek
       priceHeaders.forEach(h => {
         h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
       });
-    
+
       billingBtn.textContent = yearly
         ? 'Przełącz na płatność miesięczną'
         : 'Przełącz na płatność roczną';
@@ -284,4 +318,13 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '../main/Regulamin_NextAi.pdf';
     });
   }
+
+  const planPrices = {
+    basic: { monthly: 599, yearly: 5750 },
+    pro: { monthly: 1299, yearly: 12470 },
+    enterprise: { monthly: 2990, yearly: 28600 },
+  };
+
+  // Zapisz ceny w localStorage
+  localStorage.setItem("planPrices", JSON.stringify(planPrices));
 });
