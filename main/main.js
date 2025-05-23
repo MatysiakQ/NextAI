@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chatQuestion.focus();
     }, 300);
   });
-  
+
   chatClose.addEventListener('click', () => {
     chatWidget.classList.remove('open');
     chatToggle.classList.add('closing');
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       chatToggle.classList.remove('closing');
     }, 300);
-  });  
+  });
   chatQuestion.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -244,46 +244,76 @@ document.addEventListener('DOMContentLoaded', () => {
   let yearly = false;
 
   if (billingBtn) {
+    // billingBtn.addEventListener('click', () => {
+    //   yearly = !yearly;
+
+    //   // Przełącz widoczność cen
+    //   monthlyPrices.forEach(p => {
+    //     if (yearly) {
+    //       const monthlyPrice = parseInt(p.textContent, 10);
+    //       const yearlyPrice = Math.round(monthlyPrice * 12 * 0.8); // 20% zniżki
+    //       const parent = p.parentElement;
+
+    //       // Dodaj przekreśloną cenę miesięczną
+    //       const crossedPrice = document.createElement('span');
+    //       crossedPrice.classList.add('crossed-price');
+    //       crossedPrice.textContent = `${monthlyPrice * 12} PLN`;
+    //       crossedPrice.style.color = 'red';
+    //       crossedPrice.style.textDecoration = 'line-through';
+
+    //       // Dodaj cenę roczną i oszczędności
+    //       const yearlyPriceElement = document.createElement('span');
+    //       yearlyPriceElement.classList.add('yearly-price');
+    //       yearlyPriceElement.textContent = `${yearlyPrice} PLN`;
+
+    //       // Dodaj tekst oszczędności
+    //       savingsText.textContent = 'OSZCZĘDZASZ 20%';
+
+    //       // Wyczyść poprzednie ceny i dodaj nowe
+    //       parent.innerHTML = '';
+    //       parent.appendChild(crossedPrice);
+    //       parent.appendChild(yearlyPriceElement);
+    //       parent.appendChild(savingsText);
+    //     } else {
+    //       // Przywróć miesięczne ceny
+    //       const parent = p.parentElement;
+    //       parent.innerHTML = '';
+    //       parent.appendChild(p);
+    //       savingsText.remove();
+    //     }
+    //   });
+
+    //   // Zmień nagłówek
+    //   priceHeaders.forEach(h => {
+    //     h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
+    //   });
+
+    //   billingBtn.textContent = yearly
+    //     ? 'Przełącz na płatność miesięczną'
+    //     : 'Przełącz na płatność roczną';
+    // });
     billingBtn.addEventListener('click', () => {
       yearly = !yearly;
 
-      // Przełącz widoczność cen
-      monthlyPrices.forEach(p => {
+      document.querySelectorAll('.price').forEach(priceContainer => {
+        const monthly = priceContainer.querySelector('.monthly');
+        const yearlyEl = priceContainer.querySelector('.yearly');
+        const crossed = priceContainer.querySelector('.crossed-price');
+        const savings = priceContainer.querySelector('.savings-text');
+
         if (yearly) {
-          const monthlyPrice = parseInt(p.textContent, 10);
-          const yearlyPrice = Math.round(monthlyPrice * 12 * 0.8); // 20% zniżki
-          const parent = p.parentElement;
-
-          // Dodaj przekreśloną cenę miesięczną
-          const crossedPrice = document.createElement('span');
-          crossedPrice.classList.add('crossed-price');
-          crossedPrice.textContent = `${monthlyPrice * 12} PLN`;
-          crossedPrice.style.color = 'red';
-          crossedPrice.style.textDecoration = 'line-through';
-
-          // Dodaj cenę roczną i oszczędności
-          const yearlyPriceElement = document.createElement('span');
-          yearlyPriceElement.classList.add('yearly-price');
-          yearlyPriceElement.textContent = `${yearlyPrice} PLN`;
-
-          // Dodaj tekst oszczędności
-          savingsText.textContent = 'OSZCZĘDZASZ 20%';
-
-          // Wyczyść poprzednie ceny i dodaj nowe
-          parent.innerHTML = '';
-          parent.appendChild(crossedPrice);
-          parent.appendChild(yearlyPriceElement);
-          parent.appendChild(savingsText);
+          monthly?.classList.add('hidden');
+          yearlyEl?.classList.remove('hidden');
+          crossed?.classList.remove('hidden');
+          savings?.classList.remove('hidden');
         } else {
-          // Przywróć miesięczne ceny
-          const parent = p.parentElement;
-          parent.innerHTML = '';
-          parent.appendChild(p);
-          savingsText.remove();
+          monthly?.classList.remove('hidden');
+          yearlyEl?.classList.add('hidden');
+          crossed?.classList.add('hidden');
+          savings?.classList.add('hidden');
         }
       });
 
-      // Zmień nagłówek
       priceHeaders.forEach(h => {
         h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
       });
@@ -301,14 +331,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Określ typ pakietu
       const card = this.closest('.package-card');
-      let packageType = 'basic'; // Domyślnie ustawiamy na "basic"
+      let packageType = 'basic'; // Domyślnie "basic"
+      let checkoutUrl = 'https://buy.stripe.com/test_cNicN5806549eZvgi34Rq00'; // Link dla basic
 
-      if (card.classList.contains('premium')) packageType = 'pro';
-
-      // Przekierowanie z parametrem
-      window.location.href = `../sub/subskrypcja.html?package=${packageType}`;
+      if (card.classList.contains('premium')) {
+        packageType = 'pro';
+        checkoutUrl = 'https://buy.stripe.com/test_dRmcN50xE68dcRn8PB4Rq01'; // Link dla pro
+      }
+      if (card.classList.contains('enterprise')) {
+        window.open('enterpirse_form.html', 'blank');
+        return;
+      }
+      window.location.href = checkoutUrl;
     });
   });
+
 
   // Link do regulaminu
   const termsLink = document.getElementById('terms-link');
@@ -329,17 +366,43 @@ document.addEventListener('DOMContentLoaded', () => {
   localStorage.setItem("planPrices", JSON.stringify(planPrices));
 });
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const chatbotLink = document.getElementById("open-chatbot");
-    const chatToggle = document.getElementById("chat-toggle");
-    const chatWidget = document.getElementById("chat-widget");
+document.addEventListener("DOMContentLoaded", function () {
+  const chatbotLink = document.getElementById("open-chatbot");
+  const chatToggle = document.getElementById("chat-toggle");
+  const chatWidget = document.getElementById("chat-widget");
 
-    if (chatbotLink && chatToggle && chatWidget) {
-      chatbotLink.addEventListener("click", function (e) {
-        e.preventDefault();
-        if (!chatWidget.classList.contains("open")) {
-          chatToggle.click();
-        }
-      });
+  if (chatbotLink && chatToggle && chatWidget) {
+    chatbotLink.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (!chatWidget.classList.contains("open")) {
+        chatToggle.click();
+      }
+    });
+  }
+});
+
+document.querySelector('.contact-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const data = Object.fromEntries(formData.entries());
+
+  try {
+    const response = await fetch('submit_form.php', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: formData
+    });
+
+    if (response.ok) {
+      document.getElementById('success-modal').classList.remove('hidden');
+      this.reset();
+    } else {
+      alert("Wystąpił błąd podczas wysyłania formularza.");
     }
-  });
+  } catch (error) {
+    alert("Nie można połączyć się z serwerem.");
+  }
+});

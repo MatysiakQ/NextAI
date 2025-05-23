@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $message = htmlspecialchars(trim($_POST['message'] ?? ''));
 
     // Walidacja danych
-    if (!$name || !$email || !$phone || !$message) {
+    if (!$name || !$email || !$message) {
         http_response_code(400);
         exit("Wszystkie pola są wymagane.");
     }
@@ -77,22 +77,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $mail->SMTPAuth   = true;
         $mail->Username   = $_ENV['SMTP_USER'];
         $mail->Password   = $_ENV['SMTP_PASS'];
-        $mail->SMTPSecure = 'tls';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $_ENV['SMTP_PORT'];
 
-        $mail->setFrom($_ENV['SMTP_FROM'], 'Formularz Kontaktowy');
-        $mail->addAddress($_ENV['SMTP_TO']);
+        $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['MAIL_FROM_NAME']);
+        $mail->addAddress('nextai.business@gmail.com');
         $mail->addReplyTo($email, $name);
 
         $mail->isHTML(false);
-        $mail->Subject = 'Nowa wiadomość z formularza kontaktowego';
+        $subject = $_POST['subject'] ?? 'Nowa wiadomość z formularza kontaktowego';
+        $mail->Subject = $subject;
         $mail->Body    = "Imię i nazwisko: $name\n"
                        . "Email: $email\n"
-                       . "Telefon: $phone\n"
                        . "Wiadomość: $message\n";
 
-        $mail->send();
-        echo "OK";
+        file_put_contents(__DIR__ . '/logs/last_email.txt', $mail->Body);
+
+        if($mail->send()) {
+            log_error("Wiadomość wysłana pomyślnie.");
+        } else {
+            log_error("Błąd wysyłki maila: " . $mail->ErrorInfo);
+            http_response_code(500);
+            exit("Błąd wysyłki maila.");
+        }
     } catch (Exception $e) {
         log_error("Błąd wysyłki maila: " . $mail->ErrorInfo);
         http_response_code(500);

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>NextAI – Enterprise Kontakt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <a href="index.html" class="back-button" title="Powrót do strony głównej">← Powrót</a>
+  <div class="background-grid"></div>
+
+  <section class="contact spotlight" style="padding-top: 80px;">
+    <h2 class="section-title glitch" data-text="Formularz Enterprise">Formularz Enterprise</h2>
+    <form class="contact-form">
+
+      <input type="hidden" name="subject" value="Zgloszenie dotyczace pakietu Enterprise" />
+
+
+      <label for="name">Imię</label>
+      <input id="name" type="text" name="name" placeholder="Imię" required />
+
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" placeholder="Email" required />
+
+      <label for="message">Wiadomość</label>
+      <textarea id="message" name="message" placeholder="Napisz dokładnie czego potrzebujesz" required></textarea>
+
+      <button type="submit">Wyślij</button>
+    </form>
+  </section>
+
+  <div id="success-modal" class="modal hidden">
+    <div class="modal-content glitch" data-text="Wiadomość wysłana!">
+      <span class="close-button" onclick="document.getElementById('success-modal').classList.add('hidden')">×</span>
+      <p>Dziękujemy! Skontaktujemy się z Tobą indywidualnie w sprawie pakietu Enterprise.</p>
+    </div>
+  </div>
+
+  <script>
+    document.querySelector('.contact-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+
+      try {
+        const response = await fetch('submit_form.php', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: formData
+        });
+
+        if (response.ok) {
+          document.getElementById('success-modal').classList.remove('hidden');
+          this.reset();
+        } else {
+          alert("Wystąpił błąd podczas wysyłania formularza.");
+        }
+      } catch (error) {
+        alert("Nie można połączyć się z serwerem.");
+      }
+    });
+  </script>
+</body>
+
+</html>

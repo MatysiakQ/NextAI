@@ -133,6 +133,7 @@ a:hover {
   padding: 10px;
   z-index: 1100;
 }
+
 .fa-brands {
   color: var(--accent-default);
   transition: color .3s;
@@ -341,7 +342,7 @@ section {
   top: 0;
   left: 50%;
   width: 300px;
-  height: 300px;
+  height: 320px;
   background: #111;
   padding: 20px;
   border-radius: 8px;
@@ -628,20 +629,49 @@ section {
   text-align: center;
 }
 
-.savings-text {
+/* .savings-text {
   display: block;
   font-size: 1rem;
   color: green;
   font-weight: bold;
   transform: rotate(-10deg);
   /* Tekst na skos */
+/*
   text-align: center;
   margin-top: 10px;
   background: yellow;
   /* Wyróżnienie tła */
+/*
   padding: 5px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}*/
+
+.savings-text {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #00ff00;
+  font-weight: bold;
+  transform: rotate(-8deg);
+  padding: 4px 8px;
+  border: 2px dashed #00ff00;
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 4px;
+  text-shadow: 0 0 4px #00ff00;
+  animation: pulse 2s infinite;
+  margin-top: 8px;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px #00ff00;
+  }
+
+  50% {
+    box-shadow: 0 0 12px #00ff00;
+  }
 }
 
 /* Subscribe button variants */
@@ -1141,4 +1171,26 @@ section {
 
 .body .modal-open {
   overflow: block;
+}
+
+/*=========================================
+  BACK BUTTON
+=========================================*/
+.back-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 1.2rem;
+  color: var(--accent-default);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  z-index: 1000;
+  transition: background 0.3s;
+}
+
+.back-button:hover {
+  background: rgba(0, 255, 255, 0.2);
+  color: #fff;
 }
