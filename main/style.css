@@ -2200,11 +2200,7 @@ textarea:-moz-autofill {
     display: block !important;
   }
 }
-
-/* ========================================
-  UKRYJ PLN PRZY ROCZNEJ PŁATNOŚCI
-========================================= */
-.yearly-block .currency {
+.price.yearly-active > .currency {
   display: none !important;
 }
 
