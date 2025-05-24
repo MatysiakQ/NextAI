@@ -14,6 +14,9 @@ use Stripe\TaxId;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+// Stripe init
+Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
 // Połączenie z bazą danych
 try {
     $pdo = new PDO(
@@ -39,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Dane z formularza
 $email = trim($_POST['email'] ?? '');
 $plan = trim($_POST['plan'] ?? '');
+$cardName = trim($_POST['card_name'] ?? '');
 $companyName = trim($_POST['company_name'] ?? '');
 $companyNip = trim($_POST['company_nip'] ?? '');
 $companyAddress = trim($_POST['company_address'] ?? '');
@@ -68,31 +72,31 @@ if (!isset($priceMap[$plan])) {
     exit;
 }
 
-// Stripe
-Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
-
 try {
-    // Tworzenie klienta
-    $customer = Customer::create([
+    // Tworzenie klienta z metadanymi i opcjonalnym adresem
+    $customerData = [
         'email' => $email,
+        'name' => $cardName ?: ($companyName ?: $email),
         'metadata' => [
             'plan' => $plan,
-            'invoice_requested' => $companyName ? 'yes' : 'no'
+            'invoice_requested' => $companyName ? 'yes' : 'no',
+            'company' => $companyName,
+            'nip' => $companyNip
         ]
-    ]);
+    ];
 
-    // Uzupełnienie danych adresowych
-    Customer::update($customer->id, [
-        'name' => $companyName ?: $email,
-        'address' => [
+    if ($companyName) {
+        $customerData['address'] = [
             'line1' => $companyAddress,
             'postal_code' => $companyZip,
             'city' => $companyCity,
             'country' => 'PL'
-        ]
-    ]);
+        ];
+    }
 
-    // Tylko jeśli podano NIP
+    $customer = Customer::create($customerData);
+
+    // Dodanie NIP jako TaxId jeśli podano
     if ($companyNip) {
         TaxId::create([
             'customer' => $customer->id,
@@ -110,28 +114,13 @@ try {
     ]);
 
     // Zapis do bazy: subscriptions
-    $stmt = $pdo->prepare("
-        INSERT INTO subscriptions 
-        (email, stripe_customer_id, stripe_subscription_id, plan, status, created_at) 
-        VALUES (?, ?, ?, ?, 'pending', NOW())
-    ");
+    $stmt = $pdo->prepare("INSERT INTO subscriptions (email, stripe_customer_id, stripe_subscription_id, plan, status, created_at) VALUES (?, ?, ?, ?, 'pending', NOW())");
     $stmt->execute([$email, $customer->id, $subscription->id, $plan]);
 
     // Zapis do bazy: invoices (jeśli faktura)
     if ($companyName) {
-        $stmt2 = $pdo->prepare("
-            INSERT INTO invoices 
-            (stripe_customer_id, company_name, company_nip, company_address, company_zip, company_city, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
-        ");
-        $stmt2->execute([
-            $customer->id,
-            $companyName,
-            $companyNip,
-            $companyAddress,
-            $companyZip,
-            $companyCity
-        ]);
+        $stmt2 = $pdo->prepare("INSERT INTO invoices (stripe_customer_id, company_name, company_nip, company_address, company_zip, company_city, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+        $stmt2->execute([$customer->id, $companyName, $companyNip, $companyAddress, $companyZip, $companyCity]);
     }
 
     echo json_encode([

@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
       //   console.error("Błąd podczas wysyłki do n8n:", error);
       //   document.getElementById("subscription-error").style.display = "block";
       // }
-
+      formData.append("card_name", cardName); // 👈 dodaj to tutaj
       const res = await fetch("payment.php", {
         method: "POST",
         body: formData,

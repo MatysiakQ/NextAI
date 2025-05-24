@@ -346,6 +346,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.querySelectorAll('.package-card .subscribe-button').forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      const card = this.closest('.package-card');
+      if (card.classList.contains('start')) {
+        window.location.href = '../sub/subskrypcja.html?package=basic';
+      } else if (card.classList.contains('premium')) {
+        window.location.href = '../sub/subskrypcja.html?package=pro';
+      }
+      // Enterprise zostawiasz bez zmian lub obsłuż osobno
+    });
+  });
 
   // Link do regulaminu
   const termsLink = document.getElementById('terms-link');
