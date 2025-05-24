@@ -1674,7 +1674,7 @@ textarea:-moz-autofill {
   overflow: hidden;
 }
 
-.about-section .about-desc {
+.about-section .about-desc {  
   color: #ccc;
   font-size: 1.15rem;
   max-width: 700px;
@@ -1713,4 +1713,28 @@ textarea:-moz-autofill {
   .about-section .about-video {
     border-radius: 7px;
   }
+}
+
+/* Nowe style przycisków z efektem fali */
+.subscribe-button, .contact-form button, #billing-switch {
+  position: relative;
+  overflow: hidden;
+}
+.subscribe-button::after, .contact-form button::after, #billing-switch::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 200%;
+  height: 200%;
+  background: rgba(0,255,255,0.18);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 0.5s, opacity 0.5s;
+  opacity: 0;
+}
+.subscribe-button:active::after, .contact-form button:active::after, #billing-switch:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  transition: 0s;
 }

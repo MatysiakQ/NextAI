@@ -510,3 +510,23 @@ document.querySelector('.contact-form').addEventListener('submit', async functio
     alert("Nie można połączyć się z serwerem.");
   }
 });
+
+// Testimonials slider
+document.addEventListener('DOMContentLoaded', () => {
+  const testimonials = document.querySelectorAll('.testimonial-card');
+  const prevBtn = document.querySelector('.testimonial-prev');
+  const nextBtn = document.querySelector('.testimonial-next');
+  let idx = 0;
+  if (testimonials.length) testimonials[0].classList.add('active');
+  function showTestimonial(i) {
+    testimonials.forEach((el, j) => el.classList.toggle('active', j === i));
+  }
+  prevBtn?.addEventListener('click', () => {
+    idx = (idx - 1 + testimonials.length) % testimonials.length;
+    showTestimonial(idx);
+  });
+  nextBtn?.addEventListener('click', () => {
+    idx = (idx + 1) % testimonials.length;
+    showTestimonial(idx);
+  });
+});
