@@ -300,7 +300,6 @@
       <h2 class="section-title glitch" data-text="Opinie klientów">Opinie klientów</h2>
       <div class="testimonial-slider">
         <div class="testimonial-card">
-          <!-- Biały ludzik SVG -->
           <span class="testimonial-avatar" style="background:#fff;display:flex;align-items:center;justify-content:center;">
             <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
               <circle cx="27" cy="20" r="12" fill="#e0e0e0"/>
@@ -314,7 +313,6 @@
           <p class="testimonial-text">NextAI wdrożyło u nas chatbota, który odpowiada na 90% zapytań klientów bez udziału człowieka. Oszczędzamy mnóstwo czasu!</p>
         </div>
         <div class="testimonial-card">
-          <!-- Zdjęcie polany dla Marka -->
           <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=400&h=400&facepad=2" alt="Marek" class="testimonial-avatar" />
           <span class="testimonial-name">Marek</span>
           <span class="testimonial-stars">
@@ -331,7 +329,6 @@
           <p class="testimonial-text">Świetny kontakt, szybka realizacja i realne wsparcie po wdrożeniu. Polecam każdej firmie, która chce się rozwijać!</p>
         </div>
         <div class="testimonial-card">
-          <!-- Biały ludzik SVG -->
           <span class="testimonial-avatar" style="background:#fff;display:flex;align-items:center;justify-content:center;">
             <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
               <circle cx="27" cy="20" r="12" fill="#e0e0e0"/>
@@ -353,7 +350,6 @@
           <p class="testimonial-text">System NextAI pomógł nam zautomatyzować obsługę klienta. Warto!</p>
         </div>
         <div class="testimonial-card">
-          <!-- Biały ludzik SVG -->
           <span class="testimonial-avatar" style="background:#fff;display:flex;align-items:center;justify-content:center;">
             <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
               <circle cx="27" cy="20" r="12" fill="#e0e0e0"/>
@@ -468,14 +464,15 @@
     <button id="chat-toggle" aria-label="Otwórz czat">💬</button>
     <div id="chat-widget">
       <div id="chat-header">
-        <span>🤖 Wirtualny Asystent 🤖</span>
-        <p class="powered-by">Powered by NextAI</p>
+        <span class="chatbot-avatar"><i class="fa-solid fa-robot"></i></span>
+        <span class="chatbot-title">NextAI Asystent</span>
+        <span class="powered-by">Powered by NextAI</span>
         <button id="chat-close" aria-label="Zamknij czat">&times;</button>
       </div>
       <div id="chat-body"></div>
       <div id="chat-input">
-        <input type="text" id="chat-question" placeholder="Zadaj pytanie..." />
-        <button id="chat-send" aria-label="Wyślij wiadomość">➤</button>
+        <input type="text" id="chat-question" placeholder="Zadaj pytanie..." autocomplete="off" />
+        <button id="chat-send" aria-label="Wyślij wiadomość"><i class="fa fa-paper-plane"></i></button>
       </div>
     </div>
 

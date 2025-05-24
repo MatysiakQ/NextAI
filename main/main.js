@@ -148,11 +148,12 @@ document.addEventListener('DOMContentLoaded', () => {
   chatClose.addEventListener('click', () => {
     chatWidget.classList.remove('open');
     chatToggle.classList.add('closing');
-    chatToggle.style.display = 'block';
+    chatToggle.style.display = 'flex';
     setTimeout(() => {
       chatToggle.classList.remove('closing');
     }, 300);
   });
+
   chatQuestion.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -161,12 +162,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   chatSend.addEventListener('click', sendMessage);
 
+  function appendMessage(sender, message, who = 'bot') {
+    const msg = document.createElement('div');
+    msg.className = 'chat-message ' + (who === 'user' ? 'user' : 'bot');
+    msg.innerHTML = `<span class="sender">${sender}</span>${message}`;
+    chatBody.appendChild(msg);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
   async function sendMessage() {
     const text = chatQuestion.value.trim();
     if (!text) return;
-    appendMessage('Ty', text);
+    appendMessage('Ty', text, 'user');
     chatQuestion.value = '';
-    appendMessage('Asystent', 'piszę odpowiedź...');
+    appendMessage('NextAI', '<span style="opacity:.7;">piszę odpowiedź...</span>', 'bot');
     try {
       const res = await fetch('http://localhost:5678/webhook-test/chatbot', {
         method: 'POST',
@@ -180,20 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function appendMessage(sender, message) {
-    const p = document.createElement('p');
-    p.innerHTML = `<strong>${sender}:</strong> ${message}`;
-    chatBody.appendChild(p);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
-
   function updateLastBotMessage(newText) {
-    const messages = chatBody.querySelectorAll('p');
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].innerText.startsWith('Asystent:')) {
-        messages[i].innerHTML = `<strong>Asystent:</strong> ${newText}`;
-        break;
-      }
+    const messages = chatBody.querySelectorAll('.chat-message.bot');
+    if (messages.length) {
+      messages[messages.length - 1].innerHTML = `<span class="sender">NextAI</span>${newText}`;
     }
   }
 
