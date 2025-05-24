@@ -246,5 +246,36 @@ document.addEventListener("DOMContentLoaded", function () {
   billingInfo.style.color = 'green';
 
   form.insertBefore(billingInfo, form.firstChild);
+
+  const monthly = document.getElementById('monthly-price');
+  const yearly = document.getElementById('yearly-price');
+  const yearlyBlock = document.getElementById('yearly-block');
+
+  // Funkcja do aktualizacji widoczności cen
+  function updatePriceVisibility() {
+    const isYearly = yearly && yearly.checked;
+    document.querySelectorAll('.price').forEach(price => {
+      const monthlyEl = price.querySelector('.monthly');
+      const yearlyBlockEl = price.querySelector('.yearly-block');
+      if (isYearly) {
+        if (monthlyEl) monthlyEl.classList.add('hidden');
+        if (yearlyBlockEl) yearlyBlockEl.classList.remove('hidden');
+        price.classList.add('yearly-active');
+      } else {
+        if (monthlyEl) monthlyEl.classList.remove('hidden');
+        if (yearlyBlockEl) yearlyBlockEl.classList.add('hidden');
+        price.classList.remove('yearly-active');
+      }
+    });
+  }
+
+  // Inicjalizacja widoczności cen na podstawie domyślnego pakietu
+  updatePriceVisibility();
+
+  // Obsługa zmiany opcji płatności
+  const billingOptions = document.querySelectorAll('input[name="billing"]');
+  billingOptions.forEach(option => {
+    option.addEventListener('change', updatePriceVisibility);
+  });
 });
 

@@ -478,6 +478,10 @@ input[type="checkbox"] {
   }
 }
 
+.price.yearly-active .vat-info {
+  display: none !important;
+}
+
 @media (max-width: 900px) {
   .packages {
     max-width: 99vw;

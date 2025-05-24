@@ -241,77 +241,26 @@ document.addEventListener('DOMContentLoaded', () => {
   let yearly = false;
 
   if (billingBtn) {
-    // billingBtn.addEventListener('click', () => {
-    //   yearly = !yearly;
-
-    //   // Przełącz widoczność cen
-    //   monthlyPrices.forEach(p => {
-    //     if (yearly) {
-    //       const monthlyPrice = parseInt(p.textContent, 10);
-    //       const yearlyPrice = Math.round(monthlyPrice * 12 * 0.8); // 20% zniżki
-    //       const parent = p.parentElement;
-
-    //       // Dodaj przekreśloną cenę miesięczną
-    //       const crossedPrice = document.createElement('span');
-    //       crossedPrice.classList.add('crossed-price');
-    //       crossedPrice.textContent = `${monthlyPrice * 12} PLN`;
-    //       crossedPrice.style.color = 'red';
-    //       crossedPrice.style.textDecoration = 'line-through';
-
-    //       // Dodaj cenę roczną i oszczędności
-    //       const yearlyPriceElement = document.createElement('span');
-    //       yearlyPriceElement.classList.add('yearly-price');
-    //       yearlyPriceElement.textContent = `${yearlyPrice} PLN`;
-
-    //       // Dodaj tekst oszczędności
-    //       savingsText.textContent = 'OSZCZĘDZASZ 20%';
-
-    //       // Wyczyść poprzednie ceny i dodaj nowe
-    //       parent.innerHTML = '';
-    //       parent.appendChild(crossedPrice);
-    //       parent.appendChild(yearlyPriceElement);
-    //       parent.appendChild(savingsText);
-    //     } else {
-    //       // Przywróć miesięczne ceny
-    //       const parent = p.parentElement;
-    //       parent.innerHTML = '';
-    //       parent.appendChild(p);
-    //       savingsText.remove();
-    //     }
-    //   });
-
-    //   // Zmień nagłówek
-    //   priceHeaders.forEach(h => {
-    //     h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
-    //   });
-
-    //   billingBtn.textContent = yearly
-    //     ? 'Przełącz na płatność miesięczną'
-    //     : 'Przełącz na płatność roczną';
-    // });
     billingBtn.addEventListener('click', () => {
       yearly = !yearly;
 
-      document.querySelectorAll('.price').forEach(priceContainer => {
-        const monthly = priceContainer.querySelector('.monthly');
-        const yearlyEl = priceContainer.querySelector('.yearly');
-        const crossed = priceContainer.querySelector('.crossed-price');
-        const savings = priceContainer.querySelector('.savings-text');
-
+      document.querySelectorAll('.package-card').forEach(card => {
+        const price = card.querySelector('.price');
+        if (!price) return;
+        const monthly = price.querySelector('.monthly');
+        const yearlyBlock = price.querySelector('.yearly-block');
         if (yearly) {
-          monthly?.classList.add('hidden');
-          yearlyEl?.classList.remove('hidden');
-          crossed?.classList.remove('hidden');
-          savings?.classList.remove('hidden');
+          if (monthly) monthly.classList.add('hidden');
+          if (yearlyBlock) yearlyBlock.classList.remove('hidden');
+          price.classList.add('yearly-active');
         } else {
-          monthly?.classList.remove('hidden');
-          yearlyEl?.classList.add('hidden');
-          crossed?.classList.add('hidden');
-          savings?.classList.add('hidden');
+          if (monthly) monthly.classList.remove('hidden');
+          if (yearlyBlock) yearlyBlock.classList.add('hidden');
+          price.classList.remove('yearly-active');
         }
       });
 
-      priceHeaders.forEach(h => {
+      document.querySelectorAll('.price-header').forEach(h => {
         h.textContent = yearly ? 'Cena/rok' : 'Cena/msc';
       });
 
