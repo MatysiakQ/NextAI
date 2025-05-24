@@ -14,12 +14,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Walidacja i efekty
   function markError(field, message, errorBox) {
     field.classList.add("field-error");
-    if (errorBox) errorBox.textContent = message;
+    if (errorBox) {
+      errorBox.textContent = message;
+      errorBox.style.color = "#ff5c5c";
+    }
   }
+
   function clearErrors(form) {
     form.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
   }
-
   // Logowanie
   const loginForm = document.getElementById("login-form");
   if (loginForm) {
@@ -150,12 +153,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  function markError(field, message, errorBox) {
-    field.classList.add("field-error");
-    if (errorBox) errorBox.textContent = message;
-  }
-
-  function clearErrors(form) {
-    form.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
-  }
+  // Obsługa błędów i komunikatów
 });

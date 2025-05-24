@@ -99,31 +99,26 @@ body {
   justify-content: center;
   margin-top: 10px;
 }
-
-.subscribe-button {
-  background: linear-gradient(90deg, #0ff, #00bcd4 80%);
-  color: #181818;
-  font-weight: bold;
+.contact-form button {
+  background: #0ff;
+  color: #000;
   border: none;
+  padding: 10px 16px;
   border-radius: 7px;
-  padding: 12px 0;
-  font-size: 1.1em;
+  font-size: 1em;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 12px #0ff3;
-  width: 100%;
-}
-
-.subscribe-button:hover {
-  background: linear-gradient(90deg, #00bcd4, #0ff 80%);
-  color: #111;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 /* Efekt błędu */
-.field-error {
+.contact-form input.field-error {
   border-color: #ff5c5c !important;
-  box-shadow: 0 0 5px #ff5c5c;
+  box-shadow: 0 0 5px #ff5c5c !important;
   animation: shake 0.3s ease-in-out;
+}
+.contact-form input.field-error:focus {
+  border-color: #ff5c5c !important;
+  box-shadow: 0 0 6px #ff5c5c !important;
 }
 
 @keyframes shake {
@@ -151,21 +146,6 @@ a {
 }
 a:hover {
   color: #00bcd4;
-}
-
-/* Panel użytkownika */
-#subscriptions-list {
-  margin: 20px 0;
-}
-
-.subscription-card {
-  background: #222;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px #0005;
-  color: #fff;
-  font-size: 1em;
 }
 
 /* Responsywność */
