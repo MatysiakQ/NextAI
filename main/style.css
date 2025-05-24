@@ -2209,3 +2209,7 @@ textarea:-moz-autofill {
 .yearly-block .currency {
   display: none !important;
 }
+
+.package-card.premium .yearly-price {
+  color: #fff !important;
+}
