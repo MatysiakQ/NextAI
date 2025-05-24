@@ -512,21 +512,85 @@ document.querySelector('.contact-form').addEventListener('submit', async functio
 });
 
 // Testimonials slider
-document.addEventListener('DOMContentLoaded', () => {
+(function(){
   const testimonials = document.querySelectorAll('.testimonial-card');
   const prevBtn = document.querySelector('.testimonial-prev');
   const nextBtn = document.querySelector('.testimonial-next');
+  if (!testimonials.length) return;
   let idx = 0;
-  if (testimonials.length) testimonials[0].classList.add('active');
-  function showTestimonial(i) {
-    testimonials.forEach((el, j) => el.classList.toggle('active', j === i));
+  let autoInterval = null;
+
+  function updateTestimonials() {
+    testimonials.forEach((el, i) => {
+      el.classList.remove('left', 'center', 'right', 'hidden');
+      if (i === idx % testimonials.length) {
+        el.classList.add('left');
+      } else if (i === (idx + 1) % testimonials.length) {
+        el.classList.add('center');
+      } else if (i === (idx + 2) % testimonials.length) {
+        el.classList.add('right');
+      } else {
+        el.classList.add('hidden');
+      }
+    });
   }
-  prevBtn?.addEventListener('click', () => {
+
+  function nextTestimonial() {
+    idx = (idx + 1) % testimonials.length;
+    updateTestimonials();
+  }
+
+  function prevTestimonial() {
     idx = (idx - 1 + testimonials.length) % testimonials.length;
-    showTestimonial(idx);
+    updateTestimonials();
+  }
+
+  function startAutoSlide() {
+    if (autoInterval) clearInterval(autoInterval);
+    autoInterval = setInterval(nextTestimonial, 5000);
+  }
+
+  updateTestimonials();
+  startAutoSlide();
+
+  prevBtn?.addEventListener('click', () => {
+    prevTestimonial();
+    startAutoSlide();
   });
   nextBtn?.addEventListener('click', () => {
-    idx = (idx + 1) % testimonials.length;
-    showTestimonial(idx);
+    nextTestimonial();
+    startAutoSlide();
+  });
+})();
+
+document.querySelector('.newsletter-form')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const email = this.newsletter_email.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Podaj poprawny email!');
+  // Tu możesz dodać fetch do backendu lub Mailchimp
+  this.reset();
+  document.querySelector('.newsletter-success').classList.remove('hidden');
+  setTimeout(() => document.querySelector('.newsletter-success').classList.add('hidden'), 4000);
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const bar = document.getElementById('progress-bar');
+  if (!bar) return;
+  let width = 0;
+  bar.style.width = '0';
+  const interval = setInterval(() => {
+    width += Math.random() * 10;
+    bar.style.width = Math.min(width, 90) + '%';
+    if (width >= 90) clearInterval(interval);
+  }, 120);
+  window.addEventListener('load', () => {
+    bar.style.width = '100%';
+    setTimeout(() => bar.style.opacity = '0', 400);
+  });
+});
+
+window.addEventListener('scroll', () => {
+  document.querySelectorAll('section').forEach((sec, i) => {
+    sec.style.backgroundPositionY = `${window.scrollY * 0.05 * (i % 2 === 0 ? 1 : -1)}px`;
   });
 });
