@@ -198,19 +198,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Modale dla kwadratów współpracy
-  const boxModals = {
-    'Krok 1': document.getElementById('modal-1'),
-    'Krok 2': document.getElementById('modal-2'),
-    'Krok 3': document.getElementById('modal-3')
-  };
-
-  document.querySelectorAll('.triangle-box').forEach(box => {
+  // Poprawka: obsługa kliknięcia po zmianie na ikonki
+  const boxModals = [
+    document.getElementById('modal-2'), // box-2: konsultacja
+    document.getElementById('modal-1'), // box-1: umowa
+    document.getElementById('modal-3'), // box-3: wdrożenie
+  ];
+  document.querySelectorAll('.triangle-box').forEach((box, idx) => {
     box.addEventListener('click', () => {
-      const number = box.textContent.trim();
-      const modal = boxModals[number];
+      const modal = boxModals[idx];
       if (modal) {
         modal.classList.remove('hidden');
-        document.body.classList.add('modal-open'); // Dodanie klasy blokującej scroll
+        document.body.classList.add('modal-open');
       }
     });
   });
@@ -219,16 +218,15 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const modalId = btn.getAttribute('data-modal');
       document.getElementById(`modal-${modalId}`).classList.add('hidden');
-      document.body.classList.remove('modal-open'); // Usunięcie klasy blokującej scroll
+      document.body.classList.remove('modal-open');
     });
   });
 
-  // Kliknięcie poza modalem — zamyka modal
   Object.values(boxModals).forEach(modal => {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.classList.add('hidden');
-        document.body.classList.remove('modal-open'); // Usunięcie klasy blokującej scroll
+        document.body.classList.remove('modal-open');
       }
     });
   });
