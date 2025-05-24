@@ -667,7 +667,7 @@ section {
 
 .package-card .price {
   display: inline-flex;
-  align-items: center; /* zamiast baseline */
+  align-items: center;
   gap: 0;
   margin: 0 auto 1rem;
   font-size: 2rem;
@@ -678,7 +678,7 @@ section {
 .yearly-block .currency {
   font-size: 1rem;
   opacity: 0.8;
-  margin-left: 0.08em; /* minimalny odstęp */
+  margin-left: 0.08em;
   display: inline;
   letter-spacing: 0;
   align-self: center;
