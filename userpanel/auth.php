@@ -1,7 +1,7 @@
 <?php
 session_start();
 header('Content-Type: application/json; charset=utf-8');
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 $pdo = new PDO(
     "mysql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']};charset=utf8mb4",
@@ -11,6 +11,40 @@ $pdo = new PDO(
 );
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+if ($action === 'register') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $password2 = $_POST['password2'] ?? '';
+    if (!$email || !$password) {
+        echo json_encode(['success' => false, 'message' => 'Podaj email i hasło']);
+        exit;
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy email']);
+        exit;
+    }
+    if (strlen($password) < 6) {
+        echo json_encode(['success' => false, 'message' => 'Hasło za krótkie']);
+        exit;
+    }
+    if ($password !== $password2) {
+        echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
+        exit;
+    }
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'Email już istnieje']);
+        exit;
+    }
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
+    $stmt->execute([$email, $hash]);
+    $_SESSION['user_id'] = $pdo->lastInsertId();
+    echo json_encode(['success' => true]);
+    exit;
+}
 
 if ($action === 'login') {
     $email = trim($_POST['email'] ?? '');

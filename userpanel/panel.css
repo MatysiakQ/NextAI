@@ -1,43 +1,180 @@
+/* Tło i ogólne */
 body {
   background: #0a0a0a;
   color: #fff;
   font-family: 'Source Code Pro', monospace;
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
 }
-.panel-container {
-  max-width: 400px;
-  margin: 60px auto;
+
+.background-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg, #222 0 1px, transparent 1px 80px
+  ), repeating-linear-gradient(
+    180deg, #222 0 1px, transparent 1px 80px
+  );
+  opacity: 0.25;
+}
+
+/* Sekcja i animacje */
+.packages {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  margin: 60px auto 0 auto;
   background: #181818;
-  border-radius: 12px;
-  padding: 32px 24px;
+  border-radius: 16px;
   box-shadow: 0 4px 32px #000a;
+  padding: 32px 24px 24px 24px;
+  animation: fade-in 0.7s;
 }
-input, button {
-  width: 100%;
-  margin: 10px 0;
-  padding: 12px;
-  border-radius: 6px;
-  border: none;
-  font-size: 1em;
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(30px);}
+  to { opacity: 1; transform: none;}
 }
-button {
-  background: #0ff;
-  color: #181818;
+
+/* Tytuły */
+.section-title {
+  font-size: 2.1em;
   font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
+  margin-bottom: 28px;
+  color: #0ff !important;
+  text-shadow: 0 2px 12px #0ff, 0 0 2px #fff;
+  border-bottom: 2px solid #0ff !important;
+  padding-bottom: 6px;
+  letter-spacing: 1px;
+  text-align: center;
 }
-button:hover {
-  background: #00bcd4;
+
+.section-title.glitch::before,
+.section-title.glitch::after {
+  color: #0ff !important;
+  text-shadow: 0 2px 12px #0ff, 0 0 2px #fff;
 }
-#login-error {
-  color: #ff5c5c;
+
+/* Formularze */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 auto;
+  max-width: 300px;
+}
+
+.contact-form label {
+  font-size: 1em;
+  margin-bottom: 2px;
+  color: #0ff;
+  letter-spacing: 0.5px;
+}
+
+.contact-form input[type="email"],
+.contact-form input[type="password"],
+.contact-form input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #333;
+  background: #222;
+  color: #fff;
+  font-size: 1em;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 8px;
+  outline: none;
+}
+
+.contact-form input:focus {
+  border-color: #0ff;
+  box-shadow: 0 0 6px #0ff4;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
   margin-top: 10px;
 }
+
+.subscribe-button {
+  background: linear-gradient(90deg, #0ff, #00bcd4 80%);
+  color: #181818;
+  font-weight: bold;
+  border: none;
+  border-radius: 7px;
+  padding: 12px 0;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 12px #0ff3;
+  width: 100%;
+}
+
+.subscribe-button:hover {
+  background: linear-gradient(90deg, #00bcd4, #0ff 80%);
+  color: #111;
+}
+
+/* Efekt błędu */
+.field-error {
+  border-color: #ff5c5c !important;
+  box-shadow: 0 0 5px #ff5c5c;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0);}
+  20% { transform: translateX(-5px);}
+  40% { transform: translateX(5px);}
+  60% { transform: translateX(-5px);}
+  80% { transform: translateX(5px);}
+  100% { transform: translateX(0);}
+}
+
+/* Komunikaty */
+#login-error, #register-error {
+  color: #ff5c5c;
+  margin-top: 10px;
+  text-align: center;
+  min-height: 18px;
+}
+
+/* Linki */
+a {
+  color: #0ff;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #00bcd4;
+}
+
+/* Panel użytkownika */
+#subscriptions-list {
+  margin: 20px 0;
+}
+
 .subscription-card {
   background: #222;
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 12px;
+  box-shadow: 0 2px 8px #0005;
+  color: #fff;
+  font-size: 1em;
+}
+
+/* Responsywność */
+@media (max-width: 600px) {
+  .packages {
+    padding: 18px 4vw 18px 4vw;
+    max-width: 98vw;
+  }
+  .contact-form {
+    max-width: 98vw;
+  }
 }
