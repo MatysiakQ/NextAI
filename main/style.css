@@ -1738,3 +1738,24 @@ textarea:-moz-autofill {
   opacity: 1;
   transition: 0s;
 }
+
+#progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0ff, #8A2BE2);
+  z-index: 99999;
+  transition: width 0.3s;
+}
+
+@media (max-width: 600px) {
+  .subscribe-button, .contact-form button, #billing-switch {
+    font-size: 1.1em;
+    padding: 16px 0;
+    min-height: 48px;
+  }
+  .package-card {
+    margin-bottom: 18px;
+  }
+}
