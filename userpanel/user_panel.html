@@ -7,11 +7,14 @@
   <link rel="stylesheet" href="panel.css">
 </head>
 <body>
-  <div class="panel-container">
-    <h2>Twoje subskrypcje</h2>
+  <div class="background-grid"></div>
+  <section class="packages animate-fade-in">
+    <h2 class="section-title glitch" data-text="Twoje subskrypcje">Twoje subskrypcje</h2>
     <div id="subscriptions-list"></div>
-    <button id="logout-btn">Wyloguj się</button>
-  </div>
+    <div class="button-wrapper">
+      <button id="logout-btn" class="subscribe-button" style="margin-top:30px;">Wyloguj się</button>
+    </div>
+  </section>
   <script src="auth.js"></script>
 </body>
 </html>
