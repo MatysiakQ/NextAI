@@ -376,6 +376,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Zapisz ceny w localStorage
   localStorage.setItem("planPrices", JSON.stringify(planPrices));
+
+  // USER MENU DROPDOWN
+  const userMenuToggle = document.getElementById('user-menu-toggle');
+  const userMenu = document.getElementById('user-menu');
+  let isUserLoggedIn = false;
+
+  // Funkcja do sprawdzenia zalogowania (asynchronicznie)
+  async function checkLoginStatus() {
+    try {
+      const res = await fetch('../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
+      const data = await res.json();
+      isUserLoggedIn = !!data.success;
+      renderUserMenu();
+    } catch {
+      isUserLoggedIn = false;
+      renderUserMenu();
+    }
+  }
+
+  // Funkcja do renderowania menu użytkownika
+  function renderUserMenu() {
+    if (!userMenu) return;
+    userMenu.innerHTML = '';
+    if (!isUserLoggedIn) {
+      userMenu.innerHTML = `
+        <button type="button" id="user-login-btn">Zaloguj się</button>
+        <a href="#faq">FAQ</a>
+        <a href="#" id="user-terms-link">Regulamin</a>
+        <a href="#contact">Pomoc</a>
+      `;
+    } else {
+      userMenu.innerHTML = `
+        <button type="button" id="user-account-btn">Moje konto</button>
+        <a href="#faq">FAQ</a>
+        <a href="#" id="user-terms-link">Regulamin</a>
+        <a href="#contact">Pomoc</a>
+        <button type="button" id="user-logout-btn">Wyloguj się</button>
+      `;
+    }
+  }
+
+  // Pokaz/ukryj menu po kliknięciu w ikonkę
+  if (userMenuToggle) {
+    userMenuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userMenu.classList.toggle('hidden');
+      userMenuToggle.classList.toggle('active', !userMenu.classList.contains('hidden'));
+    });
+  }
+  // Zamknij menu po kliknięciu poza nim
+  document.addEventListener('click', (e) => {
+    if (userMenu && !userMenu.classList.contains('hidden')) {
+      if (!userMenu.contains(e.target) && e.target !== userMenuToggle) {
+        userMenu.classList.add('hidden');
+        userMenuToggle.classList.remove('active');
+      }
+    }
+  });
+
+  // Delegacja obsługi kliknięć w menu użytkownika
+  if (userMenu) {
+    userMenu.addEventListener('click', async function (e) {
+      if (e.target.id === 'user-login-btn') {
+        // Zapamiętaj powrót na stronę główną po zalogowaniu
+        localStorage.setItem('afterLoginRedirect', window.location.pathname);
+        window.location.href = '../userpanel/login.html';
+      }
+      if (e.target.id === 'user-account-btn') {
+        window.location.href = '../userpanel/user_panel.html';
+      }
+      if (e.target.id === 'user-logout-btn') {
+        await fetch('../userpanel/auth.php?action=logout', { credentials: 'include' });
+        isUserLoggedIn = false;
+        renderUserMenu();
+        userMenu.classList.add('hidden');
+      }
+      if (e.target.id === 'user-terms-link') {
+        e.preventDefault();
+        window.location.href = '../main/Regulamin_NextAi.pdf';
+      }
+    });
+  }
+
+  // Po powrocie z logowania przekieruj na stronę główną jeśli trzeba
+  if (window.location.pathname.endsWith('/userpanel/login.html')) {
+    const afterLogin = localStorage.getItem('afterLoginRedirect');
+    if (afterLogin) {
+      // Po zalogowaniu w auth.js przekieruj na afterLogin
+      window.afterLoginRedirect = afterLogin;
+    }
+  }
+
+  // Sprawdź status logowania na starcie
+  checkLoginStatus();
 });
 
 document.addEventListener("DOMContentLoaded", function () {

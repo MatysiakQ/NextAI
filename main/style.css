@@ -124,7 +124,7 @@ a:hover {
 /* Social panel */
 .social-panel {
   position: fixed;
-  top: 30%;
+  top: 36%; /* było 45%, wcześniej 30% */
   right: 0;
   transform: translateY(-50%);
   display: flex;
@@ -781,11 +781,10 @@ section {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 360px;
-  max-height: 480px;
+  width: 320px;           /* było 360px */
+  max-height: 400px;      /* było 480px */
   background: linear-gradient(135deg, #0d0d1a, #1a1a2e);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  /* Delikatna ramka */
   box-shadow: 0 0 15px var(--accent-premium);
   display: flex;
   flex-direction: column;
@@ -1193,4 +1192,265 @@ section {
 .back-button:hover {
   background: rgba(0, 255, 255, 0.2);
   color: #fff;
+}
+
+/* USER MENU DROPDOWN */
+.user-menu-dropdown {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  min-width: 180px;
+  background: linear-gradient(135deg, #070a0e 80%, #10131a 100%);
+  /* jeszcze ciemniejsze tło */
+  border: 1.5px solid #0ff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px 0 rgba(0,255,255,0.10), 0 1.5px 8px #000a;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0 8px 0;
+  transition: opacity 0.22s cubic-bezier(.4,1.2,.6,1), transform 0.22s cubic-bezier(.4,1.2,.6,1);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.98);
+  backdrop-filter: blur(6px);
+}
+
+.user-menu-dropdown:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.user-menu-dropdown.hidden {
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.98);
+}
+
+.user-menu-dropdown button,
+.user-menu-dropdown a {
+  background: none;
+  border: none;
+  color: #0ff;
+  text-align: left;
+  padding: 12px 22px;
+  font-size: 1em;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.18s, color 0.18s, padding-left 0.18s;
+  text-decoration: none;
+  outline: none;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.user-menu-dropdown button:hover,
+.user-menu-dropdown a:hover {
+  background: rgba(0,255,255,0.08);
+  color: #fff;
+  padding-left: 28px;
+}
+
+.user-menu-dropdown button:active,
+.user-menu-dropdown a:active {
+  background: rgba(0,255,255,0.16);
+  color: #0ff;
+}
+
+.user-menu-dropdown:not(.hidden) {
+  box-shadow: 0 0 0 2px #0ff4, 0 8px 32px 0 rgba(0,255,255,0.10), 0 1.5px 8px #000a;
+  animation: userMenuGlow 1.2s ease-in-out alternate infinite;
+}
+
+@keyframes userMenuGlow {
+  0% { box-shadow: 0 0 0 2px #0ff4, 0 8px 32px 0 rgba(0,255,255,0.10), 0 1.5px 8px #000a; }
+  100% { box-shadow: 0 0 12px 4px #0ff6, 0 8px 32px 0 rgba(0,255,255,0.10), 0 1.5px 8px #000a; }
+}
+
+/* USER ICON (LUDZIK) STYLE */
+#user-menu-toggle i {
+  color: #ccc !important;
+  transition: color 0.2s;
+}
+#user-menu-toggle:hover i,
+#user-menu-toggle.active i {
+  color: #0ff !important;
+}
+
+/* RESPONSYWNOŚĆ - NAWIGACJA I MENU */
+@media (max-width: 1024px) {
+  .package-grid {
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+  .package-card {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .triangle-layout {
+    width: 98vw;
+    max-width: 98vw;
+    height: 350px;
+  }
+  .triangle-arrows {
+    width: 98vw;
+    max-width: 98vw;
+    height: 350px;
+  }
+  .box-1 { top: 10px; left: 40vw; }
+  .box-2 { bottom: 10px; left: 5vw; }
+  .box-3 { bottom: 10px; right: 5vw; }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: .5rem 0.5rem;
+  }
+  .nav-menu {
+    gap: 1rem;
+    margin-right: 5px;
+  }
+  .hero-section {
+    height: auto;
+    min-height: 60vh;
+    padding: 40px 0 20px 0;
+  }
+  .feature-cards {
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+  }
+  .card-slider {
+    height: 380px;
+  }
+  .card {
+    width: 90vw;
+    max-width: 340px;
+    height: 340px;
+    left: 50%;
+  }
+  .package-card {
+    padding: 18px;
+    font-size: 0.98em;
+  }
+  .section-title {
+    font-size: 1.3rem;
+    margin-bottom: 22px;
+  }
+  .packages {
+    padding: 30px 5vw;
+  }
+  .modal-content {
+    padding: 18px;
+    font-size: 1em;
+    max-width: 98vw;
+  }
+  .site-footer p {
+    font-size: 0.8rem;
+  }
+  .user-menu-dropdown {
+    min-width: 140px;
+    font-size: 0.98em;
+    right: -10px;
+  }
+  .background-grid {
+    background-size: 30px 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-section {
+    padding: 20px 0 10px 0;
+    min-height: 40vh;
+  }
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+  .feature-card, .card {
+    width: 98vw;
+    max-width: 98vw;
+    min-width: 0;
+    font-size: 0.98em;
+  }
+  .slider-controls {
+    gap: 4px;
+  }
+  .triangle-layout, .triangle-arrows {
+    width: 98vw;
+    height: 220px;
+  }
+  .box-1, .box-2, .box-3 {
+    width: 70px;
+    height: 70px;
+    font-size: 0.95em;
+  }
+  .packages {
+    padding: 10px 2vw;
+    max-width: 99vw;
+  }
+  .package-card {
+    padding: 10px;
+    font-size: 0.97em;
+  }
+  .modal-content {
+    padding: 8px;
+    font-size: 0.97em;
+    max-width: 99vw;
+  }
+  .user-menu-dropdown {
+    min-width: 110px;
+    font-size: 0.95em;
+    right: -10px;
+  }
+  #chat-widget {
+    width: 98vw;
+    max-width: 98vw;
+    min-width: 0;
+    right: 1vw;
+    bottom: 1vw;
+    max-height: 320px;
+  }
+  #chat-header {
+    font-size: 1em;
+    padding: 8px;
+  }
+  #chat-input input {
+    font-size: 13px;
+    padding: 8px;
+  }
+  #chat-input button {
+    font-size: 16px;
+    padding: 0 10px;
+  }
+  #chat-toggle {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    right: 1vw;
+    bottom: 1vw;
+  }
+  .background-grid {
+    background-size: 18px 18px;
+  }
+  .site-footer p {
+    font-size: 0.7rem;
+  }
+  .social-panel {
+    top: 18%;
+    gap: 6px;
+    padding: 4px;
+  }
+  .social-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1em;
+  }
 }

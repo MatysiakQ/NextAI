@@ -25,7 +25,6 @@
       <p>Twój cyfrowy partner – teraz jeszcze mądrzejszy!</p>
       <a href="#features" class="hero-button">Poznaj możliwości</a>
     </div>
-    </section>
   </header>
 
   <div class="social-panel">
@@ -53,6 +52,15 @@
         <li class="nav-item"><a href="#jak-wspolpraca">Współpraca</a></li>
         <li class="nav-item"><a href="#packages">Pakiety</a></li>
         <li class="nav-item"><a href="#contact">Kontakt</a></li>
+        <!-- Ikonka ludzika na końcu menu -->
+        <li class="nav-item user-menu-item" style="position:relative;display:flex;align-items:center;">
+          <button id="user-menu-toggle" aria-label="Menu użytkownika" style="background:none;border:none;cursor:pointer;padding:0;margin-left:10px;">
+            <i class="fa-solid fa-user" style="font-size:1.5em;color:#0ff;vertical-align:middle;"></i>
+          </button>
+          <div id="user-menu" class="user-menu-dropdown hidden">
+            <!-- Menu generowane przez JS -->
+          </div>
+        </li>
       </ul>
     </div>
   </nav>

@@ -54,7 +54,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await res.json();
       if (data.success) {
-        window.location.href = "user_panel.html";
+        // Sprawdź czy jest ustawiony afterLoginRedirect
+        const redirect = localStorage.getItem('afterLoginRedirect');
+        if (redirect) {
+          localStorage.removeItem('afterLoginRedirect');
+          window.location.href = redirect;
+        } else {
+          window.location.href = "user_panel.html";
+        }
       } else {
         if (data.message && data.message.toLowerCase().includes("email")) {
           markError(email, data.message, errorBox);

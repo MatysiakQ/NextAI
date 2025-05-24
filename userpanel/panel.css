@@ -149,12 +149,30 @@ a:hover {
 }
 
 /* Responsywność */
+@media (max-width: 900px) {
+  .packages {
+    max-width: 98vw;
+    padding: 18px 2vw 18px 2vw;
+  }
+}
+
 @media (max-width: 600px) {
   .packages {
-    padding: 18px 4vw 18px 4vw;
-    max-width: 98vw;
+    padding: 10px 2vw 10px 2vw;
+    max-width: 99vw;
   }
   .contact-form {
-    max-width: 98vw;
+    max-width: 99vw;
+    gap: 7px;
+  }
+  .section-title {
+    font-size: 1.2em;
+    padding-bottom: 3px;
+  }
+  .button-wrapper {
+    margin-top: 6px;
+  }
+  .background-grid {
+    background-size: 18px 18px;
   }
 }
