@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatQuestion.value = '';
     appendMessage('NextAI', '<span style="opacity:.7;">piszę odpowiedź...</span>', 'bot');
     try {
-      const res = await fetch('http://localhost:5678/webhook-test/chatbot', {
+      const res = await fetch('https://nextai.app.n8n.cloud/webhook/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: text })
