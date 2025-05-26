@@ -487,9 +487,8 @@
         <button class="testimonial-prev" aria-label="Poprzednia opinia">&#10094;</button>
         <button class="testimonial-next" aria-label="Następna opinia">&#10095;</button>
       </div>
-      <!-- Przycisk przeniesiony pod strzałki -->
-      <button id="add-opinion-btn" class="contact-form-button" style="margin:24px auto 0 auto;display:block;">Dodaj
-      opinię</button>
+      <button id="add-opinion-btn" class="contact-form-button" style="margin:24px auto 0 auto;">Dodaj opinię</button>
+      <div id="add-opinion-info" style="color:#ff5c5c;margin-top:12px;display:none;text-align:center;font-weight:bold;"></div>
     </section>
 
     <section id="contact" class="contact spotlight">
@@ -565,6 +564,41 @@
     </footer>
 
     <script src="main.js" defer></script>
+    <script>
+      // Sprawdzanie zalogowania (asynchronicznie, cache wynik)
+      let isUserLoggedIn = false;
+      async function checkLoginStatus() {
+        try {
+          const res = await fetch('../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
+          const data = await res.json();
+          isUserLoggedIn = !!data.success;
+        } catch {
+          isUserLoggedIn = false;
+        }
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        checkLoginStatus();
+        const btn = document.getElementById('add-opinion-btn');
+        const info = document.getElementById('add-opinion-info');
+        if (!btn) return;
+        btn.addEventListener('click', async function (e) {
+          await checkLoginStatus();
+          if (isUserLoggedIn) {
+            // Otwórz modal opinii tylko jeśli zalogowany
+            if (typeof document.getElementById('add-opinion-modal') !== 'undefined' && document.getElementById('add-opinion-modal')) {
+              document.getElementById('add-opinion-modal').classList.remove('hidden');
+            }
+            info.style.display = 'none';
+          } else {
+            info.textContent = "Aby dodać opinię, musisz się zalogować";
+            info.style.display = 'block';
+            // NIE pokazuj modala!
+            // document.getElementById('add-opinion-modal').classList.add('hidden');
+            setTimeout(() => { info.style.display = 'none'; }, 4000);
+          }
+        });
+      });
+    </script>
 
 
 </body>

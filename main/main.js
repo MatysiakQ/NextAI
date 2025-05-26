@@ -434,6 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeOpinionModal = document.getElementById('close-opinion-modal');
   const opinionForm = document.getElementById('opinion-form');
   const opinionSuccess = document.getElementById('opinion-success');
+  const addOpinionInfo = document.getElementById('add-opinion-info');
   // Dodane: obsługa anonimowości
   const opinionName = document.getElementById('opinion-name');
   const opinionAnonymous = document.getElementById('opinion-anonymous');
@@ -451,18 +452,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (addOpinionBtn && addOpinionModal && closeOpinionModal && opinionForm) {
-    addOpinionBtn.addEventListener('click', () => {
-      addOpinionModal.classList.remove('hidden');
-      document.body.classList.add('modal-open');
-      opinionForm.reset();
-      opinionSuccess.classList.add('hidden');
-      // Resetuj stan anonimowości
-      if (opinionAnonymous && opinionName) {
-        opinionName.disabled = false;
-        opinionName.placeholder = 'Imię lub nick';
+  // Zmieniona obsługa przycisku "Dodaj opinię"
+  if (addOpinionBtn) {
+    addOpinionBtn.addEventListener('click', async () => {
+      // Sprawdź status logowania przed pokazaniem modala
+      let loggedIn = false;
+      try {
+        const res = await fetch('../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
+        const data = await res.json();
+        loggedIn = !!data.success;
+      } catch {
+        loggedIn = false;
+      }
+      if (loggedIn) {
+        if (addOpinionModal) {
+          addOpinionModal.classList.remove('hidden');
+          document.body.classList.add('modal-open');
+          if (opinionForm) opinionForm.reset();
+          if (opinionSuccess) opinionSuccess.classList.add('hidden');
+          // Resetuj stan anonimowości
+          if (opinionAnonymous && opinionName) {
+            opinionName.disabled = false;
+            opinionName.placeholder = 'Imię lub nick';
+          }
+        }
+        if (addOpinionInfo) addOpinionInfo.style.display = 'none';
+      } else {
+        if (addOpinionInfo) {
+          addOpinionInfo.textContent = "Aby dodać opinię, musisz się zalogować";
+          addOpinionInfo.style.display = 'block';
+          setTimeout(() => { addOpinionInfo.style.display = 'none'; }, 4000);
+        }
+        // NIE pokazuj modala!
+        if (addOpinionModal) addOpinionModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
       }
     });
+  }
+
+  if (closeOpinionModal && addOpinionModal) {
     closeOpinionModal.addEventListener('click', () => {
       addOpinionModal.classList.add('hidden');
       document.body.classList.remove('modal-open');
@@ -473,6 +501,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('modal-open');
       }
     });
+  }
+
+  if (opinionForm) {
     opinionForm.addEventListener('submit', function (e) {
       e.preventDefault();
       // Obsługa anonimowości
