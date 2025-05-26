@@ -41,12 +41,15 @@ document.addEventListener("DOMContentLoaded", () => {
       errorBox.textContent = "";
 
       if (!email.value.trim()) {
-        markError(email, "Podaj email", errorBox);
+        markError(email, "Podaj login lub email", errorBox);
         return;
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-        markError(email, "Wprowadź poprawny adres e-mail.", errorBox);
-        return;
+      // Pozwól na login lub email (nie wymagaj formatu email)
+      if (email.value.includes("@")) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+          markError(email, "Wprowadź poprawny adres e-mail.", errorBox);
+          return;
+        }
       }
       if (!password.value) {
         markError(password, "Podaj hasło", errorBox);

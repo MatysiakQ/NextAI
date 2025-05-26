@@ -46,8 +46,13 @@ if ($action === 'register') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $password2 = $_POST['password2'] ?? '';
-    if (!$email || !$password) {
-        echo json_encode(['success' => false, 'message' => 'Podaj email i hasło']);
+    $username = trim($_POST['username'] ?? ''); // Dodaj pobieranie nicku
+    if (!$email || !$password || !$username) {
+        echo json_encode(['success' => false, 'message' => 'Podaj email, nazwę użytkownika i hasło']);
+        exit;
+    }
+    if (!preg_match('/^[a-zA-Z0-9_\-\.]{3,32}$/', $username)) {
+        echo json_encode(['success' => false, 'message' => 'Nieprawidłowa nazwa użytkownika']);
         exit;
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -62,42 +67,40 @@ if ($action === 'register') {
         echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
         exit;
     }
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-    $stmt->execute([$email]);
+    // Sprawdź czy email lub nick już istnieje
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? OR NazwaUzytkownika = ?");
+    $stmt->execute([$email, $username]);
     if ($stmt->fetch()) {
-        echo json_encode(['success' => false, 'message' => 'Email już istnieje']);
+        echo json_encode(['success' => false, 'message' => 'Email lub nazwa użytkownika już istnieje']);
         exit;
     }
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
-    $stmt->execute([$email, $hash]);
+    $stmt = $pdo->prepare("INSERT INTO users (email, password, NazwaUzytkownika) VALUES (?, ?, ?)");
+    $stmt->execute([$email, $hash, $username]);
     $_SESSION['user_id'] = $pdo->lastInsertId();
     echo json_encode(['success' => true]);
     exit;
 }
 
 if ($action === 'login') {
-    $email = trim($_POST['email'] ?? '');
+    $login = trim($_POST['email'] ?? ''); // może być email lub nick
     $password = $_POST['password'] ?? '';
-    if (!$email || !$password) {
-        echo json_encode(['success' => false, 'message' => 'Podaj email i hasło']);
+    if (!$login || !$password) {
+        echo json_encode(['success' => false, 'message' => 'Podaj login/email i hasło']);
         exit;
     }
     try {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
+        // Szukaj po email lub NazwaUzytkownika
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR NazwaUzytkownika = ?");
+        $stmt->execute([$login, $login]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($user && !empty($user['password']) && password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             echo json_encode(['success' => true]);
         } else {
-            if ($user && empty($user['password'])) {
-                error_log("LOGIN ERROR: Empty password hash for user $email\n", 3, __DIR__ . '/../php_errors.log');
-            }
             echo json_encode(['success' => false, 'message' => 'Nieprawidłowe dane logowania']);
         }
     } catch (Exception $e) {
-        error_log("LOGIN SQL ERROR: " . $e->getMessage(), 3, __DIR__ . '/../php_errors.log');
         echo json_encode(['success' => false, 'message' => 'Błąd logowania']);
     }
     exit;
@@ -109,25 +112,114 @@ if ($action === 'logout') {
     exit;
 }
 
+if ($action === 'update_profile') {
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['success' => false, 'message' => 'Brak dostępu']);
+        exit;
+    }
+    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $password2 = $_POST['password2'] ?? '';
+    $avatarPath = null;
+
+    if (!$username || !$email) {
+        echo json_encode(['success' => false, 'message' => 'Podaj nazwę użytkownika i email']);
+        exit;
+    }
+    if (!preg_match('/^[a-zA-Z0-9_\-\.]{3,32}$/', $username)) {
+        echo json_encode(['success' => false, 'message' => 'Nieprawidłowa nazwa użytkownika']);
+        exit;
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy email']);
+        exit;
+    }
+    // Sprawdź czy nick lub email nie jest już zajęty przez innego użytkownika
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE (email = ? OR NazwaUzytkownika = ?) AND id != ?");
+    $stmt->execute([$email, $username, $_SESSION['user_id']]);
+    if ($stmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'Email lub nazwa użytkownika już istnieje']);
+        exit;
+    }
+
+    // Obsługa uploadu avatara
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+        $fileTmp = $_FILES['avatar']['tmp_name'];
+        $fileName = $_FILES['avatar']['name'];
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (!in_array($fileExt, $allowed)) {
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowy format avatara']);
+            exit;
+        }
+        $avatarDir = __DIR__ . '/avatary/';
+        if (!is_dir($avatarDir)) mkdir($avatarDir, 0777, true);
+        $newName = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $fileExt;
+        $destPath = $avatarDir . $newName;
+        if (!move_uploaded_file($fileTmp, $destPath)) {
+            echo json_encode(['success' => false, 'message' => 'Błąd zapisu avatara']);
+            exit;
+        }
+        $avatarPath = 'avatary/' . $newName;
+    }
+
+    // Aktualizuj dane
+    if ($password) {
+        if (strlen($password) < 6) {
+            echo json_encode(['success' => false, 'message' => 'Hasło za krótkie']);
+            exit;
+        }
+        if ($password !== $password2) {
+            echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
+            exit;
+        }
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        if ($avatarPath) {
+            $stmt = $pdo->prepare("UPDATE users SET NazwaUzytkownika=?, email=?, password=?, Avatar=? WHERE id=?");
+            $stmt->execute([$username, $email, $hash, $avatarPath, $_SESSION['user_id']]);
+        } else {
+            $stmt = $pdo->prepare("UPDATE users SET NazwaUzytkownika=?, email=?, password=? WHERE id=?");
+            $stmt->execute([$username, $email, $hash, $_SESSION['user_id']]);
+        }
+    } else {
+        if ($avatarPath) {
+            $stmt = $pdo->prepare("UPDATE users SET NazwaUzytkownika=?, email=?, Avatar=? WHERE id=?");
+            $stmt->execute([$username, $email, $avatarPath, $_SESSION['user_id']]);
+        } else {
+            $stmt = $pdo->prepare("UPDATE users SET NazwaUzytkownika=?, email=? WHERE id=?");
+            $stmt->execute([$username, $email, $_SESSION['user_id']]);
+        }
+    }
+    echo json_encode(['success' => true, 'avatar' => $avatarPath]);
+    exit;
+}
+
 if ($action === 'subscriptions') {
     if (!isset($_SESSION['user_id'])) {
         echo json_encode(['success' => false, 'message' => 'Brak dostępu']);
         exit;
     }
     try {
-        // Najpierw pobierz email użytkownika
-        $stmt = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT email, NazwaUzytkownika, Avatar FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$user) {
             echo json_encode(['success' => false, 'subscriptions' => [], 'message' => 'Nie znaleziono użytkownika']);
             exit;
         }
-        // Teraz pobierz subskrypcje po emailu
         $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE email = ?");
         $stmt->execute([$user['email']]);
         $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode(['success' => true, 'subscriptions' => $subs]);
+        echo json_encode([
+            'success' => true,
+            'subscriptions' => $subs,
+            'user' => [
+                'email' => $user['email'],
+                'username' => $user['NazwaUzytkownika'] ?? (explode('@', $user['email'])[0]),
+                'avatar' => $user['Avatar'] ?? null
+            ]
+        ]);
     } catch (Exception $e) {
         error_log("SUBSCRIPTIONS SQL ERROR: " . $e->getMessage(), 3, __DIR__ . '/../pdo_errors.log');
         echo json_encode(['success' => false, 'subscriptions' => [], 'message' => 'Błąd pobierania subskrypcji']);
