@@ -57,6 +57,7 @@
               <button type="button" id="change-password-btn" class="profile2-change-btn">Zmień hasło</button>
             </div>
             <div id="change-password-form" class="profile2-change-form" style="display:none;">
+              <input type="password" id="profile2-old-password" placeholder="Stare hasło" autocomplete="current-password">
               <input type="password" id="profile2-password" placeholder="Nowe hasło" autocomplete="new-password">
               <input type="password" id="profile2-password2" placeholder="Powtórz hasło" autocomplete="new-password">
               <button type="button" id="save-password-btn" class="profile2-save-btn">Zapisz</button>
@@ -96,14 +97,20 @@
         document.getElementById('cancel-password-btn').onclick = function () {
           changePasswordForm.style.display = "none";
           changePasswordBtn.style.display = "";
+          document.getElementById('profile2-old-password').value = "";
           document.getElementById('profile2-password').value = "";
           document.getElementById('profile2-password2').value = "";
         };
         document.getElementById('save-password-btn').onclick = function () {
+          const oldPass = document.getElementById('profile2-old-password').value;
           const pass1 = document.getElementById('profile2-password').value;
           const pass2 = document.getElementById('profile2-password2').value;
+          if (oldPass.length < 6) {
+            alert("Stare hasło musi mieć min. 6 znaków.");
+            return;
+          }
           if (pass1.length < 6) {
-            alert("Hasło musi mieć min. 6 znaków.");
+            alert("Nowe hasło musi mieć min. 6 znaków.");
             return;
           }
           if (pass1 !== pass2) {
@@ -113,6 +120,7 @@
           // TODO: Wyślij na backend
           changePasswordForm.style.display = "none";
           changePasswordBtn.style.display = "";
+          document.getElementById('profile2-old-password').value = "";
           document.getElementById('profile2-password').value = "";
           document.getElementById('profile2-password2').value = "";
           alert("Hasło zostało zmienione!");

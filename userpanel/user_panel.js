@@ -54,6 +54,7 @@ document.getElementById('profile2-form').addEventListener('submit', function(e) 
   const email = document.getElementById('profile2-email').value.trim();
   const password = document.getElementById('profile2-password') ? document.getElementById('profile2-password').value : '';
   const password2 = document.getElementById('profile2-password2') ? document.getElementById('profile2-password2').value : '';
+  const oldPassword = document.getElementById('profile2-old-password') ? document.getElementById('profile2-old-password').value : '';
   const errorBox = document.getElementById('profile2-error');
   const successBox = document.getElementById('profile2-success');
   errorBox.textContent = "";
@@ -76,12 +77,25 @@ document.getElementById('profile2-form').addEventListener('submit', function(e) 
     return;
   }
 
+  // Jeśli użytkownik zmienia hasło, wymagaj starego hasła i sprawdź wymagania
+  if (password) {
+    if (!oldPassword) {
+      errorBox.textContent = "Podaj stare hasło.";
+      return;
+    }
+    if (!/(?=.*[A-Z])(?=.*\d).{6,}/.test(password)) {
+      errorBox.textContent = "Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę.";
+      return;
+    }
+  }
+
   const formData = new FormData();
   formData.append('action', 'update_profile');
   formData.append('username', username);
   formData.append('email', email);
   formData.append('password', password);
   formData.append('password2', password2);
+  formData.append('old_password', oldPassword);
 
   // Dodaj avatar jeśli wybrano plik
   if (avatar2Input.files && avatar2Input.files[0]) {

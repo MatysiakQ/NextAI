@@ -113,12 +113,21 @@ document.addEventListener("DOMContentLoaded", () => {
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors(registerForm);
+      const username = document.getElementById('register-username');
       const email = document.getElementById('register-email');
       const password = document.getElementById('register-password');
       const password2 = document.getElementById('register-password2');
       const errorBox = document.getElementById("register-error");
       errorBox.textContent = "";
 
+      if (!username.value.trim()) {
+        markError(username, "Podaj nazwę użytkownika", errorBox);
+        return;
+      }
+      if (!/^[a-zA-Z0-9_\-\.]{3,32}$/.test(username.value.trim())) {
+        markError(username, "Nieprawidłowa nazwa użytkownika", errorBox);
+        return;
+      }
       if (!email.value.trim()) {
         markError(email, "Podaj email", errorBox);
         return;
@@ -131,12 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
         markError(password, "Podaj hasło", errorBox);
         return;
       }
-      if (password.value !== password2.value) {
-        markError(password2, "Hasła nie są takie same!", errorBox);
+      if (!/(?=.*[A-Z])(?=.*\d).{6,}/.test(password.value)) {
+        markError(password, "Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę.", errorBox);
         return;
       }
-      if (password.value.length < 6) {
-        markError(password, "Hasło musi mieć min. 6 znaków.", errorBox);
+      if (password.value !== password2.value) {
+        markError(password2, "Hasła nie są takie same!", errorBox);
         return;
       }
 
@@ -145,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch("auth.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `action=register&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}`
+          body: `action=register&username=${encodeURIComponent(username.value.trim())}&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}`
         });
         data = await res.json();
       } catch {
@@ -161,6 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (data.message && data.message.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
           markError(password2, data.message, errorBox);
+        } else if (data.message && data.message.toLowerCase().includes("nazwa")) {
+          markError(username, data.message, errorBox);
         } else {
           markError(email, data.message, errorBox);
           markError(password, data.message, errorBox);

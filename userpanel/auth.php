@@ -59,8 +59,9 @@ if ($action === 'register') {
         echo json_encode(['success' => false, 'message' => 'Nieprawidłowy email']);
         exit;
     }
-    if (strlen($password) < 6) {
-        echo json_encode(['success' => false, 'message' => 'Hasło za krótkie']);
+    // Wymagania: min. 6 znaków, 1 wielka litera, 1 cyfra
+    if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
+        echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę']);
         exit;
     }
     if ($password !== $password2) {
@@ -121,6 +122,7 @@ if ($action === 'update_profile') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $password2 = $_POST['password2'] ?? '';
+    $oldPassword = $_POST['old_password'] ?? '';
     $avatarPath = null;
 
     if (!$username || !$email) {
@@ -166,12 +168,21 @@ if ($action === 'update_profile') {
 
     // Aktualizuj dane
     if ($password) {
-        if (strlen($password) < 6) {
-            echo json_encode(['success' => false, 'message' => 'Hasło za krótkie']);
+        // Wymagania: min. 6 znaków, 1 wielka litera, 1 cyfra
+        if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
+            echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę']);
             exit;
         }
         if ($password !== $password2) {
             echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
+            exit;
+        }
+        // Sprawdź stare hasło
+        $stmt = $pdo->prepare("SELECT password FROM users WHERE id=?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$oldPassword || !$user || !password_verify($oldPassword, $user['password'])) {
+            echo json_encode(['success' => false, 'message' => 'Stare hasło niepoprawne']);
             exit;
         }
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -259,7 +270,8 @@ if ($action === 'set_new_password') {
     $token = $_POST['token'] ?? '';
     $password = $_POST['password'] ?? '';
     $password2 = $_POST['password2'] ?? '';
-    if (!$token || !$password || !$password2) {
+    $oldPassword = $_POST['old_password'] ?? '';
+    if (!$token || !$password || !$password2 || !$oldPassword) {
         echo json_encode(['success' => false, 'message' => 'Brak wymaganych danych']);
         exit;
     }
@@ -267,15 +279,21 @@ if ($action === 'set_new_password') {
         echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
         exit;
     }
-    if (strlen($password) < 6) {
-        echo json_encode(['success' => false, 'message' => 'Hasło za krótkie']);
+    // Wymagania: min. 6 znaków, 1 wielka litera, 1 cyfra
+    if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
+        echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę']);
         exit;
     }
-    $stmt = $pdo->prepare("SELECT id, reset_token_expires FROM users WHERE reset_token=?");
+    $stmt = $pdo->prepare("SELECT id, reset_token_expires, password FROM users WHERE reset_token=?");
     $stmt->execute([$token]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$user || strtotime($user['reset_token_expires']) < time()) {
         echo json_encode(['success' => false, 'message' => 'Token wygasł lub jest nieprawidłowy']);
+        exit;
+    }
+    // Sprawdź stare hasło
+    if (!$oldPassword || !password_verify($oldPassword, $user['password'])) {
+        echo json_encode(['success' => false, 'message' => 'Stare hasło niepoprawne']);
         exit;
     }
     $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -342,7 +360,8 @@ if ($action === 'set_new_password_code') {
     $code = trim($_POST['code'] ?? '');
     $password = $_POST['password'] ?? '';
     $password2 = $_POST['password2'] ?? '';
-    if (!$email || !$code || !$password || !$password2) {
+    $oldPassword = $_POST['old_password'] ?? '';
+    if (!$email || !$code || !$password || !$password2 || !$oldPassword) {
         echo json_encode(['success' => false, 'message' => 'Brak wymaganych danych']);
         exit;
     }
@@ -350,11 +369,12 @@ if ($action === 'set_new_password_code') {
         echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
         exit;
     }
-    if (strlen($password) < 6) {
-        echo json_encode(['success' => false, 'message' => 'Hasło za krótkie']);
+    // Wymagania: min. 6 znaków, 1 wielka litera, 1 cyfra
+    if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
+        echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę']);
         exit;
     }
-    $stmt = $pdo->prepare("SELECT id, reset_code, reset_code_expires FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT id, reset_code, reset_code_expires, password FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$user || !$user['reset_code'] || !$user['reset_code_expires']) {
@@ -367,6 +387,11 @@ if ($action === 'set_new_password_code') {
     }
     if (strtotime($user['reset_code_expires']) < time()) {
         echo json_encode(['success' => false, 'message' => 'Kod wygasł']);
+        exit;
+    }
+    // Sprawdź stare hasło
+    if (!$oldPassword || !password_verify($oldPassword, $user['password'])) {
+        echo json_encode(['success' => false, 'message' => 'Stare hasło niepoprawne']);
         exit;
     }
     $hash = password_hash($password, PASSWORD_DEFAULT);
