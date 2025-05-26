@@ -315,7 +315,6 @@
     <!-- TESTIMONIALS SECTION -->
     <section class="testimonials" id="testimonials">
       <h2 class="section-title glitch" data-text="Opinie klientów">Opinie klientów</h2>
-      <button id="add-opinion-btn" class="subscribe-button" style="margin-bottom:24px;">Dodaj opinię</button>
       <div class="testimonial-slider">
         <div class="testimonial-card">
           <span class="testimonial-avatar"
@@ -488,6 +487,9 @@
         <button class="testimonial-prev" aria-label="Poprzednia opinia">&#10094;</button>
         <button class="testimonial-next" aria-label="Następna opinia">&#10095;</button>
       </div>
+      <!-- Przycisk przeniesiony pod strzałki -->
+      <button id="add-opinion-btn" class="contact-form-button" style="margin:24px auto 0 auto;display:block;">Dodaj
+      opinię</button>
     </section>
 
     <section id="contact" class="contact spotlight">
@@ -518,6 +520,11 @@
         <form id="opinion-form" style="display:flex;flex-direction:column;gap:14px;">
           <label for="opinion-name" style="color:#ccc;">Imię lub nick</label>
           <input id="opinion-name" name="name" type="text" maxlength="32" required style="padding:8px;border-radius:6px;border:1px solid #222;background:#181a2b;color:#fff;">
+          <!-- Nowy checkbox anonimowości -->
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:0;font-size:0.98em;color:#0ff;cursor:pointer;">
+            <input type="checkbox" id="opinion-anonymous" name="anonymous" style="accent-color:var(--accent-default);width:18px;height:18px;margin:0;">
+            <span>Dodaj anonimowo</span>
+          </label>
           <label for="opinion-stars" style="color:#ccc;">Ocena</label>
           <select id="opinion-stars" name="stars" required style="padding:8px;border-radius:6px;border:1px solid #222;background:#181a2b;color:#fff;">
             <option value="5">★★★★★</option>
@@ -528,7 +535,8 @@
           </select>
           <label for="opinion-text" style="color:#ccc;">Opinia</label>
           <textarea id="opinion-text" name="text" rows="4" maxlength="400" required style="padding:8px;border-radius:6px;border:1px solid #222;background:#181a2b;color:#fff;"></textarea>
-          <button type="submit" class="subscribe-button" style="margin-top:10px;">Wyślij opinię</button>
+          <!-- Zmieniony przycisk na niebieski -->
+          <button type="submit" class="contact-form-button" style="margin-top:10px;">Wyślij opinię</button>
         </form>
         <div id="opinion-success" class="newsletter-success hidden" style="margin-top:18px;">Dziękujemy za opinię!</div>
       </div>

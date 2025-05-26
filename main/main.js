@@ -423,6 +423,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeOpinionModal = document.getElementById('close-opinion-modal');
   const opinionForm = document.getElementById('opinion-form');
   const opinionSuccess = document.getElementById('opinion-success');
+  // Dodane: obsługa anonimowości
+  const opinionName = document.getElementById('opinion-name');
+  const opinionAnonymous = document.getElementById('opinion-anonymous');
+
+  if (opinionAnonymous && opinionName) {
+    opinionAnonymous.addEventListener('change', function () {
+      if (this.checked) {
+        opinionName.value = '';
+        opinionName.disabled = true;
+        opinionName.placeholder = 'Anonimowy';
+      } else {
+        opinionName.disabled = false;
+        opinionName.placeholder = 'Imię lub nick';
+      }
+    });
+  }
 
   if (addOpinionBtn && addOpinionModal && closeOpinionModal && opinionForm) {
     addOpinionBtn.addEventListener('click', () => {
@@ -430,6 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.add('modal-open');
       opinionForm.reset();
       opinionSuccess.classList.add('hidden');
+      // Resetuj stan anonimowości
+      if (opinionAnonymous && opinionName) {
+        opinionName.disabled = false;
+        opinionName.placeholder = 'Imię lub nick';
+      }
     });
     closeOpinionModal.addEventListener('click', () => {
       addOpinionModal.classList.add('hidden');
@@ -443,6 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     opinionForm.addEventListener('submit', function (e) {
       e.preventDefault();
+      // Obsługa anonimowości
+      if (opinionAnonymous && opinionAnonymous.checked && opinionName) {
+        opinionName.value = 'Anonimowy';
+      }
       // Tu można dodać wysyłkę do backendu lub localStorage
       opinionSuccess.classList.remove('hidden');
       setTimeout(() => {

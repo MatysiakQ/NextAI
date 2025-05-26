@@ -851,6 +851,69 @@ section {
   background: rgba(0, 255, 255, 0.8);
 }
 
+.contact-form-button {
+  padding: 12px;
+  background: var(--accent-default);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .3s, color .3s, box-shadow .3s;
+  box-shadow: 0 2px 8px #0ff3;
+  margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.contact-form-button:hover {
+  background: #00e6e6;
+  color: #181a2b;
+  box-shadow: 0 0 16px #0ff6;
+}
+/* Efekt fali na kliknięcie */
+.contact-form-button::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 200%;
+  height: 200%;
+  background: rgba(0,255,255,0.18);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 0.5s, opacity 0.5s;
+  opacity: 0;
+}
+.contact-form-button:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  transition: 0s;
+}
+
+/* Styl dla checkboxa anonimowości w modalu opinii */
+#opinion-anonymous {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--accent-default);
+  border-radius: 4px;
+  background: transparent;
+  outline: none;
+  box-shadow: 0 0 4px #0ff4;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  vertical-align: middle;
+}
+#opinion-anonymous:focus {
+  outline: 2px solid var(--accent-default);
+}
+#opinion-anonymous:checked {
+  background: var(--accent-default);
+  border-color: var(--accent-default);
+}
+
 /*=========================================
   CHAT WIDGET
 =========================================*/
