@@ -292,16 +292,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Obsługa przycisków subskrypcji (przekierowanie z odpowiednim typem płatności)
   document.querySelectorAll('.package-card .subscribe-button').forEach(button => {
     button.addEventListener('click', function (e) {
       e.preventDefault();
       const card = this.closest('.package-card');
-      if (card.classList.contains('start')) {
-        window.location.href = '../sub/subskrypcja.html?package=basic';
-      } else if (card.classList.contains('premium')) {
-        window.location.href = '../sub/subskrypcja.html?package=pro';
+      // Ustal pakiet
+      let packageType = 'basic';
+      if (card.classList.contains('premium')) packageType = 'pro';
+      if (card.classList.contains('enterprise')) {
+        window.open('enterpirse_form.html', 'blank');
+        return;
       }
-      // Enterprise zostawiasz bez zmian lub obsłuż osobno
+      // Sprawdź czy na stronie jest aktywna płatność roczna
+      let isYearly = false;
+      const billingBtn = document.getElementById('billing-switch');
+      if (billingBtn && billingBtn.textContent.includes('miesięczną')) {
+        isYearly = true;
+      }
+      // Przekieruj z odpowiednim parametrem billing
+      const billingParam = isYearly ? 'yearly' : 'monthly';
+      window.location.href = `../sub/subskrypcja.html?package=${packageType}&billing=${billingParam}`;
     });
   });
 
