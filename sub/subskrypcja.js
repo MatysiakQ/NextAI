@@ -217,35 +217,32 @@ document.addEventListener("DOMContentLoaded", function () {
     return urlParams.get(param);
   }
 
+  // Przenieś deklarację planSelect wyżej, przed pierwsze użycie!
+  const planSelect = document.getElementById("plan");
+
   // Odczytaj parametr "package" z URL
   const selectedPackage = getQueryParam("package");
-
-  // Ustaw domyślny pakiet na podstawie parametru
-  if (selectedPackage) {
-    const planSelect = document.getElementById("plan");
-    if (planSelect) {
-      planSelect.value = selectedPackage; // Ustaw odpowiednią wartość w selekcie
-    }
+  if (selectedPackage && planSelect) {
+    planSelect.value = selectedPackage;
   }
 
   // Nowa funkcjonalność: Ustawienie domyślnego pakietu i typu płatności
   const selectedPackageDefault = getQueryParam('package') || 'basic';
   const billingType = getQueryParam('billing') || 'monthly';
 
-  // Ustaw domyślny pakiet w selekcie
   if (planSelect) {
     planSelect.value = selectedPackageDefault;
   }
 
-  // Wyświetl odpowiedni typ płatności
-  const billingInfo = document.createElement('p');
-  billingInfo.textContent = billingType === 'yearly'
-    ? 'Wybrano płatność roczną (oszczędzasz 20%)'
-    : 'Wybrano płatność miesięczną';
-  billingInfo.style.fontWeight = 'bold';
-  billingInfo.style.color = 'green';
-
-  form.insertBefore(billingInfo, form.firstChild);
+  // Usuwamy generowanie napisu o typie płatności
+  // (usuń lub zakomentuj poniższy fragment)
+  // const billingInfo = document.createElement('p');
+  // billingInfo.textContent = billingType === 'yearly'
+  //   ? 'Wybrano płatność roczną (oszczędzasz 20%)'
+  //   : 'Wybrano płatność miesięczną';
+  // billingInfo.style.fontWeight = 'bold';
+  // billingInfo.style.color = 'green';
+  // form.insertBefore(billingInfo, form.firstChild);
 
   const monthly = document.getElementById('monthly-price');
   const yearly = document.getElementById('yearly-price');
@@ -277,5 +274,60 @@ document.addEventListener("DOMContentLoaded", function () {
   billingOptions.forEach(option => {
     option.addEventListener('change', updatePriceVisibility);
   });
+
+  // Dodaj obsługę przełącznika płatności
+  const billingSwitch = document.getElementById('billing-switch');
+  const billingTypeInput = document.getElementById('billing-type');
+  // planSelect już jest wyżej zadeklarowany
+
+  // Zapamiętaj oryginalne wartości opcji
+  const originalOptions = [
+    { value: "basic", text: "Basic – 599 zł / msc" },
+    { value: "pro", text: "Pro – 1199 zł / msc" }
+  ];
+
+  // Wartości roczne (na razie 100zł/msc)
+  const yearlyOptions = [
+    { value: "basic", text: "Basic – 100 zł / msc (przy płatności rocznej)" },
+    { value: "pro", text: "Pro – 100 zł / msc (przy płatności rocznej)" }
+  ];
+
+  let isYearly = false;
+
+  if (billingSwitch && billingTypeInput && planSelect) {
+    billingSwitch.addEventListener('click', function () {
+      isYearly = !isYearly;
+      billingSwitch.textContent = isYearly
+        ? 'Przełącz na płatność miesięczną'
+        : 'Przełącz na płatność roczną';
+      billingTypeInput.value = isYearly ? 'yearly' : 'monthly';
+
+      // Zapamiętaj aktualnie wybraną opcję (basic/pro)
+      const currentValue = planSelect.value;
+
+      // Zmień opcje selecta
+      planSelect.innerHTML = '';
+      const options = isYearly ? yearlyOptions : originalOptions;
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        planSelect.appendChild(option);
+      });
+
+      // Przywróć wybraną opcję jeśli istnieje, w przeciwnym razie ustaw pierwszą
+      if (options.some(opt => opt.value === currentValue)) {
+        planSelect.value = currentValue;
+      } else {
+        planSelect.value = options[0].value;
+      }
+    });
+  }
+
+  // Odczytaj parametr "billing" z URL i ustaw domyślnie
+  const billingTypeFinal = getQueryParam('billing') || 'monthly';
+  if (billingTypeFinal === 'yearly') {
+    billingSwitch.click();
+  }
 });
 

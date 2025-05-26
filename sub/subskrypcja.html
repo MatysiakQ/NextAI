@@ -20,6 +20,9 @@
 
     <form id="subscription-form" class="contact-form two-column">
       <div class="form-left">
+        <!-- Ukryte pole na typ płatności -->
+        <input type="hidden" id="billing-type" name="billing_type" value="monthly">
+
         <label for="email">Email</label>
         <input type="email" name="email" id="email">
 
@@ -53,8 +56,10 @@
           Chcę otrzymać fakturę VAT
         </label>
 
-        <div class="button-wrapper">
+        <div class="button-wrapper button-wrapper-flex">
           <button type="submit" class="subscribe-button">Aktywuj subskrypcję</button>
+          <button type="button" id="billing-switch" aria-label="Przełącz typ płatności">Przełącz na płatność roczną
+          </button>
         </div>
       </div>
 
