@@ -1,14 +1,41 @@
 <?php
+// Dodaj to na samym początku pliku:
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../vendor/autoload.php';
 
-$pdo = new PDO(
-    "mysql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']};charset=utf8mb4",
-    $_ENV['DB_USER'],
-    $_ENV['DB_PASS'],
-    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-);
+// Dodaj ładowanie .env:
+if (file_exists(__DIR__ . '/../.env')) {
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+    $dotenv->load();
+}
+
+$db_host = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? null);
+$db_name = getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? null);
+$db_user = getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? null);
+$db_pass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? null);
+
+if (!$db_host || !$db_name || !$db_user) {
+    echo json_encode(['success' => false, 'message' => 'Błąd konfiguracji bazy danych']);
+    exit;
+}
+
+try {
+    $pdo = new PDO(
+        "mysql:host=$db_host;dbname=$db_name;charset=utf8mb4",
+        $db_user,
+        $db_pass,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+} catch (Exception $e) {
+    error_log("PDO ERROR: " . $e->getMessage(), 3, __DIR__ . '/../pdo_errors.log');
+    echo json_encode(['success' => false, 'message' => 'Błąd połączenia z bazą danych']);
+    exit;
+}
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
@@ -76,10 +103,24 @@ if ($action === 'subscriptions') {
         echo json_encode(['success' => false, 'message' => 'Brak dostępu']);
         exit;
     }
-    $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE email = (SELECT email FROM users WHERE id = ?)");
-    $stmt->execute([$_SESSION['user_id']]);
-    $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode(['success' => true, 'subscriptions' => $subs]);
+    try {
+        // Najpierw pobierz email użytkownika
+        $stmt = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) {
+            echo json_encode(['success' => false, 'subscriptions' => [], 'message' => 'Nie znaleziono użytkownika']);
+            exit;
+        }
+        // Teraz pobierz subskrypcje po emailu
+        $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE email = ?");
+        $stmt->execute([$user['email']]);
+        $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(['success' => true, 'subscriptions' => $subs]);
+    } catch (Exception $e) {
+        error_log("SUBSCRIPTIONS SQL ERROR: " . $e->getMessage(), 3, __DIR__ . '/../pdo_errors.log');
+        echo json_encode(['success' => false, 'subscriptions' => [], 'message' => 'Błąd pobierania subskrypcji']);
+    }
     exit;
 }
 
@@ -232,4 +273,15 @@ if ($action === 'set_new_password_code') {
     exit;
 }
 
+// Dodaj globalny handler na końcu pliku, aby zawsze zwracać JSON nawet przy nieprzechwyconym błędzie:
+set_exception_handler(function($e) {
+    error_log("UNCAUGHT ERROR: " . $e->getMessage(), 3, __DIR__ . '/../php_errors.log');
+    header('Content-Type: application/json; charset=utf-8');
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Wewnętrzny błąd serwera']);
+    exit;
+});
+
 echo json_encode(['success' => false, 'message' => 'Nieznana akcja']);
+
+?>

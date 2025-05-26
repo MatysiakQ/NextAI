@@ -3,8 +3,15 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.pathname.endsWith("login.html") ||
     window.location.pathname.endsWith("register.html")
   ) {
-    fetch("auth.php?action=subscriptions")
-      .then(res => res.json())
+    fetch("auth.php?action=subscriptions")  
+      .then(async res => {
+        if (!res.ok) return { success: false };
+        try {
+          return await res.json();
+        } catch {
+          return { success: false };
+        }
+      })
       .then(data => {
         if (data.success) window.location.href = "user_panel.html";
       });
@@ -46,12 +53,19 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const res = await fetch("auth.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}`
-      });
-      const data = await res.json();
+      let data;
+      try {
+        const res = await fetch("auth.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}`
+        });
+        data = await res.json();
+      } catch {
+        errorBox.textContent = "Błąd połączenia z serwerem.";
+        errorBox.style.color = "#ff5c5c";
+        return;
+      }
       if (data.success) {
         const redirect = localStorage.getItem('afterLoginRedirect');
         if (redirect) {
@@ -85,9 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors(registerForm);
-      const email = registerForm.querySelector('input[name="email"]');
-      const password = registerForm.querySelector('input[name="password"]');
-      const password2 = registerForm.querySelector('input[name="password2"]');
+      const email = document.getElementById('register-email');
+      const password = document.getElementById('register-password');
+      const password2 = document.getElementById('register-password2');
       const errorBox = document.getElementById("register-error");
       errorBox.textContent = "";
 
@@ -112,12 +126,19 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const res = await fetch("auth.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `action=register&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}`
-      });
-      const data = await res.json();
+      let data;
+      try {
+        const res = await fetch("auth.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `action=register&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}`
+        });
+        data = await res.json();
+      } catch {
+        errorBox.textContent = "Błąd połączenia z serwerem.";
+        errorBox.style.color = "#ff5c5c";
+        return;
+      }
       if (data.success) {
         window.location.href = "user_panel.html";
       } else {
