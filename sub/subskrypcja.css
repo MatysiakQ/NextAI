@@ -299,6 +299,20 @@
     text-align: center;
   }
   
+  /* Dodaj nową klasę do flexowego ustawienia przycisków */
+  .button-wrapper-flex {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+  }
+  .button-wrapper-flex .subscribe-button {
+    margin-top: 0;
+  }
+  .button-wrapper-flex #billing-switch {
+    margin-top: 0;
+  }
+  
   .subscribe-button {
     padding: 12px 24px;
     background-color: var(--accent-premium);
@@ -357,6 +371,20 @@
 /* Przycisk */
 .button-wrapper {
   text-align: center;
+}
+
+/* Dodaj nową klasę do flexowego ustawienia przycisków */
+.button-wrapper-flex {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+}
+.button-wrapper-flex .subscribe-button {
+  margin-top: 0;
+}
+.button-wrapper-flex #billing-switch {
+  margin-top: 0;
 }
 
 /* Checkbox */
@@ -532,5 +560,29 @@ input[type="checkbox"] {
   .background-grid {
     background-size: 14px 14px;
   }
+}
+.billing-toggle {
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: center;
+}
+#billing-switch {
+  padding: 10px 24px;
+  background: var(--accent-default);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 16px #0ff4, 0 1.5px 8px #000a;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+  outline: none;
+}
+#billing-switch:hover, #billing-switch:focus {
+  background: #00e6e6;
+  color: #111;
+  box-shadow: 0 0 24px #0ff8, 0 1.5px 8px #000a;
+  transform: scale(1.04);
 }
 
