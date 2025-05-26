@@ -1819,7 +1819,7 @@ section {
   }
 }
 
-/* === AUTOUZUPEŁNIANIE: wyłącz białe tło i ramki === */
+/* === AUTOUZUPEŁNIANIE: wyłącz białe tło i ramki dla wszystkich inputów/textarea na stronie === */
 input:-webkit-autofill,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:hover,

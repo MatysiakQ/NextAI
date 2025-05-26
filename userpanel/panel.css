@@ -148,6 +148,40 @@ a:hover {
   color: #00bcd4;
 }
 
+/* === AUTOUZUPEŁNIANIE: wyłącz białe tło i ramki dla wszystkich inputów/textarea na stronie === */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #222 inset !important;
+  box-shadow: 0 0 0 1000px #222 inset !important;
+  -webkit-text-fill-color: #0ff !important;
+  color: #0ff !important;
+  caret-color: #0ff !important;
+  border: 1.5px solid #0ff !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+input:-webkit-autofill::first-line {
+  color: #0ff !important;
+}
+
+input:-internal-autofill-selected {
+  background-color: #222 !important;
+  color: #0ff !important;
+}
+
+input:-moz-autofill,
+textarea:-moz-autofill {
+  box-shadow: 0 0 0 1000px #222 inset !important;
+  -moz-text-fill-color: #0ff !important;
+  color: #0ff !important;
+}
+
 /* Responsywność */
 @media (max-width: 900px) {
   .packages {
