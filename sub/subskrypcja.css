@@ -226,10 +226,38 @@
   }
   
   input[type="checkbox"] {
-    accent-color: var(--accent-default);
-    transform: scale(1.1);
-    margin-right: 8px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--accent-default);
+    border-radius: 4px;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
+    position: relative;
     vertical-align: middle;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  
+  input[type="checkbox"]:checked {
+    background: var(--accent-default);
+    border-color: var(--accent-default);
+  }
+  
+  input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0px;
+    width: 6px;
+    height: 12px;
+    border: solid #000;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+    display: block;
   }
   
   /* === Loader === */
@@ -395,8 +423,37 @@
 }
 
 input[type="checkbox"] {
-  accent-color: var(--accent-default);
-  transform: scale(1.1);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--accent-default);
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+  transition: border-color 0.2s, background 0.2s;
+}
+input[type="checkbox"]:checked {
+  background: var(--accent-default);
+  border-color: var(--accent-default);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 0px;
+  width: 6px;
+  height: 12px;
+  border: solid #000;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+  display: block;
 }
 .credit-card-container {
   display: flex;

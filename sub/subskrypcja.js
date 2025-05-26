@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const email = emailField.value.trim();
     const plan = document.getElementById("plan").value;
     const cardName = cardNameField.value.trim();
+    const billingType = document.getElementById("billing-type").value; // <-- dodane
 
     let hasError = false;
 
@@ -132,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const formData = new URLSearchParams({
       email,
       plan,
+      billing_type: billingType, // <-- dodane
       ...invoiceData,
     });
 

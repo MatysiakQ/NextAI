@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Dane z formularza
 $email = trim($_POST['email'] ?? '');
 $plan = trim($_POST['plan'] ?? '');
+$billingType = trim($_POST['billing_type'] ?? 'monthly'); // <-- dodane
 $cardName = trim($_POST['card_name'] ?? '');
 $companyName = trim($_POST['company_name'] ?? '');
 $companyNip = trim($_POST['company_nip'] ?? '');
@@ -50,7 +51,7 @@ $companyZip = trim($_POST['company_zip'] ?? '');
 $companyCity = trim($_POST['company_city'] ?? '');
 
 // Walidacja
-if (!$email || !$plan) {
+if (!$email || !$plan || !$billingType) { // <-- dodane billingType
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Brakuje wymaganych danych']);
     exit;
@@ -61,16 +62,23 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// Cennik
+// Cennik - 4 kombinacje
 $priceMap = [
-    'basic' => $_ENV['STRIPE_PRICE_BASIC'],
-    'pro' => $_ENV['STRIPE_PRICE_PRO']
+    'basic' => [
+        'monthly' => $_ENV['STRIPE_PRICE_BASIC_MONTHLY'],
+        'yearly' => $_ENV['STRIPE_PRICE_BASIC_YEARLY'],
+    ],
+    'pro' => [
+        'monthly' => $_ENV['STRIPE_PRICE_PRO_MONTHLY'],
+        'yearly' => $_ENV['STRIPE_PRICE_PRO_YEARLY'],
+    ]
 ];
-if (!isset($priceMap[$plan])) {
+if (!isset($priceMap[$plan][$billingType])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Nieznany pakiet subskrypcji']);
     exit;
 }
+$priceId = $priceMap[$plan][$billingType];
 
 try {
     // Tworzenie klienta z metadanymi i opcjonalnym adresem
@@ -108,7 +116,7 @@ try {
     // Subskrypcja
     $subscription = Subscription::create([
         'customer' => $customer->id,
-        'items' => [[ 'price' => $priceMap[$plan] ]],
+        'items' => [[ 'price' => $priceId ]], // <-- zmiana
         'payment_behavior' => 'default_incomplete',
         'expand' => ['latest_invoice.payment_intent']
     ]);
