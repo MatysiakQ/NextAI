@@ -28,6 +28,7 @@
         <button id="nav2-courses"><i class="fa-solid fa-graduation-cap"></i> Moje kursy</button>
       </div>
       <div class="logout2-btn-wrapper">
+        <button id="nav-mainpage-btn" class="nav-mainpage-btn"><i class="fa-solid fa-house"></i> Powrót na stronę główną</button>
         <button id="logout2-btn"><i class="fa-solid fa-right-from-bracket"></i> Wyloguj się</button>
       </div>
     </nav>
@@ -117,6 +118,9 @@
           alert("Hasło zostało zmienione!");
         };
       }
+      document.getElementById("nav-mainpage-btn").onclick = function() {
+        window.location.href = "/";
+      };
     });
   </script>
 </body>

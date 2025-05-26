@@ -136,20 +136,29 @@ body {
 }
 .profile2-avatar-edit {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
-  background: rgba(0,0,0,0.7);
+  height: 100%;
+  background: rgba(10, 10, 10, 0.92); /* ciemny, pełny overlay */
   color: #0ff;
-  font-size: 0.9em;
+  font-size: 0.52em;
   text-align: center;
-  padding: 4px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 22px; /* było 16px, teraz trochę niżej */
+  padding-bottom: 0;
   border-radius: 0 0 50% 50%;
-  display: none;
-  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.18s;
+  pointer-events: none;
+  z-index: 2;
 }
 .profile2-avatar:hover .profile2-avatar-edit {
-  display: block;
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
 }
 .profile2-form {
   width: 100%;
@@ -261,6 +270,8 @@ body {
   left: 0;
   z-index: 3;
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 #logout2-btn {
   background: none;
@@ -282,6 +293,27 @@ body {
 #logout2-btn:hover {
   background: #ff5c5c22;
   color: #fff;
+}
+.nav-mainpage-btn {
+  background: none;
+  border: none;
+  color: #0ff;
+  font-size: 1.05em;
+  padding: 14px 32px 8px 32px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0 18px 0 0;
+  font-family: inherit;
+  width: 100%;
+  transition: background 0.18s, color 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+}
+.nav-mainpage-btn:hover {
+  background: #0ff2;
+  color: #000;
 }
 .subscriptions2-list {
   margin-top: 18px;
@@ -345,6 +377,16 @@ body {
   background: #00bcd4;
   color: #fff;
   box-shadow: 0 0 18px #0ff8;
+}
+#profile2-success {
+  display: none;
+  color: #0f8;
+  background: none;
+  font-weight: bold;
+  margin: 12px 0 0 0;
+  text-align: center;
+  font-size: 1.04em;
+  letter-spacing: 0.5px;
 }
 @media (max-width: 900px) {
   .userpanel2-container { flex-direction: column; }
