@@ -5,19 +5,18 @@ ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
+
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../vendor/autoload.php';
 
-// Dodaj ładowanie .env:
-if (file_exists(__DIR__ . '/../.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-    $dotenv->load();
-}
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->load();
 
-$db_host = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? null);
-$db_name = getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? null);
-$db_user = getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? null);
-$db_pass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? null);
+$db_host = $_ENV['DB_HOST'];
+$db_name = $_ENV['DB_NAME'];
+$db_user = $_ENV['DB_USER'];
+$db_pass = $_ENV['DB_PASS'];
+
 
 if (!$db_host || !$db_name || !$db_user) {
     echo json_encode(['success' => false, 'message' => 'Błąd konfiguracji bazy danych']);
@@ -37,7 +36,11 @@ try {
     exit;
 }
 
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
+$action = $_POST['action'] ?? $_GET['action'] ?? null;
+if (!$action) {
+    echo json_encode(['success' => false, 'message' => 'Brak parametru akcji.']);
+    exit;
+}
 
 if ($action === 'register') {
     $email = trim($_POST['email'] ?? '');
@@ -80,14 +83,22 @@ if ($action === 'login') {
         echo json_encode(['success' => false, 'message' => 'Podaj email i hasło']);
         exit;
     }
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Nieprawidłowe dane logowania']);
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($user && !empty($user['password']) && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            echo json_encode(['success' => true]);
+        } else {
+            if ($user && empty($user['password'])) {
+                error_log("LOGIN ERROR: Empty password hash for user $email\n", 3, __DIR__ . '/../php_errors.log');
+            }
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowe dane logowania']);
+        }
+    } catch (Exception $e) {
+        error_log("LOGIN SQL ERROR: " . $e->getMessage(), 3, __DIR__ . '/../php_errors.log');
+        echo json_encode(['success' => false, 'message' => 'Błąd logowania']);
     }
     exit;
 }

@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.pathname.endsWith("login.html") ||
     window.location.pathname.endsWith("register.html")
   ) {
-    fetch("auth.php?action=subscriptions")  
+    fetch("auth.php?action=subscriptions")
       .then(async res => {
         if (!res.ok) return { success: false };
         try {
@@ -60,7 +60,18 @@ document.addEventListener("DOMContentLoaded", () => {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}`
         });
-        data = await res.json();
+        if (!res.ok) {
+          errorBox.textContent = "Błąd połączenia z serwerem.";
+          errorBox.style.color = "#ff5c5c";
+          return;
+        }
+        try {
+          data = await res.json();
+        } catch {
+          errorBox.textContent = "Błąd odpowiedzi serwera.";
+          errorBox.style.color = "#ff5c5c";
+          return;
+        }
       } catch {
         errorBox.textContent = "Błąd połączenia z serwerem.";
         errorBox.style.color = "#ff5c5c";
