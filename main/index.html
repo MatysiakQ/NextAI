@@ -47,6 +47,7 @@
         <li class="nav-item"><a href="#agents">Agenci</a></li>
         <li class="nav-item"><a href="#jak-wspolpraca">Współpraca</a></li>
         <li class="nav-item"><a href="#packages">Pakiety</a></li>
+        <li class="nav-item"><a href="#testimonials">Opinie</a></li>
         <li class="nav-item"><a href="#contact">Kontakt</a></li>
         <li class="nav-item user-menu-item" style="position:relative;display:flex;align-items:center;">
           <button id="user-menu-toggle" aria-label="Menu użytkownika"
@@ -314,6 +315,7 @@
     <!-- TESTIMONIALS SECTION -->
     <section class="testimonials" id="testimonials">
       <h2 class="section-title glitch" data-text="Opinie klientów">Opinie klientów</h2>
+      <button id="add-opinion-btn" class="subscribe-button" style="margin-bottom:24px;">Dodaj opinię</button>
       <div class="testimonial-slider">
         <div class="testimonial-card">
           <span class="testimonial-avatar"
@@ -505,6 +507,30 @@
       <div class="modal-content glitch" data-text="Wiadomość wysłana!">
         <span class="close-button" onclick="document.getElementById('success-modal').classList.add('hidden')">×</span>
         <p>Dziękujemy za wiadomość! Skontaktujemy się z Tobą niebawem.</p>
+      </div>
+    </div>
+
+    <!-- MODAL: Dodaj opinię -->
+    <div id="add-opinion-modal" class="modal hidden">
+      <div class="modal-content" style="max-width:420px;">
+        <span class="close-button" id="close-opinion-modal" style="top:12px;right:18px;">&times;</span>
+        <h3 style="margin-bottom:18px;color:var(--accent-default);">Dodaj swoją opinię</h3>
+        <form id="opinion-form" style="display:flex;flex-direction:column;gap:14px;">
+          <label for="opinion-name" style="color:#ccc;">Imię lub nick</label>
+          <input id="opinion-name" name="name" type="text" maxlength="32" required style="padding:8px;border-radius:6px;border:1px solid #222;background:#181a2b;color:#fff;">
+          <label for="opinion-stars" style="color:#ccc;">Ocena</label>
+          <select id="opinion-stars" name="stars" required style="padding:8px;border-radius:6px;border:1px solid #222;background:#181a2b;color:#fff;">
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★☆</option>
+            <option value="3">★★★☆☆</option>
+            <option value="2">★★☆☆☆</option>
+            <option value="1">★☆☆☆☆</option>
+          </select>
+          <label for="opinion-text" style="color:#ccc;">Opinia</label>
+          <textarea id="opinion-text" name="text" rows="4" maxlength="400" required style="padding:8px;border-radius:6px;border:1px solid #222;background:#181a2b;color:#fff;"></textarea>
+          <button type="submit" class="subscribe-button" style="margin-top:10px;">Wyślij opinię</button>
+        </form>
+        <div id="opinion-success" class="newsletter-success hidden" style="margin-top:18px;">Dziękujemy za opinię!</div>
       </div>
     </div>
 

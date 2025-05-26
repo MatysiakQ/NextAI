@@ -2190,3 +2190,48 @@ textarea:-moz-autofill {
 .package-card.premium .yearly-price {
   color: #fff !important;
 }
+
+/* MODAL: Dodaj opinię */
+#add-opinion-modal .modal-content {
+  background: #181a2b;
+  border: 2px solid var(--accent-default);
+  color: #fff;
+  box-shadow: 0 0 24px #0ff6;
+  border-radius: 14px;
+  padding: 32px 28px 24px 28px;
+  text-align: left;
+  animation: popUp .3s ease;
+}
+#add-opinion-modal label {
+  font-size: 1em;
+  color: #0ff;
+}
+#add-opinion-modal input,
+#add-opinion-modal textarea,
+#add-opinion-modal select {
+  background: #181a2b;
+  color: #0ff;
+  border: 1px solid #222;
+  border-radius: 6px;
+  font-size: 1em;
+  padding: 8px;
+  margin-bottom: 0;
+  outline: none;
+  transition: border 0.2s;
+}
+#add-opinion-modal input:focus,
+#add-opinion-modal textarea:focus,
+#add-opinion-modal select:focus {
+  border: 1.5px solid #0ff;
+}
+#add-opinion-modal .subscribe-button {
+  width: 100%;
+  margin-top: 10px;
+}
+#add-opinion-modal .newsletter-success {
+  color: #0ff;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-top: 18px;
+}

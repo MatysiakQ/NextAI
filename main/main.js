@@ -416,6 +416,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sprawdź status logowania na starcie
   checkLoginStatus();
+
+  // MODAL: Dodaj opinię
+  const addOpinionBtn = document.getElementById('add-opinion-btn');
+  const addOpinionModal = document.getElementById('add-opinion-modal');
+  const closeOpinionModal = document.getElementById('close-opinion-modal');
+  const opinionForm = document.getElementById('opinion-form');
+  const opinionSuccess = document.getElementById('opinion-success');
+
+  if (addOpinionBtn && addOpinionModal && closeOpinionModal && opinionForm) {
+    addOpinionBtn.addEventListener('click', () => {
+      addOpinionModal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      opinionForm.reset();
+      opinionSuccess.classList.add('hidden');
+    });
+    closeOpinionModal.addEventListener('click', () => {
+      addOpinionModal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    });
+    addOpinionModal.addEventListener('click', (e) => {
+      if (e.target === addOpinionModal) {
+        addOpinionModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      }
+    });
+    opinionForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      // Tu można dodać wysyłkę do backendu lub localStorage
+      opinionSuccess.classList.remove('hidden');
+      setTimeout(() => {
+        addOpinionModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        opinionSuccess.classList.add('hidden');
+      }, 1800);
+    });
+  }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
