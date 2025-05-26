@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Punkt 6: automatyczne przekierowanie jeśli już zalogowany
   if (
     window.location.pathname.endsWith("login.html") ||
     window.location.pathname.endsWith("register.html")
@@ -29,8 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors(loginForm);
-      const email = document.getElementById("email");
-      const password = document.getElementById("password");
+      const email = loginForm.querySelector('input[name="email"]');
+      const password = loginForm.querySelector('input[name="password"]');
       const errorBox = document.getElementById("login-error");
       errorBox.textContent = "";
 
@@ -54,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await res.json();
       if (data.success) {
-        // Sprawdź czy jest ustawiony afterLoginRedirect
         const redirect = localStorage.getItem('afterLoginRedirect');
         if (redirect) {
           localStorage.removeItem('afterLoginRedirect');
@@ -63,7 +61,13 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = "user_panel.html";
         }
       } else {
-        if (data.message && data.message.toLowerCase().includes("email")) {
+        // Dodajemy specjalny komunikat jeśli login/hasło niepoprawne
+        if (data.message && data.message.toLowerCase().includes("nieprawidłowe")) {
+          errorBox.textContent = "Niepoprawny login/hasło";
+          errorBox.style.color = "#ff5c5c";
+          markError(email, "", null);
+          markError(password, "", null);
+        } else if (data.message && data.message.toLowerCase().includes("email")) {
           markError(email, data.message, errorBox);
         } else if (data.message && data.message.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
@@ -81,9 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors(registerForm);
-      const email = document.getElementById("register-email");
-      const password = document.getElementById("register-password");
-      const password2 = document.getElementById("register-password2");
+      const email = registerForm.querySelector('input[name="email"]');
+      const password = registerForm.querySelector('input[name="password"]');
+      const password2 = registerForm.querySelector('input[name="password2"]');
       const errorBox = document.getElementById("register-error");
       errorBox.textContent = "";
 
@@ -117,14 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success) {
         window.location.href = "user_panel.html";
       } else {
-        // Obsługa błędów z backendu
         if (data.message && data.message.toLowerCase().includes("email")) {
           markError(email, data.message, errorBox);
         } else if (data.message && data.message.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
           markError(password2, data.message, errorBox);
         } else {
-          // domyślnie podkreśl oba
           markError(email, data.message, errorBox);
           markError(password, data.message, errorBox);
         }
@@ -159,6 +161,4 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch("auth.php?action=logout").then(() => window.location.href = "login.html");
     };
   }
-
-  // Obsługa błędów i komunikatów
 });
