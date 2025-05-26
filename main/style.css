@@ -522,30 +522,126 @@ section {
 /* Góra */
 .box-1 {
   top: 40px;
-  left: 300px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* Dół lewy */
 .box-2 {
   bottom: 40px;
-  left: 60px;
+  left: 12%;
+  transform: none;
 }
 
 /* Dół prawy */
 .box-3 {
   bottom: 40px;
-  right: 60px;
+  right: 12%;
+  transform: none;
 }
 
+.triangle-arrows {
+  position: absolute;
+  top: 0; left: 0;
+  width: 700px;
+  height: 550px;
+  pointer-events: none;
+  z-index: 1;
+}
 .triangle-arrows line {
   stroke: var(--accent-default);
-  stroke-width: 2;
-  marker-end: url(#arrow);
+  stroke-width: 2.5;
+  marker-end: url(#arrow) !important; /* wymuś marker na każdej linii */
 }
 
-.triangle-box-info {
-  color: #7c7171;
-  font-style: italic;
+/* IDEALNE POZYCJE STRZAŁEK DLA DESKTOPA */
+@media (min-width: 901px) {
+  /* 1: Konsultacja (box-2) -> Umowa (box-1) */
+  .triangle-arrows line.arrow-1 {
+    x1: 134px; y1: 460px;    /* prawa krawędź box-2 */
+    x2: 350px; y2: 90px;     /* lewa krawędź box-1 */
+    marker-end: url(#arrow) !important;
+  }
+  /* 2: Umowa (box-1) -> Wdrożenie (box-3) */
+  .triangle-arrows line.arrow-2 {
+    x1: 450px; y1: 90px;     /* prawa krawędź box-1 */
+    x2: 566px; y2: 460px;    /* lewa krawędź box-3 */
+    marker-end: url(#arrow) !important;
+  }
+  /* 3: Wdrożenie (box-3) -> Konsultacja (box-2) */
+  .triangle-arrows line.arrow-3 {
+    x1: 616px; y1: 460px;    /* prawa krawędź box-3 */
+    x2: 84px; y2: 460px;     /* lewa krawędź box-2 */
+    marker-end: url(#arrow) !important;
+  }
+}
+
+/* Mobile/tablet - proporcjonalnie */
+@media (max-width: 900px) {
+  .triangle-layout, .triangle-arrows {
+    width: 98vw;
+    max-width: 98vw;
+    height: 350px;
+  }
+  /* ...existing code... */
+  /* Strzałki na mobile: wyliczane względem szerokości ekranu */
+  .triangle-arrows line.arrow-1 {
+    x1: calc(10vw + 100px); y1: 340px;   /* prawa krawędź box-2 */
+    x2: 50vw; y2: 60px;                  /* lewa krawędź box-1 */
+  }
+  .triangle-arrows line.arrow-2 {
+    x1: calc(50vw + 50px); y1: 60px;     /* prawa krawędź box-1 */
+    x2: calc(90vw); y2: 340px;           /* lewa krawędź box-3 */
+  }
+  .triangle-arrows line.arrow-3 {
+    x1: calc(90vw + 100px); y1: 340px;   /* prawa krawędź box-3 */
+    x2: 10vw; y2: 340px;                 /* lewa krawędź box-2 */
+  }
+}
+@media (max-width: 600px) {
+  .triangle-layout, .triangle-arrows {
+    width: 98vw;
+    height: 220px;
+  }
+  .box-1 { top: 6px; left: 50%; transform: translateX(-50%);}
+  .box-2 { bottom: 6px; left: 10vw; transform: none;}
+  .box-3 { bottom: 6px; right: 10vw; transform: none;}
+  .triangle-arrows line.arrow-1 {
+    x1: 22vw; y1: 200px;
+    x2: 50vw; y2: 28px;
+  }
+  .triangle-arrows line.arrow-2 {
+    x1: 50vw; y1: 28px;
+    x2: 78vw; y2: 200px;
+  }
+  .triangle-arrows line.arrow-3 {
+    x1: 74vw; y1: 195px;
+    x2: 26vw; y2: 195px;
+  }
+}
+
+/* === TRIANGLE KAFELKI: OZNACZENIA KROKÓW === */
+.triangle-step-label {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  background: var(--accent-default);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  box-shadow: 0 1px 6px #0ff6;
+  border: 2px solid #111;
+  opacity: 0.92;
+  pointer-events: none;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 0;
 }
 
 /*=========================================
@@ -1594,8 +1690,8 @@ section {
   box-shadow: 0 0 0 2px #0ff6;
 }
 
-.user-menu-dropdown:not(.hidden) {
-}
+/* .user-menu-dropdown:not(.hidden) {
+} */
 
 @keyframes userMenuGlow {
   0% { box-shadow: 0 0 0 2px #0ff4, 0 12px 36px 0 #0ff3, 0 1.5px 8px #000a; }
@@ -1636,9 +1732,9 @@ section {
     max-width: 98vw;
     height: 350px;
   }
-  .box-1 { top: 10px; left: 40vw; }
-  .box-2 { bottom: 10px; left: 5vw; }
-  .box-3 { bottom: 10px; right: 5vw; }
+  .box-1 { top: 10px; left: 50%; transform: translateX(-50%);}
+  .box-2 { bottom: 10px; left: 10vw; transform: none;}
+  .box-3 { bottom: 10px; right: 10vw; transform: none;}
 }
 
 .feature-cards.feature-cards-grid {
