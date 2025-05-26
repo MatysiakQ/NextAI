@@ -154,15 +154,40 @@ if (changePasswordBtn && changePasswordForm) {
   changePasswordBtn.onclick = function () {
     changePasswordForm.style.display = "flex";
     changePasswordBtn.style.display = "none";
+    // Wyczyść stare hasło przy każdym otwarciu
+    if (document.getElementById('profile2-old-password')) {
+      document.getElementById('profile2-old-password').value = "";
+    }
   };
   document.getElementById('cancel-password-btn').onclick = function () {
     changePasswordForm.style.display = "none";
     changePasswordBtn.style.display = "";
+    if (document.getElementById('profile2-old-password')) document.getElementById('profile2-old-password').value = "";
     document.getElementById('profile2-password').value = "";
     document.getElementById('profile2-password2').value = "";
   };
   document.getElementById('save-password-btn').onclick = function () {
-    // To tylko pokazuje/ukrywa formularz, zapis jest przez submit formularza głównego
+    // Wymagaj starego hasła przy próbie zmiany
+    const oldPass = document.getElementById('profile2-old-password').value;
+    const pass1 = document.getElementById('profile2-password').value;
+    const pass2 = document.getElementById('profile2-password2').value;
+    if (!oldPass) {
+      alert("Podaj stare hasło.");
+      return;
+    }
+    if (pass1.length < 6) {
+      alert("Nowe hasło musi mieć min. 6 znaków.");
+      return;
+    }
+    if (!/(?=.*[A-Z])(?=.*\d).{6,}/.test(pass1)) {
+      alert("Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę.");
+      return;
+    }
+    if (pass1 !== pass2) {
+      alert("Hasła nie są takie same!");
+      return;
+    }
+    // Zamknij formularz, zapis jest przez submit formularza głównego
     changePasswordForm.style.display = "none";
     changePasswordBtn.style.display = "";
   };

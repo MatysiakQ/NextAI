@@ -1,10 +1,15 @@
 /* Motyw NextAI dla panelu użytkownika */
+html, body {
+  min-height: 100vh;
+  height: auto;
+}
 body {
   background: #0a0a0a;
   color: #fff;
   font-family: 'Source Code Pro', monospace;
   margin: 0;
   min-height: 100vh;
+  height: auto;
   overflow-x: hidden;
 }
 .background-grid {
@@ -22,6 +27,8 @@ body {
 .userpanel2-container {
   display: flex;
   min-height: 100vh;
+  height: auto;
+  align-items: stretch;
   background: none;
   position: relative;
   z-index: 1;
@@ -29,13 +36,19 @@ body {
 .userpanel2-nav {
   display: flex;
   flex-direction: column;
-  height: 100vh;
   min-height: 100vh;
+  height: auto;
   justify-content: space-between;
   position: relative;
   background: #15181c;
   border-right: 2px solid #0ff;
   padding: 0;
+  flex: 0 0 240px; /* wymusza szerokość i rozciągnięcie na całą wysokość */
+  box-sizing: border-box;
+  flex-grow: 0;
+  flex-shrink: 0;
+  /* Rozciąganie na całą wysokość kontenera */
+  align-self: stretch;
 }
 .userpanel2-nav button {
   background: none;
@@ -389,12 +402,38 @@ body {
   letter-spacing: 0.5px;
 }
 @media (max-width: 900px) {
-  .userpanel2-container { flex-direction: column; }
-  .userpanel2-nav {
+  .userpanel2-container {
+    flex-direction: column;
+    align-items: stretch;
     min-height: 0;
     height: auto;
   }
-  .userpanel2-nav button { flex: 1; padding: 14px 0; border-radius: 0; font-size: 1em; }
+  .userpanel2-nav {
+    min-height: 0;
+    height: auto;
+    flex: unset;
+    width: 100%;
+    max-width: 100vw;
+    border-right: none;
+    border-bottom: 2px solid #0ff;
+    border-radius: 0 0 18px 18px;
+    box-sizing: border-box;
+    position: static;
+    flex-grow: unset;
+    align-self: auto;
+  }
+  .userpanel2-nav button {
+    flex: 1;
+    padding: 14px 0;
+    border-radius: 0;
+    font-size: 1em;
+  }
+  .logout2-btn-wrapper {
+    position: static;
+    bottom: unset;
+    left: unset;
+    border-radius: 0 0 18px 18px;
+  }
   .userpanel2-content { padding: 0; }
   .userpanel2-section {
     max-width: 99vw;
@@ -413,5 +452,10 @@ body {
   }
   .userpanel2-section {
     padding: 10px 2vw;
+  }
+  .userpanel2-nav {
+    padding: 0;
+    min-width: 0;
+    max-width: 100vw;
   }
 }
