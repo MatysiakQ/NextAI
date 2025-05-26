@@ -537,27 +537,10 @@ section {
   right: 60px;
 }
 
-.triangle-arrows {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 700px;
-  height: 550px;
-  z-index: 1;
-  pointer-events: none;
-}
-
 .triangle-arrows line {
   stroke: var(--accent-default);
   stroke-width: 2;
   marker-end: url(#arrow);
-}
-
-.triangle-arrows line:nth-child(1) {
-  x1: 350px;
-  y1: 0;
-  x2: 100px;
-  y2: 100px;
 }
 
 .triangle-box-info {
