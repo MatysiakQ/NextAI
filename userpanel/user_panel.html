@@ -4,17 +4,109 @@
   <meta charset="UTF-8">
   <title>Panel użytkownika – NextAI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="panel.css">
+  <link rel="stylesheet" href="user_panel.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
   <div class="background-grid"></div>
-  <section class="packages animate-fade-in">
-    <h2 class="section-title glitch" data-text="Twoje subskrypcje">Twoje subskrypcje</h2>
-    <div id="subscriptions-list"></div>
-    <div class="button-wrapper">
-      <button id="logout-btn" class="subscribe-button" style="margin-top:30px;">Wyloguj się</button>
-    </div>
-  </section>
-  <script src="auth.js"></script>
+  <div class="userpanel2-container">
+    <nav class="userpanel2-nav">
+      <div class="nav-btns-top">
+        <button id="nav2-profile" class="active"><i class="fa-solid fa-user"></i> Mój profil</button>
+        <button id="nav2-subscriptions"><i class="fa-solid fa-credit-card"></i> Moje subskrypcje</button>
+        <button id="nav2-courses"><i class="fa-solid fa-graduation-cap"></i> Moje kursy</button>
+      </div>
+      <div class="logout2-btn-wrapper">
+        <button id="logout2-btn"><i class="fa-solid fa-right-from-bracket"></i> Wyloguj się</button>
+      </div>
+    </nav>
+    <main class="userpanel2-content">
+      <!-- Sekcja: Mój profil -->
+      <section id="section2-profile" class="userpanel2-section active">
+        <h2 class="section-title glitch" data-text="Mój profil">Mój profil</h2>
+        <div class="profile2-avatar" id="profile2-avatar" title="Kliknij, aby zmienić avatar">
+          <span id="avatar2-img"><i class="fa-solid fa-user"></i></span>
+          <span class="profile2-avatar-edit">Zmień avatar</span>
+          <input type="file" id="avatar2-upload" accept="image/*">
+        </div>
+        <form class="profile2-form" id="profile2-form" autocomplete="off">
+          <div class="form-group">
+            <label for="profile2-username">Nazwa użytkownika</label>
+            <input type="text" id="profile2-username" name="username" maxlength="32" required>
+          </div>
+          <div class="form-group">
+            <label for="profile2-email">Email</label>
+            <input type="email" id="profile2-email" name="email" required>
+          </div>
+          <div class="form-group">
+            <label>Hasło</label>
+            <div class="profile2-password-row">
+              <span class="profile2-password-value">********</span>
+              <button type="button" id="change-password-btn" class="profile2-change-btn">Zmień hasło</button>
+            </div>
+            <div id="change-password-form" class="profile2-change-form" style="display:none;">
+              <input type="password" id="profile2-password" placeholder="Nowe hasło" autocomplete="new-password">
+              <input type="password" id="profile2-password2" placeholder="Powtórz hasło" autocomplete="new-password">
+              <button type="button" id="save-password-btn" class="profile2-save-btn">Zapisz</button>
+              <button type="button" id="cancel-password-btn" class="profile2-cancel-btn">Anuluj</button>
+            </div>
+          </div>
+          <div class="button-wrapper button-wrapper-center">
+            <button type="submit" class="subscribe-button main-save-btn"><i class="fa-solid fa-floppy-disk"></i> Zapisz zmiany</button>
+          </div>
+          <div id="profile2-error" class="form-error"></div>
+          <div id="profile2-success" class="form-success" style="display:none;">Zapisano zmiany!</div>
+        </form>
+      </section>
+      <!-- Sekcja: Moje subskrypcje -->
+      <section id="section2-subscriptions" class="userpanel2-section">
+        <h2 class="section-title glitch" data-text="Moje subskrypcje">Moje subskrypcje</h2>
+        <div class="subscriptions2-list" id="subscriptions2-list"></div>
+      </section>
+      <!-- Sekcja: Moje kursy -->
+      <section id="section2-courses" class="userpanel2-section">
+        <h2 class="section-title glitch" data-text="Moje kursy">Moje kursy</h2>
+        <div style="color:#aaa;text-align:center;padding:30px 0;">Wkrótce dostępne!</div>
+      </section>
+    </main>
+  </div>
+  <script src="user_panel.js"></script>
+  <script>
+    // Obsługa zmiany hasła (przycisk "Zmień hasło" pokazuje formularz)
+    document.addEventListener('DOMContentLoaded', function () {
+      const changePasswordBtn = document.getElementById('change-password-btn');
+      const changePasswordForm = document.getElementById('change-password-form');
+      if (changePasswordBtn && changePasswordForm) {
+        changePasswordBtn.onclick = function () {
+          changePasswordForm.style.display = "flex";
+          changePasswordBtn.style.display = "none";
+        };
+        document.getElementById('cancel-password-btn').onclick = function () {
+          changePasswordForm.style.display = "none";
+          changePasswordBtn.style.display = "";
+          document.getElementById('profile2-password').value = "";
+          document.getElementById('profile2-password2').value = "";
+        };
+        document.getElementById('save-password-btn').onclick = function () {
+          const pass1 = document.getElementById('profile2-password').value;
+          const pass2 = document.getElementById('profile2-password2').value;
+          if (pass1.length < 6) {
+            alert("Hasło musi mieć min. 6 znaków.");
+            return;
+          }
+          if (pass1 !== pass2) {
+            alert("Hasła nie są takie same!");
+            return;
+          }
+          // TODO: Wyślij na backend
+          changePasswordForm.style.display = "none";
+          changePasswordBtn.style.display = "";
+          document.getElementById('profile2-password').value = "";
+          document.getElementById('profile2-password2').value = "";
+          alert("Hasło zostało zmienione!");
+        };
+      }
+    });
+  </script>
 </body>
 </html>
