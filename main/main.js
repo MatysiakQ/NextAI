@@ -589,13 +589,50 @@ document.addEventListener('DOMContentLoaded', () => {
     line.setAttribute('y2', y2);
   }
 
+  // Strzałka z kafelka 3 do 1 (z wdrożenia do konsultacji) - prosto z lewej ściany box-3 do środka prawej ściany box-2
+  function drawArrow3to1() {
+    const box3 = document.getElementById('triangle-wdrozenie'); // box-3
+    const box1 = document.getElementById('triangle-konsultacja'); // box-2 (ale id=1)
+    const container = document.querySelector('.cooperation-container.triangle-layout');
+    const line = document.getElementById('arrow-3-1-line');
+    if (!box3 || !box1 || !container || !line) return;
+
+    const cRect = container.getBoundingClientRect();
+    const b3Rect = box3.getBoundingClientRect();
+    const b1Rect = box1.getBoundingClientRect();
+
+    // Początek: środek lewej ściany box3 (wdrożenie)
+    let x1 = b3Rect.left - cRect.left;
+    let y1 = b3Rect.top - cRect.top + b3Rect.height / 2;
+    // Koniec: środek prawej ściany box1 (konsultacja)
+    let x2 = b1Rect.left - cRect.left + b1Rect.width;
+    let y2 = b1Rect.top - cRect.top + b1Rect.height / 2;
+
+    // Skróć strzałkę tylko na końcu (przy kafelku docelowym)
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const shorten = 18;
+    if (len > shorten) {
+      x2 = x2 - (dx / len) * shorten;
+      y2 = y2 - (dy / len) * shorten;
+    }
+
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     drawArrow1to2();
     drawArrow2to3();
+    drawArrow3to1();
   });
   window.addEventListener('resize', () => {
     drawArrow1to2();
     drawArrow2to3();
+    drawArrow3to1();
   });
 });
 
