@@ -2314,3 +2314,25 @@ textarea:-moz-autofill {
   font-size: 1.1em;
   margin-top: 18px;
 }
+
+/* Strzałka z kafelka 1 do 2 w sekcji współpraca */
+.arrow-1-2 {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Prosta strzałka z kafelka 1 do 2 */
+.arrow-2-1 {
+  position: absolute;
+  left: calc(12% + 50px); /* środek box-2 */
+  bottom: 140px;           /* dostosuj, by linia zaczynała się nad box-2 */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cooperation-container.triangle-layout {
+  position: relative;
+}

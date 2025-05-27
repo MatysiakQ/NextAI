@@ -519,6 +519,33 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1800);
     });
   }
+
+  function drawArrow1to2() {
+    const box1 = document.getElementById('triangle-konsultacja'); // box-2 (numer 1)
+    const box2 = document.getElementById('triangle-umowa'); // box-1 (numer 2)
+    const container = document.querySelector('.cooperation-container.triangle-layout');
+    const line = document.getElementById('arrow-1-2-line');
+    if (!box1 || !box2 || !container || !line) return;
+
+    const cRect = container.getBoundingClientRect();
+    const b1Rect = box1.getBoundingClientRect();
+    const b2Rect = box2.getBoundingClientRect();
+
+    // Początek: środek górnej krawędzi box1 (konsultacja)
+    const x1 = b1Rect.left - cRect.left + b1Rect.width / 2;
+    const y1 = b1Rect.top - cRect.top;
+    // Koniec: środek dolnej krawędzi box2 (umowa), przesunięty w lewo o 30px
+    const x2 = b2Rect.left - cRect.left + b2Rect.width / 2 - 30;
+    const y2 = b2Rect.top - cRect.top + b2Rect.height;
+
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+  }
+
+  window.addEventListener('DOMContentLoaded', drawArrow1to2);
+  window.addEventListener('resize', drawArrow1to2);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
