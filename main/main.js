@@ -535,8 +535,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const x1 = b1Rect.left - cRect.left + b1Rect.width / 2;
     const y1 = b1Rect.top - cRect.top;
     // Koniec: środek dolnej krawędzi box2 (umowa), przesunięty w lewo o 30px
-    const x2 = b2Rect.left - cRect.left + b2Rect.width / 2 - 30;
-    const y2 = b2Rect.top - cRect.top + b2Rect.height;
+    let x2 = b2Rect.left - cRect.left + b2Rect.width / 2 - 30;
+    let y2 = b2Rect.top - cRect.top + b2Rect.height;
+
+    // Skróć strzałkę o 18px przed kafelkiem docelowym (dostosuj w razie potrzeby)
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const shorten = 18;
+    if (len > shorten) {
+      x2 = x2 - (dx / len) * shorten;
+      y2 = y2 - (dy / len) * shorten;
+    }
 
     line.setAttribute('x1', x1);
     line.setAttribute('y1', y1);
