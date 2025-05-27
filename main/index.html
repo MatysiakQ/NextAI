@@ -162,30 +162,23 @@
     <h2 class="section-title glitch" data-text="Jak wygląda współpraca?">Jak wygląda współpraca?</h2>
     <p class="cooperation-description">Współpraca z NextAI to proces, który zaczyna się od zrozumienia Twoich potrzeb i
       kończy na pełnej automatyzacji. Oto jak to wygląda:</p>
-    <p class="triangle-box-info">[Kliknij w kwadraty, aby dowiedzieć się więcej o każdym kroku.]</p>
+    <p class="triangle-box-info">[Kliknij w kafelki, aby dowiedzieć się więcej o każdym kroku.]</p>
     <div class="cooperation-container triangle-layout">
-      <div class="triangle-box box-1">
+      <!-- Góra (Umowa) -->
+      <div class="triangle-box box-1" id="triangle-umowa">
         <span class="triangle-step-label">2</span>
         <i class="fa-solid fa-file-signature" title="Umowa"></i>
       </div>
-      <div class="triangle-box box-2">
+      <!-- Lewy dół (Konsultacja) -->
+      <div class="triangle-box box-2" id="triangle-konsultacja">
         <span class="triangle-step-label">1</span>
         <i class="fa-solid fa-comments" title="Konsultacja"></i>
       </div>
-      <div class="triangle-box box-3">
+      <!-- Prawy dół (Wdrożenie) -->
+      <div class="triangle-box box-3" id="triangle-wdrozenie">
         <span class="triangle-step-label">3</span>
         <i class="fa-solid fa-rocket" title="Wdrożenie"></i>
       </div>
-      <svg class="triangle-arrows" viewBox="0 0 700 550">
-        <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent-default)" />
-          </marker>
-        </defs>
-        <line class="arrow-1" x1="110" y1="450" x2="300" y2="130" marker-end="url(#arrow)" />
-        <line class="arrow-2" x1="400" y1="130" x2="600" y2="410" marker-end="url(#arrow)" />
-        <line class="arrow-3" x1="550" y1="450" x2="160" y2="450" marker-end="url(#arrow)" />
-      </svg>
     </div>
     <!-- MODALE DO KWADRATÓW WSPÓŁPRACY -->
     <div id="modal-1" class="modal hidden">
