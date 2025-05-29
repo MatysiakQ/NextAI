@@ -1237,25 +1237,203 @@ section {
 /*=========================================
   MODAL
 =========================================*/
+/* === SUPER MODAL NEXTAI: WSPÓŁPRACA === */
 .modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: radial-gradient(ellipse at 60% 40%, #0ff2 0%, #181a2b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: modalFadeIn 0.5s cubic-bezier(.4,1.2,.6,1);
+  backdrop-filter: blur(8px) saturate(1.2);
+  overflow: auto;
+}
+.modal.hidden {
+  display: none;
+}
+.modal-content {
+  position: relative;
+  background: linear-gradient(135deg, #10131e 80%, #0ff1 100%);
+  border: 3px solid var(--accent-default);
+  border-radius: 22px;
+  box-shadow:
+    0 0 32px #0ff8,
+    0 0 0 6px #0ff2,
+    0 2px 32px #000a;
+  padding: 54px 44px 44px 44px;
+  min-width: 320px;
+  max-width: 420px;
+  width: 95vw;
+  max-height: 90vh;
+  color: #fff;
+  text-align: center;
+  font-size: 1.22rem;
+  font-family: 'Source Code Pro', monospace;
+  animation: modalPopUp 0.38s cubic-bezier(.4,1.2,.6,1);
+  overflow-y: auto;
+  background-clip: padding-box;
+  /* Neon border animation */
+  box-shadow:
+    0 0 32px #0ff8,
+    0 0 0 6px #0ff2,
+    0 2px 32px #000a,
+    0 0 64px 8px #8A2BE2aa;
+  transition: box-shadow 0.3s;
+}
+.modal-content:hover {
+  box-shadow:
+    0 0 48px #0ffb,
+    0 0 0 10px #8A2BE2cc,
+    0 2px 32px #000a,
+    0 0 96px 12px #FFD70088;
+}
+.modal-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(120deg, #0ff2 0%, #8A2BE2 100%);
+  opacity: 0.08;
+  filter: blur(18px);
+}
+.modal-content .glitch-title {
+  display: block;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--accent-default);
+  margin-bottom: 18px;
+  letter-spacing: 1.2px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 0 8px #0ff, 0 0 24px #8A2BE2;
+  animation: modalGlitchTitle 2.2s infinite linear alternate;
+}
+.modal-content .glitch-title::before,
+.modal-content .glitch-title::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.modal-content .glitch-title::before {
+  color: var(--accent-premium);
+  z-index: 3;
+  animation: glitch-1 1.2s infinite linear alternate-reverse;
+}
+.modal-content .glitch-title::after {
+  color: var(--accent-enterprise);
+  z-index: 4;
+  animation: glitch-2 1.2s infinite linear alternate;
+}
+@keyframes modalGlitchTitle {
+  0% { text-shadow: 0 0 8px #0ff, 0 0 24px #8A2BE2; }
+  50% { text-shadow: 0 0 24px #FFD700, 0 0 48px #0ff; }
+  100% { text-shadow: 0 0 8px #0ff, 0 0 24px #8A2BE2; }
+}
+.modal-content p {
+  line-height: 2.1;
+  font-size: 1.08em;
+  font-weight: 500;
+  color: #b8f6f6;
+  margin: 0 0 10px 0;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 8px #000a;
+  letter-spacing: 0.1px;
+}
+.modal-content p::before {
+  content: "";
+  display: none;
+}
+.modal-content .modal-icon {
+  font-size: 2.8em;
+  margin-bottom: 18px;
+  color: var(--accent-default);
+  filter: drop-shadow(0 0 12px #0ff8);
+  animation: modalIconPulse 1.8s infinite alternate;
+}
+@keyframes modalIconPulse {
+  0% { filter: drop-shadow(0 0 8px #0ff8);}
+  100% { filter: drop-shadow(0 0 24px #FFD700);}
+}
+.close-button {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  font-size: 2.2em;
+  font-weight: bold;
+  color: var(--accent-default);
+  cursor: pointer;
+  z-index: 10;
+  background: none;
+  border: none;
+  transition: color .3s, transform .2s;
+  text-shadow: 0 0 8px #0ff8;
+  line-height: 1;
+  padding: 0;
+}
+.close-button:hover {
+  color: #fff;
+  transform: scale(1.18) rotate(8deg);
+  text-shadow: 0 0 24px #FFD700;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalPopUp {
+  0% { transform: scale(.85) translateY(40px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* RESPONSYWNOŚĆ MODALI */
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 18px 6vw 18px 6vw;
+    min-width: 0;
+    max-width: 98vw;
+    font-size: 1em;
+    border-radius: 12px;
+  }
+  .modal-content .glitch-title {
+    font-size: 1.1em;
+  }
+  .close-button {
+    font-size: 1.5em;
+    top: 8px; right: 10px;
+  }
+}
+
+/*=========================================
+  CHAT MODAL
+=========================================*/
+.chat-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  animation: fadeIn .4s ease;
+  animation: fadeIn 0.4s ease;
 }
 
-.modal.hidden {
+.chat-modal.hidden {
   display: none;
 }
 
-.modal-content {
+.chat-modal-content {
   background: #1a1818;
   border: 2px solid var(--accent-default);
   padding: 40px;
@@ -1272,18 +1450,18 @@ section {
   animation: popUp .3s ease forwards;
 }
 
-.modal-content p {
+.chat-modal-content p {
   line-height: 3;
   font-size: 1rem;
   font-weight: bold;
 }
 
-.modal-content p::before {
+.chat-modal-content p::before {
   content: "– ";
   font-size: 1rem;
 }
 
-.close-button {
+.close-chat-button {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -1294,7 +1472,7 @@ section {
   transition: color .3s;
 }
 
-.close-button:hover {
+.close-chat-button:hover {
   color: #fff;
 }
 
@@ -2274,6 +2452,7 @@ textarea:-moz-autofill {
 #add-opinion-modal .modal-content {
   background: #181a2b;
   border: 2px solid var(--accent-default);
+ 
   color: #fff;
   box-shadow: 0 0 24px #0ff6;
   border-radius: 14px;
