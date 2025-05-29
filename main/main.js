@@ -760,3 +760,13 @@ window.addEventListener('scroll', () => {
     sec.style.backgroundPositionY = `${window.scrollY * 0.05 * (i % 2 === 0 ? 1 : -1)}px`;
   });
 });
+
+// Zamknięcie modali klawiszem Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal:not(.hidden)').forEach(modal => {
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    });
+  }
+});
