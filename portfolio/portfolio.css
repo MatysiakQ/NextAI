@@ -689,7 +689,7 @@
   .video-modal-content {
     max-width: 98vw;
     padding: 12px 2vw 12px 2vw;
-    border-radius: 12px;
+    border-radius: 12 px;
   }
   #videoFrame {
     min-height: 220px;
@@ -705,3 +705,6 @@
   flex-direction: column;
   justify-content: space-between;
 }
+
+/* Usuń/nie powielaj stylów .social-panel, .social-icon, #chat-widget, #chat-toggle, #chat-header, #chat-body, #chat-input, #chat-close, itp.
+   Wszystkie te style są już w main/style.css i będą działać globalnie. */

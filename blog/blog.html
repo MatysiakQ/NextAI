@@ -76,5 +76,28 @@
   </footer>
   <script src="blog.js" defer></script>
   <script src="../main/main.js" defer></script>
+  <!-- SOCIAL PANEL (jak na stronie głównej) -->
+  <div class="social-panel">
+    <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon"><i class="fa-brands fa-square-instagram"></i></a>
+    <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon"><i class="fa-brands fa-square-facebook"></i></a>
+    <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank" class="social-icon"><i class="fa-brands fa-linkedin"></i></a>
+    <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
+  </div>
+
+  <!-- CHATBOT (jak na stronie głównej) -->
+  <button id="chat-toggle" aria-label="Otwórz czat">💬</button>
+  <div id="chat-widget">
+    <div id="chat-header">
+      <span class="chatbot-avatar"><i class="fa-solid fa-robot"></i></span>
+      <span class="chatbot-title">NextAI Asystent</span>
+      <span class="powered-by"><a href="http://next-ai.pl">Powered by NextAI</a></span>
+      <button id="chat-close" aria-label="Zamknij czat">&times;</button>
+    </div>
+    <div id="chat-body"></div>
+    <div id="chat-input">
+      <input type="text" id="chat-question" placeholder="Zadaj pytanie..." autocomplete="off" />
+      <button id="chat-send" aria-label="Wyślij wiadomość"><i class="fa fa-paper-plane"></i></button>
+    </div>
+  </div>
 </body>
 </html>
