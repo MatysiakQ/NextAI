@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kursy – NextAI</title>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
+  <title>Kursy NextAI – Dostęp do wiedzy AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="courses.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <link rel="icon" href="../main/nextai.jpg" type="image/x-icon" />
@@ -35,59 +35,145 @@
       </ul>
     </div>
   </nav>
-  <header class="hero-section" style="min-height:40vh;">
-    <div class="hero-content">
-      <h1 class="logo glitch" data-text="Kursy NextAI">Kursy NextAI</h1>
-      <p>Rozwijaj się z nami – praktyczne kursy AI, automatyzacji i chatbotów</p>
+  <header class="courses-hero">
+    <div class="courses-hero-content">
+      <h1 class="courses-title glitch" data-text="Kursy NextAI">Kursy NextAI</h1>
+      <p class="courses-subtitle">Rozwijaj się z nami – praktyczne kursy AI, automatyzacji i chatbotów dla każdego poziomu</p>
+      <div class="courses-access-info" id="courses-access-info">
+        <i class="fa-solid fa-lock"></i> Sprawdzanie dostępu do kursów...
+      </div>
     </div>
   </header>
-  <section class="about-section" style="padding-top:30px;">
-    <h2 class="about-title glitch" data-text="Dostępne kursy">Dostępne kursy</h2>
-    <div class="feature-cards feature-cards-grid">
-      <div class="feature-card">
-        <h3>🤖 Tworzenie Chatbotów od podstaw</h3>
-        <p>Naucz się projektować, trenować i wdrażać chatboty na Messenger, WWW i WhatsApp.</p>
-        <p><strong>Poziom:</strong> Początkujący / Średniozaawansowany</p>
+  <main class="courses-main">
+    <section class="courses-section">
+      <h2 class="courses-section-title">Darmowe kursy</h2>
+      <div class="courses-grid" id="free-courses">
+        <div class="course-card" data-access="free">
+          <div class="course-icon"><i class="fa-solid fa-robot"></i></div>
+          <h3>Wprowadzenie do AI</h3>
+          <p>Podstawy sztucznej inteligencji i jej zastosowania w biznesie.</p>
+          <button class="course-btn" data-link="free-ai-intro.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="free">
+          <div class="course-icon"><i class="fa-solid fa-comments"></i></div>
+          <h3>Chatboty – od zera</h3>
+          <p>Dowiedz się jak działają chatboty i jak je wykorzystać w firmie.</p>
+          <button class="course-btn" data-link="free-chatbots.html">Rozpocznij</button>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3>⚡ Automatyzacje biznesowe z RPA</h3>
-        <p>Praktyczne workflowy, integracje API, automatyzacja faktur, powiadomień i procesów HR.</p>
-        <p><strong>Poziom:</strong> Średniozaawansowany</p>
+    </section>
+    <section class="courses-section">
+      <h2 class="courses-section-title">Kursy dla subskrybentów BASIC</h2>
+      <div class="courses-grid" id="basic-courses">
+        <div class="course-card" data-access="basic">
+          <div class="course-icon"><i class="fa-solid fa-bolt"></i></div>
+          <h3>Automatyzacje biznesowe z RPA</h3>
+          <p>Praktyczne workflowy, integracje API, automatyzacja faktur i powiadomień.</p>
+          <button class="course-btn" data-link="basic-rpa.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="basic">
+          <div class="course-icon"><i class="fa-solid fa-calendar-check"></i></div>
+          <h3>Bot do umawiania spotkań</h3>
+          <p>Tworzenie bota do rezerwacji spotkań i integracja z kalendarzem Google.</p>
+          <button class="course-btn" data-link="basic-meetings.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="basic">
+          <div class="course-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+          <h3>Automatyzacja mailingu</h3>
+          <p>Budowa automatycznych kampanii e-mail i powiadomień dla klientów.</p>
+          <button class="course-btn" data-link="basic-mailing.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="basic">
+          <div class="course-icon"><i class="fa-solid fa-user-gear"></i></div>
+          <h3>Bot HR – onboarding pracowników</h3>
+          <p>Automatyzacja procesu wdrożenia nowych pracowników w firmie.</p>
+          <button class="course-btn" data-link="basic-hr-onboarding.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="basic">
+          <div class="course-icon"><i class="fa-solid fa-file-invoice"></i></div>
+          <h3>Bot do obsługi reklamacji</h3>
+          <p>Tworzenie bota do przyjmowania i obsługi reklamacji klientów.</p>
+          <button class="course-btn" data-link="basic-complaints.html">Rozpocznij</button>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3>📈 AI w praktyce – analizy i predykcje</h3>
-        <p>Wprowadzenie do uczenia maszynowego, analizy danych i wdrożeń AI w firmie.</p>
-        <p><strong>Poziom:</strong> Początkujący / Biznes</p>
+    </section>
+    <section class="courses-section">
+      <h2 class="courses-section-title">Kursy dla subskrybentów PRO</h2>
+      <div class="courses-grid" id="pro-courses">
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <h3>AI w praktyce – analizy i predykcje</h3>
+          <p>Uczenie maszynowe, analiza danych i wdrożenia AI w firmie.</p>
+          <button class="course-btn" data-link="pro-ai-analytics.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-network-wired"></i></div>
+          <h3>Integracje SaaS i API</h3>
+          <p>Łączenie narzędzi online, automatyczne raporty, synchronizacja danych.</p>
+          <button class="course-btn" data-link="pro-saas-api.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-users"></i></div>
+          <h3>Warsztaty: AI dla zespołów</h3>
+          <p>Szkolenia dla firm – wdrożenia AI, automatyzacje, bezpieczeństwo danych.</p>
+          <button class="course-btn" data-link="pro-teams.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-brain"></i></div>
+          <h3>Zaawansowane uczenie maszynowe</h3>
+          <p>Techniki ML, deep learning, praktyczne projekty AI.</p>
+          <button class="course-btn" data-link="pro-ml-advanced.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3>Bezpieczeństwo AI i danych</h3>
+          <p>Ochrona danych, bezpieczeństwo modeli i wdrożeń AI.</p>
+          <button class="course-btn" data-link="pro-ai-security.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-robot"></i></div>
+          <h3>Tworzenie własnych agentów AI</h3>
+          <p>Budowa i wdrożenie własnych agentów konwersacyjnych.</p>
+          <button class="course-btn" data-link="pro-custom-agents.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-database"></i></div>
+          <h3>Integracja AI z bazami danych</h3>
+          <p>Łączenie modeli AI z relacyjnymi i nierelacyjnymi bazami danych.</p>
+          <button class="course-btn" data-link="pro-ai-databases.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-microchip"></i></div>
+          <h3>AI w IoT i automatyce</h3>
+          <p>Wykorzystanie AI w urządzeniach IoT i automatyzacji przemysłowej.</p>
+          <button class="course-btn" data-link="pro-ai-iot.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-language"></i></div>
+          <h3>Przetwarzanie języka naturalnego (NLP)</h3>
+          <p>Analiza tekstu, chatboty, generowanie treści z AI.</p>
+          <button class="course-btn" data-link="pro-nlp.html">Rozpocznij</button>
+        </div>
+        <div class="course-card" data-access="pro">
+          <div class="course-icon"><i class="fa-solid fa-chart-pie"></i></div>
+          <h3>AI w analizie biznesowej</h3>
+          <p>Wykorzystanie AI do raportowania i predykcji w biznesie.</p>
+          <button class="course-btn" data-link="pro-business-analytics.html">Rozpocznij</button>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3>🎓 Kurs: Integracje SaaS i API</h3>
-        <p>Łączenie narzędzi online, automatyczne raporty, synchronizacja danych.</p>
-        <p><strong>Poziom:</strong> Średniozaawansowany</p>
-      </div>
-      <div class="feature-card">
-        <h3>🧑‍💻 Warsztaty: AI dla zespołów</h3>
-        <p>Szkolenia dedykowane dla firm – wdrożenia AI, automatyzacje, bezpieczeństwo danych.</p>
-        <p><strong>Poziom:</strong> Firmy / Zespoły</p>
-      </div>
-    </div>
-    <div style="margin-top:40px;text-align:center;">
-      <a href="mailto:kontakt@next-ai.pl" class="hero-button">Zapisz się lub zapytaj o szczegóły</a>
-    </div>
-  </section>
+    </section>
+  </main>
   <footer class="site-footer">
     <p>&copy; 2025 NextAI. Wszelkie prawa zastrzeżone.</p>
     <a href="http://next-ai.pl"><p>Powered by NextAI</p></a>
     <a href="#" id="terms-link"> Regulamin firmy NextAi.</a>
   </footer>
-  <!-- SOCIAL PANEL (jak na stronie głównej) -->
   <div class="social-panel">
     <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon"><i class="fa-brands fa-square-instagram"></i></a>
     <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon"><i class="fa-brands fa-square-facebook"></i></a>
     <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank" class="social-icon"><i class="fa-brands fa-linkedin"></i></a>
     <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
   </div>
-
-  <!-- CHATBOT (jak na stronie głównej) -->
   <button id="chat-toggle" aria-label="Otwórz czat">💬</button>
   <div id="chat-widget">
     <div id="chat-header">
