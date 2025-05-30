@@ -35,10 +35,49 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.portfolio-card-alt').forEach(card => {
     card.addEventListener('mouseenter', () => {
       card.style.transition = 'transform .18s cubic-bezier(.4,1.2,.6,1)';
-      card.style.transform += ' scale(1.06)';
+      // Ustaw transform bezpośrednio na scale(1.06), nie doklejaj do istniejącego
+      card.style.transform = 'scale(1.06)';
     });
     card.addEventListener('mouseleave', () => {
-      card.style.transform = card.style.transform.replace(' scale(1.06)', '');
+      // Przywróć transform do wartości początkowej (pusty string = domyślna)
+      card.style.transform = '';
     });
   });
+});
+document.querySelectorAll('.video-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const videoSrc = btn.getAttribute('data-video');
+    const modal = document.getElementById('videoModal');
+    const iframe = document.getElementById('videoFrame');
+    iframe.src = videoSrc + "?autoplay=1";
+    modal.style.display = 'flex';
+    // Focus na close-btn dla accessibility
+    setTimeout(() => {
+      modal.querySelector('.close-btn')?.focus();
+    }, 100);
+  });
+});
+
+document.querySelector('.close-btn').addEventListener('click', () => {
+  const modal = document.getElementById('videoModal');
+  const iframe = document.getElementById('videoFrame');
+  iframe.src = '';
+  modal.style.display = 'none';
+});
+
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('videoModal');
+  if (e.target === modal) {
+    document.getElementById('videoFrame').src = '';
+    modal.style.display = 'none';
+  }
+});
+
+// Zamknięcie modala klawiszem Escape
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('videoModal');
+  if (modal && modal.style.display === 'flex' && e.key === 'Escape') {
+    document.getElementById('videoFrame').src = '';
+    modal.style.display = 'none';
+  }
 });
