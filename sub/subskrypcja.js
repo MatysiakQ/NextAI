@@ -332,4 +332,3 @@ document.addEventListener("DOMContentLoaded", function () {
     billingSwitch.click();
   }
 });
-
