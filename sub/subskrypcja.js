@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
     { value: "pro", text: "Pro – 1199 zł / msc" }
   ];
   const yearlyOptions = [
-    { value: "basic", text: "Basic – 100 zł / msc (rocznie)" },
-    { value: "pro", text: "Pro – 100 zł / msc (rocznie)" }
+    { value: "basic", text: "Basic – 480 zł / msc (Z zoobowiązaniem rocznym)" },
+    { value: "pro", text: "Pro – 910 zł / msc (Z zoobowiązaniem rocznym)" }
   ];
   let isYearly = false;
 
