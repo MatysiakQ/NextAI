@@ -43,59 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
       card.style.transform = '';
     });
   });
-
-  // NAVIGATION INDICATOR LOGIC
-  const menu = document.querySelector('.nav-menu');
-  const links = document.querySelectorAll('.nav-item a');
-  if (menu && links.length) {
-    const indicator = document.createElement('div');
-    indicator.classList.add('nav-indicator');
-    menu.appendChild(indicator);
-
-    let hoveredLink = null;
-
-    function updateIndicator(link) {
-      if (link) {
-        const rect = link.getBoundingClientRect();
-        const menuRect = menu.getBoundingClientRect();
-        indicator.style.width = `${rect.width}px`;
-        indicator.style.transform = `translateX(${rect.left - menuRect.left}px)`;
-      }
-    }
-
-    function setIndicatorToActive() {
-      if (!hoveredLink) {
-        const activeLink = document.querySelector('.nav-item a.active');
-        if (activeLink) updateIndicator(activeLink);
-      }
-    }
-
-    setIndicatorToActive();
-
-    links.forEach(link => {
-      link.addEventListener('mouseenter', () => {
-        hoveredLink = link;
-        updateIndicator(link);
-      });
-      link.addEventListener('mouseleave', () => {
-        hoveredLink = null;
-        setTimeout(() => {
-          if (!document.querySelector('.nav-item a:hover')) {
-            setIndicatorToActive();
-          }
-        }, 1);
-      });
-      link.addEventListener('touchend', () => {
-        hoveredLink = null;
-        setIndicatorToActive();
-      });
-    });
-
-    menu.addEventListener('mouseleave', () => {
-      hoveredLink = null;
-      setIndicatorToActive();
-    });
-  }
+  // ...nie dodawaj tu własnej obsługi wskaźnika nawigacji ani menu użytkownika...
 });
 
 document.querySelectorAll('.video-btn').forEach(btn => {
@@ -135,3 +83,4 @@ document.addEventListener('keydown', (e) => {
     modal.style.display = 'none';
   }
 });
+// ...nie dodawaj tu własnej obsługi menu użytkownika – całość jest w main.js

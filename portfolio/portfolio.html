@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="portfolio.css" />
   <link rel="icon" href="nextai.jpg" type="image/x-icon" />
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 </head>
 <body>
   <div class="background-grid"></div>
@@ -24,6 +24,14 @@
         <li class="nav-item"><a href="portfolio.html" class="active">Portfolio</a></li>
         <li class="nav-item"><a href="../courses/courses.html">Kursy</a></li>
         <li class="nav-item"><a href="../blog/blog.html">Blog</a></li>
+        <li class="nav-item"><a href="../sub/subskrypcja.html">Subskrypcja</a></li>
+        <li class="nav-item user-menu-item" style="position:relative;display:flex;align-items:center;">
+          <button id="user-menu-toggle" aria-label="Menu użytkownika"
+            style="background:none;border:none;cursor:pointer;padding:0;margin-left:10px;">
+            <i class="fa-solid fa-user" style="font-size:1.5em;color:#0ff;vertical-align:middle;"></i>
+          </button>
+          <div id="user-menu" class="user-menu-dropdown hidden"></div>
+        </li>
       </ul> 
     </div>
   </nav>
@@ -160,6 +168,8 @@
   <a href="http://next-ai.pl"><p>Powered by NextAI</p></a>
   <p><a href="#" id="terms-link" > Regulamin firmy NextAi.</a></p>
 </footer>
+<script src="../user-menu.js" defer></script>
 <script src="portfolio.js" defer></script>
+<script src="../main/main.js" defer></script>
 </body>
 </html>

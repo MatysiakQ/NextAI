@@ -7,10 +7,36 @@
   <title>Subskrypcja – NextAI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="subskrypcja.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 </head>
 
 <body>
   <div class="background-grid"></div>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../main/index.html" class="nav-logo">NextAI</a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="../main/index.html">Strona główna</a></li>
+        <li class="nav-item"><a href="../portfolio/portfolio.html">Portfolio</a></li>
+        <li class="nav-item"><a href="../courses/courses.html">Kursy</a></li>
+        <li class="nav-item"><a href="../blog/blog.html">Blog</a></li>
+        <li class="nav-item"><a href="subskrypcja.html" class="active">Subskrypcja</a></li>
+        <li class="nav-item user-menu-item" style="position:relative;display:flex;align-items:center;">
+          <button id="user-menu-toggle" aria-label="Menu użytkownika"
+            style="background:none;border:none;cursor:pointer;padding:0;margin-left:10px;">
+            <i class="fa-solid fa-user" style="font-size:1.5em;color:#0ff;vertical-align:middle;"></i>
+          </button>
+          <div id="user-menu" class="user-menu-dropdown hidden"></div>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
   <section class="packages animate-fade-in">
     <h2 class="section-title glitch" data-text="Aktywuj subskrypcję">Aktywuj subskrypcję</h2>
@@ -40,7 +66,9 @@
     <div id="form-success" class="form-success hidden">✅ Przekierowano do Stripe</div>
   </section>
 
+  <script src="../user-menu.js" defer></script>
   <script src="subskrypcja.js"></script>
+  <script src="../main/main.js" defer></script>
 </body>
 
 </html>
