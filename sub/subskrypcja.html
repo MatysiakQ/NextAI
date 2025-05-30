@@ -1,3 +1,4 @@
+<!-- subskrypcja.html -->
 <!DOCTYPE html>
 <html lang="pl">
 
@@ -5,11 +6,7 @@
   <meta charset="UTF-8">
   <title>Subskrypcja – NextAI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="stripe-pk"
-    content="pk_test_51RLkHqH55SekC08VIpRzgEPAGhPp9TUfVZrIVwbKFiiJ4WUMHZFDWXCk7R8Ia9QFktpoBNQxfl4wtTwMLxaj5deA00RqMemh8b">
   <link rel="stylesheet" href="subskrypcja.css">
-  <script src="https://js.stripe.com/v3/"></script>
-
 </head>
 
 <body>
@@ -20,7 +17,6 @@
 
     <form id="subscription-form" class="contact-form two-column">
       <div class="form-left">
-        <!-- Ukryte pole na typ płatności -->
         <input type="hidden" id="billing-type" name="billing_type" value="monthly">
 
         <label for="email">Email</label>
@@ -32,57 +28,16 @@
           <option value="pro">Pro – 1199 zł / msc</option>
         </select>
 
-        <div class="credit-card-container">
-          <div class="credit-card glitch-border">
-            <img class="mastercard-logo" src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
-              alt="Mastercard">
-            <div class="card-top">
-              <input type="text" id="card-name" placeholder="IMIĘ I NAZWISKO">
-            </div>
-            <div class="card-middle">
-              <div id="card-number-element" class="stripe-input"></div>
-            </div>
-            <div class="card-bottom">
-              <div id="card-expiry-element" class="stripe-input" style="flex: 1;"></div>
-              <div id="card-cvc-element" class="stripe-input" style="flex: 1;"></div>
-            </div>
-          </div>
-        </div>
-
-        <div id="card-errors" role="alert"></div>
-
-        <label class="checkbox-label">
-          <input type="checkbox" id="want-invoice">
-          Chcę otrzymać fakturę VAT
-        </label>
-
         <div class="button-wrapper button-wrapper-flex">
           <button type="submit" class="subscribe-button">Aktywuj subskrypcję</button>
-          <button type="button" id="billing-switch" aria-label="Przełącz typ płatności">Przełącz na płatność roczną
-          </button>
+          <button type="button" id="billing-switch">Przełącz na płatność roczną</button>
         </div>
-      </div>
-
-      <div id="invoice-fields" class="form-right invoice-fields hidden">
-        <label for="company-name">Nazwa firmy</label>
-        <input type="text" id="company-name" name="company_name">
-
-        <label for="company-nip">NIP</label>
-        <input type="text" id="company-nip" name="company_nip">
-
-        <label for="company-address">Ulica</label>
-        <input type="text" id="company-address" name="company_address">
-
-        <label for="company-zip">Kod pocztowy</label>
-        <input type="text" id="company-zip" name="company_zip">
-
-        <label for="company-city">Miasto</label>
-        <input type="text" id="company-city" name="company_city">
       </div>
     </form>
 
+    <div id="card-errors" role="alert"></div>
     <div id="form-loader" class="loader hidden"></div>
-    <div id="form-success" class="form-success hidden">✅ Subskrypcja aktywna!</div>
+    <div id="form-success" class="form-success hidden">✅ Przekierowano do Stripe</div>
   </section>
 
   <script src="subskrypcja.js"></script>
