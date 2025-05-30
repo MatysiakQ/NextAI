@@ -1,6 +1,6 @@
 // Courses page JS
 document.addEventListener('DOMContentLoaded', () => {
-  // Glitch effect
+    // Glitch effect
   setInterval(() => {
     document.querySelectorAll('.glitch').forEach(el => {
       el.classList.add('glitch-active');
