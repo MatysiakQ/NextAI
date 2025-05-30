@@ -621,7 +621,7 @@
 }
 /* Usuń niepotrzebne marginesy na końcu sekcji showcase */
 .portfolio-showcase {
-  margin-bottom: 0;
+  margin-bottom: 48px; /* Zwiększono odstęp od stopki */
   padding-bottom: 0;
 }
 .video-modal {
