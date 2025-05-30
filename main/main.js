@@ -58,14 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Obsługa kliknięcia w linki nawigacji
   links.forEach(link => {
     link.addEventListener('click', e => {
-      e.preventDefault();
-      const href = link.getAttribute('href');
-      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-
-      // Ustaw aktywny link po kliknięciu
-      links.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-      updateIndicator(link);
+      // Usunięto e.preventDefault() i przewijanie do sekcji
+      // Pozostaw domyślne zachowanie przeglądarki (przejście na podstronę)
     });
   });
 

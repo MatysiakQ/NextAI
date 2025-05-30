@@ -219,6 +219,15 @@ a:hover {
   transition: color .3s;
 }
 
+.nav-menu .active {
+  color: #0af !important;
+  border-bottom: 2.5px solid #0af;
+  background: none;
+  font-weight: bold;
+  /* Opcjonalnie: */
+  /* text-shadow: 0 2px 8px #0af3; */
+}
+
 .nav-indicator {
   position: absolute;
   bottom: 0;
