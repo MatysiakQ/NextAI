@@ -3,68 +3,58 @@ document.addEventListener('DOMContentLoaded', () => {
   // NAVIGATION
   const menu = document.querySelector('.nav-menu');
   const links = document.querySelectorAll('.nav-item a');
-  const sections = document.querySelectorAll('section[id], .hero-section');
   const indicator = document.createElement('div');
   indicator.classList.add('nav-indicator');
   menu.appendChild(indicator);
 
+  let hoveredLink = null;
+
+  // Funkcja do ustawiania wskaźnika na danym linku
   function updateIndicator(link) {
     if (!link) return;
     const rect = link.getBoundingClientRect();
     const menuRect = menu.getBoundingClientRect();
-
-    // Ustaw pozycję i szerokość wskaźnika
     indicator.style.width = `${rect.width}px`;
     indicator.style.transform = `translateX(${rect.left - menuRect.left}px)`;
   }
 
-  function setActiveSection() {
-    const scrollPosition = window.scrollY + 150; // Offset dla lepszej detekcji
-    let activeSection = null;
-
-    sections.forEach(section => {
-      if (scrollPosition >= section.offsetTop && scrollPosition < section.offsetTop + section.offsetHeight) {
-        activeSection = section;
-      }
-    });
-
-    links.forEach(link => {
-      const href = link.getAttribute('href');
-      if (activeSection && href === `#${activeSection.id}`) {
-        link.classList.add('active');
-        updateIndicator(link);
-      } else {
-        link.classList.remove('active');
-      }
-    });
+  // Funkcja do ustawiania wskaźnika na aktywnym linku
+  function setIndicatorToActive() {
+    if (!hoveredLink) {
+      const activeLink = document.querySelector('.nav-item a.active');
+      if (activeLink) updateIndicator(activeLink);
+    }
   }
 
   // Ustaw wskaźnik na aktywny element przy załadowaniu strony
-  const activeLink = document.querySelector('.nav-item a.active');
-  if (activeLink) updateIndicator(activeLink);
+  setIndicatorToActive();
 
-  // Aktualizacja wskaźnika na scroll
-  window.addEventListener('scroll', setActiveSection);
-
-  // Aktualizacja wskaźnika na hover
+  // Hover na linku: wskaźnik pod linkiem pod kursorem
   links.forEach(link => {
-    link.addEventListener('mouseenter', () => updateIndicator(link));
+    link.addEventListener('mouseenter', () => {
+      hoveredLink = link;
+      updateIndicator(link);
+    });
     link.addEventListener('mouseleave', () => {
-      const activeLink = document.querySelector('.nav-item a.active');
-      if (activeLink) updateIndicator(activeLink);
+      hoveredLink = null;
+      // Sprawdź, czy żaden inny link nie jest hoverowany
+      setTimeout(() => {
+        if (!document.querySelector('.nav-item a:hover')) {
+          setIndicatorToActive();
+        }
+      }, 1);
+    });
+    link.addEventListener('touchend', () => {
+      hoveredLink = null;
+      setIndicatorToActive();
     });
   });
 
-  // Obsługa kliknięcia w linki nawigacji
-  links.forEach(link => {
-    link.addEventListener('click', e => {
-      // Usunięto e.preventDefault() i przewijanie do sekcji
-      // Pozostaw domyślne zachowanie przeglądarki (przejście na podstronę)
-    });
+  // Po opuszczeniu całej nawigacji (ul.nav-menu) wracaj na aktywny
+  menu.addEventListener('mouseleave', () => {
+    hoveredLink = null;
+    setIndicatorToActive();
   });
-
-  // Ustaw aktywną sekcję na początku
-  setActiveSection();
 
   // SLIDER
   let current = 0;

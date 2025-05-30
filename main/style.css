@@ -219,28 +219,28 @@ a:hover {
   transition: color .3s;
 }
 
-.nav-menu .active {
+.nav-menu .active,
+.nav-menu a:hover {
   color: #0af !important;
-  border-bottom: 2.5px solid #0af;
-  background: none;
   font-weight: bold;
-  /* Opcjonalnie: */
-  /* text-shadow: 0 2px 8px #0af3; */
+  background: none;
 }
 
 .nav-indicator {
   position: absolute;
   bottom: 0;
   height: 3px;
-  background-color: var(--accent-default);
-  transition: transform 0.3s ease, width 0.3s ease;
+  background-color: #0af;
+  transition: transform 0.3s cubic-bezier(.4,1.2,.6,1), width 0.3s cubic-bezier(.4,1.2,.6,1);
   z-index: 1;
   width: 0;
+  border-radius: 2px;
 }
 
 .nav-item a.active {
-  color: var(--accent-default);
+  color: #0af !important;
   font-weight: bold;
+  /* border-bottom: 2.5px solid var(--accent-default); <-- USUŃ */
 }
 
 .nav-item a:hover {
