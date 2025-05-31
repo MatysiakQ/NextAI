@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function reset() {
     clearInterval(interval);
-    interval = setInterval(next, 5000);
+    interval = setInterval(next, 10000); // Reset na 10 sekund
   }
 
   // Dodanie obsługi kliknięcia na kartę
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  let interval = setInterval(next, 5000); // Automatyczne przesuwanie co 5 sekund
+  let interval = setInterval(next, 10000); // Automatyczne przesuwanie co 10 sekund
   nextBtn?.addEventListener('click', () => { next(); reset(); });
   prevBtn?.addEventListener('click', () => { prev(); reset(); });
   if (cards.length) updateCards();
