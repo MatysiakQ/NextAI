@@ -50,10 +50,11 @@ document.querySelectorAll('.video-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const videoSrc = btn.getAttribute('data-video');
     const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('videoFrame');
-    iframe.src = videoSrc + "?autoplay=1";
+    const video = document.getElementById('videoPlayer');
+    video.querySelector('source').src = videoSrc;
+    video.load();
+    video.play();
     modal.style.display = 'flex';
-    // Focus na close-btn dla accessibility
     setTimeout(() => {
       modal.querySelector('.close-btn')?.focus();
     }, 100);
@@ -62,10 +63,12 @@ document.querySelectorAll('.video-btn').forEach(btn => {
 
 document.querySelector('.close-btn').addEventListener('click', () => {
   const modal = document.getElementById('videoModal');
-  const iframe = document.getElementById('videoFrame');
-  iframe.src = '';
+  const video = document.getElementById('videoPlayer');
+  video.pause();
+  video.currentTime = 0;
   modal.style.display = 'none';
 });
+
 
 window.addEventListener('click', (e) => {
   const modal = document.getElementById('videoModal');
