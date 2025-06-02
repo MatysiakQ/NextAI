@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!document.querySelector('.nav-item a:hover')) {
           setIndicatorToActive();
         }
-      }, 1);
+      }, 100);
     });
     link.addEventListener('touchend', () => {
       hoveredLink = null;
@@ -54,6 +54,20 @@ document.addEventListener('DOMContentLoaded', () => {
   menu.addEventListener('mouseleave', () => {
     hoveredLink = null;
     setIndicatorToActive();
+  });
+
+  let debounceTimeout;
+
+  links.forEach(link => {
+    link.addEventListener('mouseleave', () => {
+      hoveredLink = null;
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        if (!document.querySelector('.nav-item a:hover')) {
+          setIndicatorToActive();
+        }
+      }, 100);
+    });
   });
 
   // SLIDER
@@ -159,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!text) return;
     appendMessage('Ty', text, 'user');
     chatQuestion.value = '';
-    appendMessage('NextAI', '<span style="opacity:.7;">piszę odpowiedź...</span>', 'bot');
+  appendMessage('NextAI', '<span style="opacity:.7;">piszę odpowiedź<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span></span>', 'bot');
     try {
       const res = await fetch('https://nextai.app.n8n.cloud/webhook/chatbot', {
         method: 'POST',
@@ -514,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Skróć strzałkę o 18px przed kafelkiem docelowym (dostosuj w razie potrzeby)
     const dx = x2 - x1;
     const dy = y2 - y1;
-    const len = Math.sqrt(dx*dx + dy*dy);
+    const len = Math.sqrt(dx * dx + dy * dy);
     const shorten = 18;
     if (len > shorten) {
       x2 = x2 - (dx / len) * shorten;
@@ -549,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Skróć strzałkę tylko na końcu (przy kafelku docelowym), nie na początku
     const dx = x2 - x1;
     const dy = y2 - y1;
-    const len = Math.sqrt(dx*dx + dy*dy);
+    const len = Math.sqrt(dx * dx + dy * dy);
     const shorten = 18;
     if (len > shorten) {
       x2 = x2 - (dx / len) * shorten;
@@ -584,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Skróć strzałkę tylko na końcu (przy kafelku docelowym)
     const dx = x2 - x1;
     const dy = y2 - y1;
-    const len = Math.sqrt(dx*dx + dy*dy);
+    const len = Math.sqrt(dx * dx + dy * dy);
     const shorten = 18;
     if (len > shorten) {
       x2 = x2 - (dx / len) * shorten;
@@ -651,7 +665,7 @@ document.querySelector('.contact-form').addEventListener('submit', async functio
 });
 
 // Testimonials slider
-(function(){
+(function () {
   const testimonials = document.querySelectorAll('.testimonial-card');
   const prevBtn = document.querySelector('.testimonial-prev');
   const nextBtn = document.querySelector('.testimonial-next');
@@ -702,7 +716,7 @@ document.querySelector('.contact-form').addEventListener('submit', async functio
   });
 })();
 
-document.querySelector('.newsletter-form')?.addEventListener('submit', function(e) {
+document.querySelector('.newsletter-form')?.addEventListener('submit', function (e) {
   e.preventDefault();
   const email = this.newsletter_email.value.trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Podaj poprawny email!');

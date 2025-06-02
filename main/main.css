@@ -2534,3 +2534,24 @@ textarea:-moz-autofill {
 .cooperation-container.triangle-layout {
   position: relative;
 }
+
+.dot-anim {
+  display: inline;
+}
+
+.dot-anim span {
+  display: inline;
+  opacity: 0;
+  animation: dot-blink 1.2s infinite;
+}
+
+.dot-anim span:nth-child(1) { animation-delay: 0s; }
+.dot-anim span:nth-child(2) { animation-delay: 0.2s; }
+.dot-anim span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+
