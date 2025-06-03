@@ -10,7 +10,7 @@ use Dotenv\Dotenv;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 
-$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
 Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
