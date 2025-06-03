@@ -2553,5 +2553,23 @@ textarea:-moz-autofill {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
+@media (max-width: 768px) {
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 64px;
+    right: 20px;
+    background-color: #181a2b;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    z-index: 999;
+  }
+
+  .nav-menu.show {
+    display: flex;
+  }
+}
 
 

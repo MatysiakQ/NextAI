@@ -1,9 +1,16 @@
-
+// Funkcja do automatycznego wykrywania poprawnej ścieżki
+function getCorrectPath() {
+  const path = window.location.pathname;
+  if (path === '/' || path.includes('/main/') || path.endsWith('index.html')) {
+    return './userpanel/';
+  }
+  return '../userpanel/';
+}
 // main.js
 document.addEventListener('DOMContentLoaded', () => {
     window.checkLoginStatus = async function() {
     try {
-      const res = await fetch('./userpanel/auth.php?action=verify', { 
+      const res = await fetch(getCorrectPath() + 'auth.php?action=verify', { 
         credentials: 'include',
         cache: 'no-cache'
       });
@@ -56,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   };
+
 
   // Inicjalizuj sprawdzanie sesji
   window.initSessionCheck();
@@ -390,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userMenuToggle && userMenu) {
     async function checkLoginStatus() {
       try {
-        const res = await fetch('./userpanel/auth.php?action=verify', { 
+        const res = await fetch('../userpanel/auth.php?action=verify', { 
           credentials: 'include',
           cache: 'no-cache'
         });
@@ -473,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (e.target.id === 'user-logout-btn') {
         try {
-          await fetch('./userpanel/auth.php?action=logout', { 
+          await fetch('../userpanel/auth.php?action=logout', { 
             credentials: 'include',
             method: 'POST'
           });
@@ -529,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Sprawdź status logowania przed pokazaniem modala
       let loggedIn = false;
       try {
-        const res = await fetch('./userpanel/auth.php?action=verify', { 
+        const res = await fetch('../userpanel/auth.php?action=verify', { 
           credentials: 'include',
           cache: 'no-cache'
         });
@@ -730,7 +738,7 @@ if (contactForm) {
     const formData = new FormData(this);
 
     try {
-      const response = await fetch("/sub/checkout.php", {
+      const response = await fetch("../sub/checkout.php", {
         method: 'POST',
         headers: {
           'Accept': 'application/json'

@@ -8,12 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, 3000);
 
-  // Mobile nav toggle
-  const navToggle = document.querySelector('.nav-toggle');
-  const navMenu = document.querySelector('.nav-menu');
-  navToggle?.addEventListener('click', () => {
-    navMenu.classList.toggle('show');
-  });
+ 
 
   // Animacja wejścia kafelków portfolio (feature-card, portfolio-card)
   const cards = document.querySelectorAll('.portfolio-card, .feature-card:not(.robot-card), .portfolio-card-alt');
