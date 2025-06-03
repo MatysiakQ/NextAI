@@ -14,6 +14,8 @@ $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
 Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+error_log("POST data: " . print_r($_POST, true));
+error_log("Env STRIPE_PRICE_BASIC_MONTHLY: " . ($_ENV['STRIPE_PRICE_BASIC_MONTHLY'] ?? 'brak'));
 
 $email = $_POST['email'] ?? '';
 $plan = $_POST['plan'] ?? '';
