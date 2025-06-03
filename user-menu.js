@@ -5,17 +5,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!(userMenuToggle && userMenu)) return;
 
-  async function checkLoginStatus() {
-    try {
-      const res = await fetch('/../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
-      const data = await res.json();
-      isUserLoggedIn = !!data.success;
-      renderUserMenu();
-    } catch {
-      isUserLoggedIn = false;
-      renderUserMenu();
-    }
+async function checkLoginStatus() {
+  try {
+    const res = await fetch('./userpanel/auth.php?action=subscriptions', { 
+      credentials: 'include' 
+    });
+    const data = await res.json();
+    isUserLoggedIn = !!data.success;
+    renderUserMenu();
+  } catch {
+    isUserLoggedIn = false; 
+    renderUserMenu();
   }
+}
 
   function renderUserMenu() {
     userMenu.innerHTML = '';

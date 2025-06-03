@@ -1,12 +1,18 @@
 <?php
-// webhook.php
+// webhook.php (poprawiona wersja)
 require __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
-$dotenv = Dotenv::createImmutable(__DIR__);
+// Logowanie do pliku
+$logFile = __DIR__ . '/logs/stripe_webhook.log';
+if (!file_exists(dirname($logFile))) {
+    mkdir(dirname($logFile), 0755, true);
+}
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
 Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
@@ -21,9 +27,11 @@ try {
         $payload, $sigHeader, $endpointSecret
     );
 } catch (\UnexpectedValueException $e) {
+    error_log("[WEBHOOK] Invalid payload: " . $e->getMessage(), 3, $logFile);
     http_response_code(400);
     exit();
 } catch (\Stripe\Exception\SignatureVerificationException $e) {
+    error_log("[WEBHOOK] Invalid signature: " . $e->getMessage(), 3, $logFile);
     http_response_code(400);
     exit();
 }
@@ -38,35 +46,100 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
+    // Sprawdź czy event już był przetwarzany
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM stripe_events WHERE stripe_event_id = ?");
+    $stmt->execute([$event->id]);
+    if ($stmt->fetchColumn() > 0) {
+        error_log("[WEBHOOK] Event already processed: {$event->id}", 3, $logFile);
+        http_response_code(200);
+        exit();
+    }
+
+    // Zapisz event
+    $stmt = $pdo->prepare("INSERT INTO stripe_events (stripe_event_id, event_type, data) VALUES (?, ?, ?)");
+    $stmt->execute([$event->id, $type, json_encode($event->data)]);
+
     if ($type === 'checkout.session.completed') {
         $customerId = $data->customer;
         $subscriptionId = $data->subscription;
         $email = $data->customer_email;
         $plan = $data->metadata->plan ?? 'unknown';
+        
+        // Pobierz user_id jeśli istnieje
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $userId = $stmt->fetchColumn();
 
-        $stmt = $pdo->prepare("INSERT INTO subscriptions (email, stripe_customer_id, stripe_subscription_id, plan, status, created_at) VALUES (?, ?, ?, ?, 'active', NOW())");
-        $stmt->execute([$email, $customerId, $subscriptionId, $plan]);
+        // Wstaw lub zaktualizuj subskrypcję
+        $stmt = $pdo->prepare("
+            INSERT INTO subscriptions (email, user_id, stripe_customer_id, stripe_subscription_id, plan, status, created_at) 
+            VALUES (?, ?, ?, ?, ?, 'active', NOW())
+            ON DUPLICATE KEY UPDATE 
+                status = 'active',
+                plan = VALUES(plan),
+                updated_at = NOW()
+        ");
+        $stmt->execute([$email, $userId, $customerId, $subscriptionId, $plan]);
+
+        // Zapisz sesję checkout
+        $stmt = $pdo->prepare("
+            INSERT INTO checkout_sessions (stripe_session_id, email, user_id, plan, status, completed_at) 
+            VALUES (?, ?, ?, ?, 'complete', NOW())
+            ON DUPLICATE KEY UPDATE 
+                status = 'complete',
+                completed_at = NOW()
+        ");
+        $stmt->execute([$data->id, $email, $userId, $plan]);
+
+        error_log("[WEBHOOK] Subscription created: $subscriptionId for $email", 3, $logFile);
     }
 
     if ($type === 'customer.subscription.updated') {
         $subId = $data->id;
         $status = $data->status;
+        $currentStart = date('Y-m-d H:i:s', $data->current_period_start);
         $currentEnd = date('Y-m-d H:i:s', $data->current_period_end);
 
-        $stmt = $pdo->prepare("UPDATE subscriptions SET status = ?, current_period_end = ? WHERE stripe_subscription_id = ?");
-        $stmt->execute([$status, $currentEnd, $subId]);
+        $stmt = $pdo->prepare("
+            UPDATE subscriptions 
+            SET status = ?, current_period_start = ?, current_period_end = ?, updated_at = NOW() 
+            WHERE stripe_subscription_id = ?
+        ");
+        $stmt->execute([$status, $currentStart, $currentEnd, $subId]);
+
+        error_log("[WEBHOOK] Subscription updated: $subId to status $status", 3, $logFile);
     }
 
     if ($type === 'customer.subscription.deleted') {
         $subId = $data->id;
 
-        $stmt = $pdo->prepare("UPDATE subscriptions SET status = 'canceled' WHERE stripe_subscription_id = ?");
+        $stmt = $pdo->prepare("UPDATE subscriptions SET status = 'canceled', updated_at = NOW() WHERE stripe_subscription_id = ?");
         $stmt->execute([$subId]);
+
+        error_log("[WEBHOOK] Subscription canceled: $subId", 3, $logFile);
     }
 
+    // Oznacz event jako przetworzony
+    $stmt = $pdo->prepare("UPDATE stripe_events SET processed = 1, processed_at = NOW() WHERE stripe_event_id = ?");
+    $stmt->execute([$event->id]);
+
     http_response_code(200);
+    error_log("[WEBHOOK] Successfully processed event: {$event->id} of type: $type", 3, $logFile);
+
 } catch (Exception $e) {
-    error_log("[STRIPE WEBHOOK ERROR] " . $e->getMessage(), 3, __DIR__ . '/logs/stripe_webhook.log');
+    error_log("[STRIPE WEBHOOK ERROR] " . $e->getMessage() . " - Event: {$event->id}", 3, $logFile);
+    
+    // Zapisz błąd w bazie
+    if (isset($pdo)) {
+        try {
+            $stmt = $pdo->prepare("UPDATE stripe_events SET error_message = ? WHERE stripe_event_id = ?");
+            $stmt->execute([$e->getMessage(), $event->id]);
+        } catch (Exception $dbError) {
+            error_log("[WEBHOOK DB ERROR] " . $dbError->getMessage(), 3, $logFile);
+        }
+    }
+    
     http_response_code(500);
     exit();
 }
+?>

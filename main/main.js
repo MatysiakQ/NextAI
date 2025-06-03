@@ -1,17 +1,76 @@
+
 // main.js
 document.addEventListener('DOMContentLoaded', () => {
+    window.checkLoginStatus = async function() {
+    try {
+      const res = await fetch('./userpanel/auth.php?action=verify', { 
+        credentials: 'include',
+        cache: 'no-cache'
+      });
+      
+      // Sprawdź czy odpowiedź to JSON
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Otrzymano odpowiedź, która nie jest JSON-em');
+        localStorage.removeItem('nextai_logged_in');
+        document.cookie = 'nextai_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=lax';
+        return false;
+      }
+      
+      const data = await res.json();
+      
+      // Zapisz status w localStorage i cookie jako backup
+      if (data.success && data.logged_in) {
+        localStorage.setItem('nextai_logged_in', 'true');
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 dni
+        document.cookie = `nextai_session=true; expires=${expires.toUTCString()}; path=/; secure; samesite=lax`;
+        return true;
+      } else {
+        localStorage.removeItem('nextai_logged_in');
+        document.cookie = 'nextai_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=lax';
+        return false;
+      }
+    } catch (error) {
+      console.error('Błąd sprawdzania statusu logowania:', error);
+      localStorage.removeItem('nextai_logged_in');
+      document.cookie = 'nextai_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=lax';
+      return false;
+    }
+  };
+
+  // Funkcja inicjalizująca sprawdzanie sesji
+  window.initSessionCheck = function() {
+    // Sprawdź status przy załadowaniu strony
+    window.checkLoginStatus();
+    
+    // Sprawdzaj status co 10 minut
+    setInterval(() => {
+      window.checkLoginStatus();
+    }, 10 * 60 * 1000);
+    
+    // Sprawdź status gdy użytkownik wraca do karty
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        window.checkLoginStatus();
+      }
+    });
+  };
+
+  // Inicjalizuj sprawdzanie sesji
+  window.initSessionCheck();
   // NAVIGATION
   const menu = document.querySelector('.nav-menu');
   const links = document.querySelectorAll('.nav-item a');
   const indicator = document.createElement('div');
   indicator.classList.add('nav-indicator');
-  menu.appendChild(indicator);
+  if (menu) menu.appendChild(indicator);
 
   let hoveredLink = null;
 
   // Funkcja do ustawiania wskaźnika na danym linku
   function updateIndicator(link) {
-    if (!link) return;
+    if (!link || !menu) return;
     const rect = link.getBoundingClientRect();
     const menuRect = menu.getBoundingClientRect();
     indicator.style.width = `${rect.width}px`;
@@ -51,10 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Po opuszczeniu całej nawigacji (ul.nav-menu) wracaj na aktywny
-  menu.addEventListener('mouseleave', () => {
-    hoveredLink = null;
-    setIndicatorToActive();
-  });
+  if (menu) {
+    menu.addEventListener('mouseleave', () => {
+      hoveredLink = null;
+      setIndicatorToActive();
+    });
+  }
 
   let debounceTimeout;
 
@@ -133,34 +194,44 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatSend = document.getElementById('chat-send');
   const chatClose = document.getElementById('chat-close');
 
-  chatToggle.addEventListener('click', () => {
-    chatToggle.classList.add('opening');
-    setTimeout(() => {
-      chatWidget.classList.add('open');
-      chatToggle.style.display = 'none';
-      chatToggle.classList.remove('opening');
-      chatQuestion.focus();
-    }, 300);
-  });
+  if (chatToggle && chatWidget) {
+    chatToggle.addEventListener('click', () => {
+      chatToggle.classList.add('opening');
+      setTimeout(() => {
+        chatWidget.classList.add('open');
+        chatToggle.style.display = 'none';
+        chatToggle.classList.remove('opening');
+        if (chatQuestion) chatQuestion.focus();
+      }, 300);
+    });
+  }
 
-  chatClose.addEventListener('click', () => {
-    chatWidget.classList.remove('open');
-    chatToggle.classList.add('closing');
-    chatToggle.style.display = 'flex';
-    setTimeout(() => {
-      chatToggle.classList.remove('closing');
-    }, 300);
-  });
+  if (chatClose && chatWidget && chatToggle) {
+    chatClose.addEventListener('click', () => {
+      chatWidget.classList.remove('open');
+      chatToggle.classList.add('closing');
+      chatToggle.style.display = 'flex';
+      setTimeout(() => {
+        chatToggle.classList.remove('closing');
+      }, 300);
+    });
+  }
 
-  chatQuestion.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-  chatSend.addEventListener('click', sendMessage);
+  if (chatQuestion) {
+    chatQuestion.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  }
+  
+  if (chatSend) {
+    chatSend.addEventListener('click', sendMessage);
+  }
 
   function appendMessage(sender, message, who = 'bot') {
+    if (!chatBody) return;
     const msg = document.createElement('div');
     msg.className = 'chat-message ' + (who === 'user' ? 'user' : 'bot');
     msg.innerHTML = `<span class="sender">${sender}</span>${message}`;
@@ -169,11 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function sendMessage() {
+    if (!chatQuestion) return;
     const text = chatQuestion.value.trim();
     if (!text) return;
     appendMessage('Ty', text, 'user');
     chatQuestion.value = '';
-  appendMessage('NextAI', '<span style="opacity:.7;">piszę odpowiedź<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span></span>', 'bot');
+    appendMessage('NextAI', '<span style="opacity:.7;">piszę odpowiedź<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span></span>', 'bot');
     try {
       const res = await fetch('https://nextai.app.n8n.cloud/webhook/chatbot', {
         method: 'POST',
@@ -188,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateLastBotMessage(newText) {
+    if (!chatBody) return;
     const messages = chatBody.querySelectorAll('.chat-message.bot');
     if (messages.length) {
       messages[messages.length - 1].innerHTML = `<span class="sender">NextAI</span>${newText}`;
@@ -195,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Modale dla kwadratów współpracy
-  // Poprawka: obsługa kliknięcia po zmianie na ikonki
   const boxModals = [
     document.getElementById('modal-2'), // box-2: konsultacja
     document.getElementById('modal-1'), // box-1: umowa
@@ -214,28 +286,27 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.close-button').forEach(btn => {
     btn.addEventListener('click', () => {
       const modalId = btn.getAttribute('data-modal');
-      document.getElementById(`modal-${modalId}`).classList.add('hidden');
-      document.body.classList.remove('modal-open');
-    });
-  });
-
-  Object.values(boxModals).forEach(modal => {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
+      const modal = document.getElementById(`modal-${modalId}`);
+      if (modal) {
         modal.classList.add('hidden');
         document.body.classList.remove('modal-open');
       }
     });
   });
 
+  boxModals.forEach(modal => {
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.add('hidden');
+          document.body.classList.remove('modal-open');
+        }
+      });
+    }
+  });
+
   // Przełącznik płatności
   const billingBtn = document.getElementById('billing-switch');
-  const monthlyPrices = document.querySelectorAll('.price .monthly');
-  const yearlyPrices = document.querySelectorAll('.price .yearly');
-  const priceHeaders = document.querySelectorAll('.price-header');
-  const savingsText = document.createElement('span'); // Element do wyświetlania oszczędności
-  savingsText.classList.add('savings-text');
-
   let yearly = false;
 
   if (billingBtn) {
@@ -268,28 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Obsługa przycisków subskrypcji
-  document.querySelectorAll('.subscribe-button').forEach(button => {
-    button.addEventListener('click', function (e) {
-      e.preventDefault();
-
-      // Określ typ pakietu
-      const card = this.closest('.package-card');
-      let packageType = 'basic'; // Domyślnie "basic"
-      let checkoutUrl = 'https://buy.stripe.com/test_cNicN5806549eZvgi34Rq00'; // Link dla basic
-
-      if (card.classList.contains('premium')) {
-        packageType = 'pro';
-        checkoutUrl = 'https://buy.stripe.com/test_dRmcN50xE68dcRn8PB4Rq01'; // Link dla pro
-      }
-      if (card.classList.contains('enterprise')) {
-        window.open('enterpirse_form.html', 'blank');
-        return;
-      }
-      window.location.href = checkoutUrl;
-    });
-  });
-
   // Obsługa przycisków subskrypcji (przekierowanie z odpowiednim typem płatności)
   document.querySelectorAll('.package-card .subscribe-button').forEach(button => {
     button.addEventListener('click', function (e) {
@@ -297,9 +346,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const card = this.closest('.package-card');
       // Ustal pakiet
       let packageType = 'basic';
-      if (card.classList.contains('premium')) packageType = 'pro';
-      if (card.classList.contains('enterprise')) {
-        window.open('enterpirse_form.html', 'blank');
+      if (card && card.classList.contains('premium')) packageType = 'pro';
+      if (card && card.classList.contains('enterprise')) {
+        window.open('enterpirse_form.html', '_blank');
         return;
       }
       // Sprawdź czy na stronie jest aktywna płatność roczna
@@ -341,17 +390,41 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userMenuToggle && userMenu) {
     async function checkLoginStatus() {
       try {
-        const res = await fetch('../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
+        const res = await fetch('./userpanel/auth.php?action=verify', { 
+          credentials: 'include',
+          cache: 'no-cache'
+        });
+        
+        // Sprawdź czy odpowiedź to JSON
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('Otrzymano odpowiedź, która nie jest JSON-em');
+          isUserLoggedIn = false;
+          renderUserMenu();
+          return;
+        }
+        
         const data = await res.json();
-        isUserLoggedIn = !!data.success;
+        isUserLoggedIn = data.success && data.logged_in;
+        
+        // Zapisz status w localStorage jako backup
+        if (isUserLoggedIn) {
+          localStorage.setItem('nextai_logged_in', 'true');
+        } else {
+          localStorage.removeItem('nextai_logged_in');
+        }
+        
         renderUserMenu();
-      } catch {
+      } catch (error) {
+        console.error('Błąd sprawdzania statusu logowania:', error);
         isUserLoggedIn = false;
+        localStorage.removeItem('nextai_logged_in');
         renderUserMenu();
       }
     }
 
     function renderUserMenu() {
+      if (!userMenu) return;
       userMenu.innerHTML = '';
       if (!isUserLoggedIn) {
         userMenu.innerHTML = `
@@ -399,11 +472,19 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '../userpanel/user_panel.html';
       }
       if (e.target.id === 'user-logout-btn') {
-        await fetch('../userpanel/auth.php?action=logout', { credentials: 'include' });
-        isUserLoggedIn = false;
-        renderUserMenu();
-        userMenu.classList.add('hidden');
-        userMenuToggle.classList.remove('active');
+        try {
+          await fetch('./userpanel/auth.php?action=logout', { 
+            credentials: 'include',
+            method: 'POST'
+          });
+          isUserLoggedIn = false;
+          localStorage.removeItem('nextai_logged_in');
+          renderUserMenu();
+          userMenu.classList.add('hidden');
+          userMenuToggle.classList.remove('active');
+        } catch (error) {
+          console.error('Błąd podczas wylogowywania:', error);
+        }
       }
       if (e.target.id === 'user-terms-link') {
         e.preventDefault();
@@ -413,6 +494,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sprawdź status logowania na starcie (na każdej stronie)
     checkLoginStatus();
+    
+    // Sprawdzaj status co 10 minut
+    setInterval(checkLoginStatus, 10 * 60 * 1000);
   }
 
   // MODAL: Dodaj opinię
@@ -445,12 +529,21 @@ document.addEventListener('DOMContentLoaded', () => {
       // Sprawdź status logowania przed pokazaniem modala
       let loggedIn = false;
       try {
-        const res = await fetch('../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
-        const data = await res.json();
-        loggedIn = !!data.success;
+        const res = await fetch('./userpanel/auth.php?action=verify', { 
+          credentials: 'include',
+          cache: 'no-cache'
+        });
+        
+        // Sprawdź czy odpowiedź to JSON
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          loggedIn = data.success && data.logged_in;
+        }
       } catch {
         loggedIn = false;
       }
+      
       if (loggedIn) {
         if (addOpinionModal) {
           addOpinionModal.classList.remove('hidden');
@@ -490,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (opinionForm) {
+  if (opinionForm && opinionSuccess) {
     opinionForm.addEventListener('submit', function (e) {
       e.preventDefault();
       // Obsługa anonimowości
@@ -500,16 +593,17 @@ document.addEventListener('DOMContentLoaded', () => {
       // Tu można dodać wysyłkę do backendu lub localStorage
       opinionSuccess.classList.remove('hidden');
       setTimeout(() => {
-        addOpinionModal.classList.add('hidden');
+        if (addOpinionModal) addOpinionModal.classList.add('hidden');
         document.body.classList.remove('modal-open');
         opinionSuccess.classList.add('hidden');
       }, 1800);
     });
   }
 
+  // Funkcje rysowania strzałek
   function drawArrow1to2() {
-    const box1 = document.getElementById('triangle-konsultacja'); // box-2 (numer 1)
-    const box2 = document.getElementById('triangle-umowa'); // box-1 (numer 2)
+    const box1 = document.getElementById('triangle-konsultacja');
+    const box2 = document.getElementById('triangle-umowa');
     const container = document.querySelector('.cooperation-container.triangle-layout');
     const line = document.getElementById('arrow-1-2-line');
     if (!box1 || !box2 || !container || !line) return;
@@ -518,14 +612,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const b1Rect = box1.getBoundingClientRect();
     const b2Rect = box2.getBoundingClientRect();
 
-    // Początek: środek górnej krawędzi box1 (konsultacja)
     const x1 = b1Rect.left - cRect.left + b1Rect.width / 2;
     const y1 = b1Rect.top - cRect.top;
-    // Koniec: środek dolnej krawędzi box2 (umowa), przesunięty w lewo o 30px
     let x2 = b2Rect.left - cRect.left + b2Rect.width / 2 - 30;
     let y2 = b2Rect.top - cRect.top + b2Rect.height;
 
-    // Skróć strzałkę o 18px przed kafelkiem docelowym (dostosuj w razie potrzeby)
     const dx = x2 - x1;
     const dy = y2 - y1;
     const len = Math.sqrt(dx * dx + dy * dy);
@@ -541,10 +632,9 @@ document.addEventListener('DOMContentLoaded', () => {
     line.setAttribute('y2', y2);
   }
 
-  // Nowa wersja: strzałka idzie od dolnej krawędzi box-umowa do górnej krawędzi box-wdrozenie
   function drawArrow2to3() {
-    const box2 = document.getElementById('triangle-umowa'); // box-1 (numer 2)
-    const box3 = document.getElementById('triangle-wdrozenie'); // box-3 (numer 3)
+    const box2 = document.getElementById('triangle-umowa');
+    const box3 = document.getElementById('triangle-wdrozenie');
     const container = document.querySelector('.cooperation-container.triangle-layout');
     const line = document.getElementById('arrow-2-3-line');
     if (!box2 || !box3 || !container || !line) return;
@@ -553,14 +643,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const b2Rect = box2.getBoundingClientRect();
     const b3Rect = box3.getBoundingClientRect();
 
-    // Początek: środek dolnej krawędzi box2 (umowa), przesunięty w prawo o 30px (symetria)
     let x1 = b2Rect.left - cRect.left + b2Rect.width / 2 + 30;
     let y1 = b2Rect.top - cRect.top + b2Rect.height;
-    // Koniec: środek górnej krawędzi box3 (wdrożenie)
     let x2 = b3Rect.left - cRect.left + b3Rect.width / 2;
     let y2 = b3Rect.top - cRect.top;
 
-    // Skróć strzałkę tylko na końcu (przy kafelku docelowym), nie na początku
     const dx = x2 - x1;
     const dy = y2 - y1;
     const len = Math.sqrt(dx * dx + dy * dy);
@@ -576,10 +663,9 @@ document.addEventListener('DOMContentLoaded', () => {
     line.setAttribute('y2', y2);
   }
 
-  // Strzałka z kafelka 3 do 1 (z wdrożenia do konsultacji) - prosto z lewej ściany box-3 do środka prawej ściany box-2
   function drawArrow3to1() {
-    const box3 = document.getElementById('triangle-wdrozenie'); // box-3
-    const box1 = document.getElementById('triangle-konsultacja'); // box-2 (ale id=1)
+    const box3 = document.getElementById('triangle-wdrozenie');
+    const box1 = document.getElementById('triangle-konsultacja');
     const container = document.querySelector('.cooperation-container.triangle-layout');
     const line = document.getElementById('arrow-3-1-line');
     if (!box3 || !box1 || !container || !line) return;
@@ -588,14 +674,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const b3Rect = box3.getBoundingClientRect();
     const b1Rect = box1.getBoundingClientRect();
 
-    // Początek: środek lewej ściany box3 (wdrożenie)
     let x1 = b3Rect.left - cRect.left;
     let y1 = b3Rect.top - cRect.top + b3Rect.height / 2;
-    // Koniec: środek prawej ściany box1 (konsultacja)
     let x2 = b1Rect.left - cRect.left + b1Rect.width;
     let y2 = b1Rect.top - cRect.top + b1Rect.height / 2;
 
-    // Skróć strzałkę tylko na końcu (przy kafelku docelowym)
     const dx = x2 - x1;
     const dy = y2 - y1;
     const len = Math.sqrt(dx * dx + dy * dy);
@@ -611,18 +694,18 @@ document.addEventListener('DOMContentLoaded', () => {
     line.setAttribute('y2', y2);
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
+  // Rysuj strzałki przy załadowaniu i zmianie rozmiaru okna
+  function drawAllArrows() {
     drawArrow1to2();
     drawArrow2to3();
     drawArrow3to1();
-  });
-  window.addEventListener('resize', () => {
-    drawArrow1to2();
-    drawArrow2to3();
-    drawArrow3to1();
-  });
+  }
+
+  drawAllArrows();
+  window.addEventListener('resize', drawAllArrows);
 });
 
+// Obsługa linku do chatbota
 document.addEventListener("DOMContentLoaded", function () {
   const chatbotLink = document.getElementById("open-chatbot");
   const chatToggle = document.getElementById("chat-toggle");
@@ -638,31 +721,35 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-document.querySelector('.contact-form').addEventListener('submit', async function (e) {
-  e.preventDefault();
+// Obsługa formularza kontaktowego
+const contactForm = document.querySelector('.contact-form');
+if (contactForm) {
+  contactForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-  const formData = new FormData(this);
-  const data = Object.fromEntries(formData.entries());
+    const formData = new FormData(this);
 
-  try {
-    const response = await fetch('submit_form.php', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: formData
-    });
+    try {
+      const response = await fetch("/sub/checkout.php", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
+        body: formData
+      });
 
-    if (response.ok) {
-      document.getElementById('success-modal').classList.remove('hidden');
-      this.reset();
-    } else {
-      alert("Wystąpił błąd podczas wysyłania formularza.");
+      if (response.ok) {
+        const successModal = document.getElementById('success-modal');
+        if (successModal) successModal.classList.remove('hidden');
+        this.reset();
+      } else {
+        alert("Wystąpił błąd podczas wysyłania formularza.");
+      }
+    } catch (error) {
+      alert("Nie można połączyć się z serwerem.");
     }
-  } catch (error) {
-    alert("Nie można połączyć się z serwerem.");
-  }
-});
+  });
+}
 
 // Testimonials slider
 (function () {
@@ -716,16 +803,23 @@ document.querySelector('.contact-form').addEventListener('submit', async functio
   });
 })();
 
-document.querySelector('.newsletter-form')?.addEventListener('submit', function (e) {
-  e.preventDefault();
-  const email = this.newsletter_email.value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Podaj poprawny email!');
-  // Tu możesz dodać fetch do backendu lub Mailchimp
-  this.reset();
-  document.querySelector('.newsletter-success').classList.remove('hidden');
-  setTimeout(() => document.querySelector('.newsletter-success').classList.add('hidden'), 4000);
-});
+// Newsletter form
+const newsletterForm = document.querySelector('.newsletter-form');
+if (newsletterForm) {
+  newsletterForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const email = this.newsletter_email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Podaj poprawny email!');
+    this.reset();
+    const successEl = document.querySelector('.newsletter-success');
+    if (successEl) {
+      successEl.classList.remove('hidden');
+      setTimeout(() => successEl.classList.add('hidden'), 4000);
+    }
+  });
+}
 
+// Progress bar przy ładowaniu strony
 window.addEventListener('DOMContentLoaded', () => {
   const bar = document.getElementById('progress-bar');
   if (!bar) return;
@@ -742,6 +836,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Parallax effect
 window.addEventListener('scroll', () => {
   document.querySelectorAll('section').forEach((sec, i) => {
     sec.style.backgroundPositionY = `${window.scrollY * 0.05 * (i % 2 === 0 ? 1 : -1)}px`;

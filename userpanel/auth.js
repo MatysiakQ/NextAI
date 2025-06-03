@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.pathname.endsWith("login.html") ||
     window.location.pathname.endsWith("register.html")
   ) {
-    fetch("auth.php?action=subscriptions")
+    fetch("auth.php?action=user_data")
       .then(async res => {
         if (!res.ok) return { success: false };
         try {
@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function clearErrors(form) {
     form.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
   }
+
   // Logowanie
   const loginForm = document.getElementById("login-form");
   if (loginForm) {
@@ -89,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = "user_panel.html";
         }
       } else {
-        // Dodajemy specjalny komunikat jeśli login/hasło niepoprawne
         if (data.message && data.message.toLowerCase().includes("nieprawidłowe")) {
           errorBox.textContent = "Niepoprawny login/hasło";
           errorBox.style.color = "#ff5c5c";
@@ -100,8 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (data.message && data.message.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
         } else {
-          markError(email, data.message, errorBox);
-          markError(password, data.message, errorBox);
+          markError(email, data.message || "Wystąpił błąd podczas logowania", errorBox);
+          markError(password, data.message || "Wystąpił błąd podczas logowania", errorBox);
         }
       }
     });
@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (!/^[a-zA-Z0-9_\-\.]{3,32}$/.test(username.value.trim())) {
-        markError(username, "Nieprawidłowa nazwa użytkownika", errorBox);
+        markError(username, "Nieprawidłowa nazwa użytkownika (3-32 znaki, tylko litery, cyfry, _, -, .)", errorBox);
         return;
       }
       if (!email.value.trim()) {
@@ -173,8 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (data.message && data.message.toLowerCase().includes("nazwa")) {
           markError(username, data.message, errorBox);
         } else {
-          markError(email, data.message, errorBox);
-          markError(password, data.message, errorBox);
+          errorBox.textContent = data.message || "Wystąpił błąd podczas rejestracji";
         }
       }
     });
@@ -182,29 +181,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Panel użytkownika – pobierz subskrypcje i ochrona dostępu
   if (window.location.pathname.endsWith("user_panel.html")) {
+    fetch("auth.php?action=user_data")
+      .then(res => {
+        if (!res.ok) {
+          window.location.href = "login.html";
+          return null;
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (!data || !data.success) {
+          window.location.href = "login.html";
+          return;
+        }
+        // Załaduj subskrypcje tylko po potwierdzeniu że użytkownik jest zalogowany
+        loadSubscriptionsForMainPage();
+      })
+      .catch(() => {
+        window.location.href = "login.html";
+      });
+
+    // Wylogowywanie
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+      logoutBtn.onclick = function() {
+        fetch("auth.php?action=logout").then(() => window.location.href = "login.html");
+      };
+    }
+  }
+
+  function loadSubscriptionsForMainPage() {
     fetch("auth.php?action=subscriptions")
       .then(res => res.json())
       .then(data => {
         const list = document.getElementById("subscriptions-list");
+        if (!list) return;
+        
         if (!data.success) {
-          window.location.href = "login.html";
+          list.textContent = "Błąd ładowania subskrypcji.";
           return;
         }
-        if (data.subscriptions.length) {
+        if (data.subscriptions && data.subscriptions.length) {
           list.innerHTML = data.subscriptions.map(sub =>
             `<div class="subscription-card">
-              <b>Pakiet:</b> ${sub.plan}<br>
-              <b>Status:</b> ${sub.status}<br>
-              <b>Data:</b> ${sub.created_at}
+              <b>Pakiet:</b> ${sub.plan || 'N/A'}<br>
+              <b>Status:</b> ${sub.status || 'N/A'}<br>
+              <b>Data:</b> ${sub.created_at || 'N/A'}
             </div>`
           ).join("");
         } else {
           list.textContent = "Brak aktywnych subskrypcji.";
         }
+      })
+      .catch(() => {
+        const list = document.getElementById("subscriptions-list");
+        if (list) list.textContent = "Błąd ładowania subskrypcji.";
       });
-    // Wylogowywanie
-    document.getElementById("logout-btn").onclick = function() {
-      fetch("auth.php?action=logout").then(() => window.location.href = "login.html");
-    };
   }
 });
