@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function checkLoginStatus() {
     try {
-      const res = await fetch('../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
+      const res = await fetch('/../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
       const data = await res.json();
       isUserLoggedIn = !!data.success;
       renderUserMenu();
