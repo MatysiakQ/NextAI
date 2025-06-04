@@ -1,4 +1,4 @@
-// user_panel.js
+
 // Przełączanie sekcji
 const navBtns2 = {
   profile: document.getElementById('nav2-profile'),
@@ -24,9 +24,106 @@ Object.entries(navBtns2).forEach(([key, btn]) => {
       if (key === 'subscriptions') {
         loadSubscriptions();
       }
+      // Jeśli przechodzimy do profilu, załaduj aktywny pakiet
+      if (key === 'profile') {
+        loadActivePackageInfo();
+      }
     });
   }
 });
+
+// Funkcja do ładowania informacji o aktywnym pakiecie
+function loadActivePackageInfo() {
+  const activePackageDiv = document.getElementById('active-package-info');
+  if (!activePackageDiv) return;
+
+  activePackageDiv.innerHTML = '<p>Ładowanie informacji o pakiecie...</p>';
+
+  fetch('auth.php?action=check_active_subscription')
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (data.success && data.subscription) {
+        const sub = data.subscription;
+        const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
+        const endDate = sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pl-PL') : 'N/A';
+        
+        activePackageDiv.innerHTML = `
+          <div class="active-package-card">
+            <h4><i class="fa-solid fa-crown"></i> Aktywny pakiet</h4>
+            <div class="package-details">
+              <p><strong>Plan:</strong> ${sub.plan || 'Nieznany'}</p>
+              <p><strong>Status:</strong> ${statusText}</p>
+              <p><strong>Odnawia się:</strong> ${endDate}</p>
+              ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
+            </div>
+            ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ? 
+              `<button class="cancel-package-btn" data-subscription-id="${sub.stripe_subscription_id}">
+                <i class="fa-solid fa-times"></i> Anuluj subskrypcję
+              </button>` : ''}
+          </div>
+        `;
+
+        // Dodaj event listener do przycisku anulowania w sekcji profilu
+        const cancelBtn = activePackageDiv.querySelector('.cancel-package-btn');
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', (event) => {
+            const subId = event.target.closest('.cancel-package-btn').dataset.subscriptionId;
+            showCancelModal(subId);
+          });
+        }
+      } else {
+        activePackageDiv.innerHTML = `
+          <div class="no-package-card">
+            <h4><i class="fa-solid fa-info-circle"></i> Brak aktywnego pakietu</h4>
+            <p>Nie masz obecnie aktywnej subskrypcji.</p>
+            <a href="/" class="subscribe-link">Wybierz pakiet</a>
+          </div>
+        `;
+      }
+    })
+    .catch(error => {
+      console.error('Błąd ładowania informacji o pakiecie:', error);
+      activePackageDiv.innerHTML = `
+        <div class="error-package-card">
+          <p>Wystąpił błąd podczas ładowania informacji o pakiecie.</p>
+        </div>
+      `;
+    });
+}
+
+// Funkcja do tłumaczenia statusów na polski
+function getStatusText(status, cancelAtPeriodEnd) {
+  if (cancelAtPeriodEnd) {
+    return 'W trakcie anulowania';
+  }
+  
+  switch (status) {
+    case 'active':
+      return 'Aktywna';
+    case 'trialing':
+      return 'W trakcie próby';
+    case 'pending':
+      return 'W toku';
+    case 'canceled':
+    case 'cancelled':
+      return 'Anulowana';
+    case 'incomplete':
+      return 'Niepełna';
+    case 'incomplete_expired':
+      return 'Wygasła';
+    case 'past_due':
+      return 'Zaległa';
+    case 'unpaid':
+      return 'Nieopłacona';
+    default:
+      return status || 'Nieznany';
+  }
+}
 
 // Załaduj dane użytkownika z backendu
 function loadUserData() {
@@ -93,17 +190,26 @@ function loadSubscriptions() {
         }
 
         data.subscriptions.forEach(sub => {
-          const statusClass = sub.status === 'active' ? 'active' : (sub.status === 'canceled' ? 'cancelled' : 'inactive');
+          const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
+          const statusClass = getStatusClass(sub.status, sub.cancel_at_period_end);
           const currentPeriodEnd = sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pl-PL') : 'N/A';
           const createdAt = sub.created_at ? new Date(sub.created_at).toLocaleDateString('pl-PL') : 'N/A';
 
           list.innerHTML += `
             <div class="subscription2-card">
-              <b>Pakiet:</b> ${sub.plan || 'N/A'}<br>
-              <b>Status:</b> <span class="subscription2-status ${statusClass}">${sub.status === 'active' ? 'Aktywna' : (sub.status === 'canceled' ? 'Anulowana' : sub.status)}</span><br>
-              <b>Data utworzenia:</b> ${createdAt}<br>
-              <b>Wygasa:</b> ${currentPeriodEnd}<br>
-              ${sub.status === 'active' && sub.stripe_subscription_id ? `<button class="subscription2-cancel-btn" data-subscription-id="${sub.stripe_subscription_id}">Anuluj subskrypcję</button>` : ''}
+              <div class="subscription-header">
+                <h4>Pakiet: ${sub.plan || 'N/A'}</h4>
+                <span class="subscription2-status ${statusClass}">${statusText}</span>
+              </div>
+              <div class="subscription-details">
+                <p><strong>Data utworzenia:</strong> ${createdAt}</p>
+                <p><strong>Wygasa:</strong> ${currentPeriodEnd}</p>
+                ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
+              </div>
+              ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ? 
+                `<button class="subscription2-cancel-btn" data-subscription-id="${sub.stripe_subscription_id}">
+                  <i class="fa-solid fa-times"></i> Anuluj subskrypcję
+                </button>` : ''}
             </div>
           `;
         });
@@ -111,10 +217,8 @@ function loadSubscriptions() {
         // Dodaj event listenery do przycisków anulowania subskrypcji
         document.querySelectorAll('.subscription2-cancel-btn').forEach(button => {
           button.addEventListener('click', (event) => {
-            const subId = event.target.dataset.subscriptionId;
-            if (confirm('Czy na pewno chcesz anulować tę subskrypcję?')) {
-              cancelSubscription(subId);
-            }
+            const subId = event.target.closest('.subscription2-cancel-btn').dataset.subscriptionId;
+            showCancelModal(subId);
           });
         });
 
@@ -128,12 +232,62 @@ function loadSubscriptions() {
     });
 }
 
+// Funkcja do określania klasy CSS dla statusu
+function getStatusClass(status, cancelAtPeriodEnd) {
+  if (cancelAtPeriodEnd) {
+    return 'pending-cancel';
+  }
+  
+  switch (status) {
+    case 'active':
+      return 'active';
+    case 'trialing':
+      return 'trialing';
+    case 'pending':
+      return 'trialing';
+    case 'canceled':
+    case 'cancelled':
+      return 'cancelled';
+    default:
+      return 'inactive';
+  }
+}
+
+// Funkcja do pokazania modala anulowania
+function showCancelModal(subscriptionId) {
+  const modal = document.getElementById('cancel-subscription-modal');
+  if (!modal) {
+    console.error('Modal anulowania subskrypcji nie został znaleziony');
+    return;
+  }
+  
+  // Przechowaj ID subskrypcji w modalu
+  modal.dataset.subscriptionId = subscriptionId;
+  modal.style.display = 'flex';
+  
+  // Zablokuj przewijanie tła
+  document.body.style.overflow = 'hidden';
+}
+
+// Funkcja do ukrycia modala anulowania
+function hideCancelModal() {
+  const modal = document.getElementById('cancel-subscription-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    // Przywróć przewijanie tła
+    document.body.style.overflow = 'auto';
+  }
+}
+
 // Funkcja do anulowania subskrypcji
 function cancelSubscription(subscriptionId) {
     if (!subscriptionId) {
         alert('Błąd: Brak ID subskrypcji');
         return;
     }
+
+    // Ukryj modal
+    hideCancelModal();
 
     fetch('auth.php', {
         method: 'POST',
@@ -151,7 +305,9 @@ function cancelSubscription(subscriptionId) {
     .then(data => {
         if (data.success) {
             alert('Anulowanie subskrypcji zostało zainicjowane.');
-            loadSubscriptions(); // Odśwież listę subskrypcji po anulowaniu
+            // Odśwież listę subskrypcji i informacje o pakiecie
+            loadSubscriptions();
+            loadActivePackageInfo();
         } else {
             alert('Błąd podczas anulowania subskrypcji: ' + (data.message || 'Nieznany błąd'));
         }
@@ -164,7 +320,6 @@ function cancelSubscription(subscriptionId) {
 
 // Funkcja do zmiany hasła
 function changePassword(oldPassword, newPassword, confirmPassword) {
-    // Walidacja po stronie klienta
     if (!oldPassword || !newPassword || !confirmPassword) {
         alert("Wszystkie pola są wymagane.");
         return;
@@ -181,7 +336,6 @@ function changePassword(oldPassword, newPassword, confirmPassword) {
         return;
     }
 
-    // Wyślij żądanie do backendu
     fetch('auth.php', {
         method: 'POST',
         headers: {
@@ -203,11 +357,9 @@ function changePassword(oldPassword, newPassword, confirmPassword) {
     .then(data => {
         if (data.success) {
             alert("Hasło zostało pomyślnie zmienione!");
-            // Wyczyść formularz
             document.getElementById('profile2-old-password').value = "";
             document.getElementById('profile2-password').value = "";
             document.getElementById('profile2-password2').value = "";
-            // Ukryj formularz zmiany hasła
             const changePasswordForm = document.getElementById('change-password-form');
             const changePasswordBtn = document.getElementById('change-password-btn');
             if (changePasswordForm) changePasswordForm.style.display = "none";
@@ -238,6 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = "login.html";
             } else {
                 loadUserData();
+                loadActivePackageInfo(); // Załaduj informacje o aktywnym pakiecie przy starcie
             }
         })
         .catch(() => window.location.href = "login.html");
@@ -295,4 +448,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         };
     }
+
+    // Obsługa modala anulowania subskrypcji
+    const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+    const keepSubscriptionBtn = document.getElementById('keep-subscription-btn');
+    const modal = document.getElementById('cancel-subscription-modal');
+
+    if (confirmCancelBtn) {
+        confirmCancelBtn.addEventListener('click', () => {
+            const subscriptionId = modal?.dataset.subscriptionId;
+            if (subscriptionId) {
+                cancelSubscription(subscriptionId);
+            }
+        });
+    }
+
+    if (keepSubscriptionBtn) {
+        keepSubscriptionBtn.addEventListener('click', hideCancelModal);
+    }
+
+    // Zamykanie modala po kliknięciu na tło
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideCancelModal();
+            }
+        });
+    }
+
+    // Zamykanie modala klawiszem Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideCancelModal();
+        }
+    });
 });

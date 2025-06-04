@@ -11,14 +11,13 @@ $cookieLifetime = 30 * 24 * 60 * 60; // 30 dni
 session_set_cookie_params([
     'lifetime' => $cookieLifetime,
     'path' => '/',
-    'domain' => '', // Zostaw puste dla automatycznego wykrycia
+    'domain' => '',
     'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
 session_start();
 
-// Regeneruj ID sesji dla bezpieczeństwa (tylko raz na sesję)
 if (!isset($_SESSION['session_regenerated'])) {
     session_regenerate_id(true);
     $_SESSION['session_regenerated'] = true;
@@ -26,30 +25,24 @@ if (!isset($_SESSION['session_regenerated'])) {
 
 header('Content-Type: application/json; charset=utf-8');
 
-// --- Włącz autoloadery dla Stripe, Dotenv i PHPMailer ---
 require __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use Stripe\Stripe;
 use Stripe\Exception\ApiErrorException;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
-// Załaduj zmienne środowiskowe
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
-// Ustaw klucz Stripe
 if (!empty($_ENV['STRIPE_SECRET_KEY'])) {
     Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
 }
 
-// Konfiguracja bazy danych
 $db_host = $_ENV['DB_HOST'];
 $db_name = $_ENV['DB_NAME'];
 $db_user = $_ENV['DB_USER'];
 $db_pass = $_ENV['DB_PASS'];
-$db_port = $_ENV['DB_PORT'] ?? '3306'; // Domyślny port MySQL to 3306
+$db_port = $_ENV['DB_PORT'] ?? '3306';
 
 if (!$db_host || !$db_name || !$db_user) {
     http_response_code(500);
@@ -75,7 +68,6 @@ try {
     exit;
 }
 
-// Globalny handler wyjątków
 set_exception_handler(function($e) use ($pdoErrorLogFile) {
     error_log("UNCAUGHT ERROR: " . $e->getMessage() . " on line " . $e->getLine() . " in " . $e->getFile(), 3, $pdoErrorLogFile);
     http_response_code(500);
@@ -83,10 +75,8 @@ set_exception_handler(function($e) use ($pdoErrorLogFile) {
     exit();
 });
 
-// Pobierz akcję z GET lub POST
 $action = $_GET['action'] ?? $_POST['action'] ?? null;
 
-// Dla POST requestów, odczytaj dane z body, jeśli to JSON
 $input = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
     $inputRaw = file_get_contents('php://input');
@@ -104,6 +94,7 @@ if (!$action) {
 
 switch ($action) {
     case 'register':
+        // ... keep existing code (register case implementation)
         $username = trim($_POST['username'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -141,7 +132,6 @@ switch ($action) {
             $_SESSION['username'] = $username;
             $_SESSION['login_time'] = time();
             
-            // Ustaw dodatkowe cookie jako backup
             setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
                      isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
             
@@ -152,6 +142,7 @@ switch ($action) {
         break;
 
     case 'login':
+        // ... keep existing code (login case implementation)
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -171,7 +162,6 @@ switch ($action) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['login_time'] = time();
             
-            // Ustaw dodatkowe cookie jako backup
             setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
                      isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
             
@@ -186,7 +176,6 @@ switch ($action) {
         session_unset();
         session_destroy();
         
-        // Usuń backup cookie
         setcookie('nextai_session', '', time() - 3600, '/', '', 
                  isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
         
@@ -194,9 +183,7 @@ switch ($action) {
         break;
 
     case 'verify':
-        // Nowa akcja do weryfikacji statusu logowania
         if (isset($_SESSION['user_email']) && isset($_SESSION['login_time'])) {
-            // Sprawdź czy sesja nie jest zbyt stara (opcjonalne)
             if (time() - $_SESSION['login_time'] < $cookieLifetime) {
                 echo json_encode(['success' => true, 'logged_in' => true]);
             } else {
@@ -209,8 +196,8 @@ switch ($action) {
         }
         break;
 
-    // ... keep existing code (all other cases remain the same)
     case 'request_password_reset':
+        // ... keep existing code (password reset cases)
         $email = trim($_POST['email'] ?? '');
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             echo json_encode(['success' => false, 'message' => 'Podaj poprawny adres email.']);
@@ -232,7 +219,6 @@ switch ($action) {
         $stmt = $pdo->prepare("UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?");
         $stmt->execute([$resetCode, $expires, $user['id']]);
 
-        // Email sending logic here (if configured)
         echo json_encode(['success' => true, 'message' => 'Jeśli adres email istnieje w naszej bazie, link do resetowania hasła został wysłany.']);
         break;
 
@@ -354,7 +340,6 @@ switch ($action) {
 
         $userEmail = $_SESSION['user_email'];
 
-        // Sprawdź czy tabela subscriptions istnieje, jeśli nie - zwróć pustą listę
         try {
             $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
             $stmt->execute();
@@ -365,7 +350,7 @@ switch ($action) {
                 exit;
             }
 
-            $stmt = $pdo->prepare("SELECT plan, status, created_at, current_period_end, stripe_subscription_id FROM subscriptions WHERE email = ? ORDER BY created_at DESC");
+            $stmt = $pdo->prepare("SELECT plan, status, created_at, current_period_end, stripe_subscription_id, cancel_at_period_end FROM subscriptions WHERE email = ? ORDER BY created_at DESC");
             $stmt->execute([$userEmail]);
             $subscriptions = $stmt->fetchAll();
 
@@ -373,6 +358,75 @@ switch ($action) {
         } catch (PDOException $e) {
             error_log("Subscriptions query error: " . $e->getMessage(), 3, $pdoErrorLogFile);
             echo json_encode(['success' => true, 'subscriptions' => []]);
+        }
+        break;
+
+    case 'check_active_subscription':
+        if (!isset($_SESSION['user_email'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Nieautoryzowany dostęp.']);
+            exit;
+        }
+
+        $userEmail = $_SESSION['user_email'];
+
+        try {
+            $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
+            $stmt->execute();
+            $tableExists = $stmt->fetch();
+            
+            if (!$tableExists) {
+                echo json_encode(['success' => true, 'subscription' => null]);
+                exit;
+            }
+
+            $stmt = $pdo->prepare("
+                SELECT plan, status, created_at, current_period_end, stripe_subscription_id, cancel_at_period_end 
+                FROM subscriptions 
+                WHERE email = ? AND (status = 'active' OR status = 'trialing') 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $stmt->execute([$userEmail]);
+            $subscription = $stmt->fetch();
+
+            if ($subscription) {
+                if (!empty($_ENV['STRIPE_SECRET_KEY']) && $subscription['stripe_subscription_id']) {
+                    try {
+                        $stripeSubscription = \Stripe\Subscription::retrieve($subscription['stripe_subscription_id']);
+                        
+                        if ($stripeSubscription->status !== $subscription['status'] || 
+                            $stripeSubscription->cancel_at_period_end != $subscription['cancel_at_period_end']) {
+                            
+                            $stmt = $pdo->prepare("
+                                UPDATE subscriptions 
+                                SET status = ?, cancel_at_period_end = ?, current_period_end = ?, updated_at = NOW() 
+                                WHERE stripe_subscription_id = ?
+                            ");
+                            $stmt->execute([
+                                $stripeSubscription->status,
+                                $stripeSubscription->cancel_at_period_end ? 1 : 0,
+                                date('Y-m-d H:i:s', $stripeSubscription->current_period_end),
+                                $subscription['stripe_subscription_id']
+                            ]);
+                            
+                            $subscription['status'] = $stripeSubscription->status;
+                            $subscription['cancel_at_period_end'] = $stripeSubscription->cancel_at_period_end;
+                            $subscription['current_period_end'] = date('Y-m-d H:i:s', $stripeSubscription->current_period_end);
+                        }
+                    } catch (Exception $e) {
+                        error_log("Stripe API Error in check_active_subscription: " . $e->getMessage(), 3, $pdoErrorLogFile);
+                    }
+                }
+                
+                echo json_encode(['success' => true, 'subscription' => $subscription]);
+            } else {
+                echo json_encode(['success' => true, 'subscription' => null]);
+            }
+            
+        } catch (PDOException $e) {
+            error_log("Database error in check_active_subscription: " . $e->getMessage(), 3, $pdoErrorLogFile);
+            echo json_encode(['success' => false, 'message' => 'Błąd bazy danych']);
         }
         break;
 
@@ -398,28 +452,33 @@ switch ($action) {
         }
 
         try {
+            // Pobierz subskrypcję ze Stripe
             $stripeSubscription = \Stripe\Subscription::retrieve($subscriptionId);
             $stripeCustomer = \Stripe\Customer::retrieve($stripeSubscription->customer);
             
+            // Sprawdź czy użytkownik ma prawo anulować tę subskrypcję
             if ($stripeCustomer->email !== $_SESSION['user_email']) {
                 http_response_code(403);
                 echo json_encode(['success' => false, 'message' => 'Nie masz uprawnień do anulowania tej subskrypcji.']);
                 exit;
             }
 
-            $stripeSubscription->cancel();
+            // Anuluj subskrypcję na końcu okresu rozliczeniowego (nie natychmiast)
+            $stripeSubscription = \Stripe\Subscription::update($subscriptionId, [
+                'cancel_at_period_end' => true
+            ]);
 
-            // Sprawdź czy tabela subscriptions istnieje przed aktualizacją
+            // Zaktualizuj status w bazie danych
             $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
             $stmt->execute();
             $tableExists = $stmt->fetch();
             
             if ($tableExists) {
-                $stmt = $pdo->prepare("UPDATE subscriptions SET status = 'canceled' WHERE stripe_subscription_id = ? AND email = ?");
+                $stmt = $pdo->prepare("UPDATE subscriptions SET cancel_at_period_end = 1, updated_at = NOW() WHERE stripe_subscription_id = ? AND email = ?");
                 $stmt->execute([$subscriptionId, $_SESSION['user_email']]);
             }
 
-            echo json_encode(['success' => true, 'message' => 'Anulowanie subskrypcji zostało pomyślnie zainicjowane.']);
+            echo json_encode(['success' => true, 'message' => 'Subskrypcja zostanie anulowana na koniec okresu rozliczeniowego.']);
 
         } catch (ApiErrorException $e) {
             http_response_code(500);

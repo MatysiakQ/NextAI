@@ -1,6 +1,5 @@
+/* subskrypcja.css – poprawiona i zoptymalizowana wersja formularza */
 @import url('../main/style.css');
-
-/* Unikalne dla subskrypcja.html */
 
 :root {
   --accent-premium: #8A2BE2;
@@ -12,17 +11,151 @@ body {
   background: var(--background-dark);
   color: var(--text-light);
   min-height: 100vh;
-  /* Usuń padding jeśli niepotrzebny, bo main/style.css już ustawia */
+  padding: 0;
+  margin: 0;
 }
 
 .packages {
-  max-width: 840px;
-  padding: 40px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 880px;
+  padding: 80px 40px;
   background: #111;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+  border: 1px solid #0ff2;
+  margin: 100px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: var(--accent-default);
+  text-align: center;
+}
+
+/* Formularz */
+#subscription-form {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+label {
+  font-weight: bold;
+  color: #b8f6f6;
+  margin-bottom: 6px;
+  display: block;
+}
+
+input[type="email"],
+select {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--accent-default);
+  border-radius: 6px;
+  background: #111;
+  color: #0ff;
+  font-size: 1rem;
+  transition: border 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0 4px #0ff3;
+  box-sizing: border-box;
+}
+
+input[type="email"]:focus,
+select:focus {
+  outline: none;
+  border-color: #00e6e6;
+  box-shadow: 0 0 8px #00e6e6;
+}
+
+#plan {
+  background: linear-gradient(90deg, #0ff, #8A2BE2, #ff5c5c);
+  color: #fff;
   border: 2px solid var(--accent-default);
+  font-weight: bold;
+  font-size: 1.1rem;
+  appearance: none;
+  background-size: 200%;
+  animation: gradient-move 3s infinite;
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0%; }
+  100% { background-position: 100%; }
+}
+
+#plan option {
+  background: #111;
+  color: #fff;
+  font-weight: bold;
+}
+
+.button-wrapper-flex {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+  align-items: stretch;
+}
+
+.subscribe-button,
+#billing-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  height: 48px;
+  line-height: 1;
+}
+
+.subscribe-button {
+  background: linear-gradient(135deg, #0ff, #00e6e6);
+  color: #000;
+  box-shadow: 0 0 10px #0ff6;
+}
+
+#billing-switch {
+  background: var(--accent-default);
+  color: #000;
+  margin-top: 14px;
+}
+
+.subscribe-button:hover,
+#billing-switch:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px #0ff;
+}
+
+#card-errors {
+  display: none;
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: rgba(255, 92, 92, 0.1);
+  border-left: 4px solid #ff5c5c;
+  border-radius: 8px;
+  color: #ff5c5c;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+#card-errors.active {
+  display: block;
 }
 
 .form-success {
@@ -34,198 +167,20 @@ body {
   animation: fadeIn 0.5s ease-in-out forwards;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  opacity: 0;
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 0.3s;
-}
-
-.button-wrapper-flex {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  align-items: center;
-}
-.button-wrapper-flex .subscribe-button,
-.button-wrapper-flex #billing-switch {
-  margin-top: 0;
-}
-
-.form-left {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.form-right {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.invoice-fields {
-  display: grid;
-  gap: 12px;
-  transition: all 0.3s ease;
-  opacity: 1;
-}
-.invoice-fields.hidden {
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.credit-card-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-.credit-card {
-  background: linear-gradient(135deg, #1f1f1f, #3a3a3a);
-  border-radius: 16px;
-  padding: 24px;
-  width: 100%;
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: relative;
-  border: 2px solid var(--accent-default);
-  animation: glitch-border 1.5s infinite;
-  overflow: hidden;
-}
-@keyframes glitch-border {
-  0%, 100% { box-shadow: 0 0 0 transparent; }
-  20% { box-shadow: 0 0 4px #0ff; }
-  40% { box-shadow: -2px 0 5px #8A2BE2; }
-  60% { box-shadow: 2px 0 5px #0ff; }
-  80% { box-shadow: 0 0 8px #8A2BE2; }
-}
-
-.card-top input,
-.card-middle .stripe-input,
-.card-bottom .stripe-input {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--accent-default);
-  color: #fff;
-  font-size: 1rem;
-  padding: 6px 0;
-  font-family: 'Source Code Pro', monospace;
-  width: 100%;
-}
-
-.mastercard-logo {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  width: 50px;
-  height: auto;
-  opacity: 0.85;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.15));
-}
-.card-bottom {
-  display: flex;
-  gap: 20px;
-}
-
-#plan {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(90deg, #0ff, #8A2BE2, #ff5c5c);
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.1rem;
-  border: 2px solid var(--accent-default);
-  border-radius: 6px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-size: 200%;
-  animation: gradient-move 3s infinite;
-}
-#plan option {
-  background: #111;
-  color: #fff;
-  font-weight: bold;
-}
-@keyframes gradient-move {
-  0% { background-position: 0%; }
-  100% { background-position: 100%; }
-}
-
-#billing-switch {
-  padding: 10px 24px;
-  background: var(--accent-default);
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.05rem;
-  box-shadow: 0 2px 16px #0ff4, 0 1.5px 8px #000a;
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
-  outline: none;
-}
-#billing-switch:hover, #billing-switch:focus {
-  background: #00e6e6;
-  color: #111;
-  box-shadow: 0 0 24px #0ff8, 0 1.5px 8px #000a;
-  transform: scale(1.04);
-}
-
-#card-errors {
-  color: #ff5c5c;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .packages {
-    max-width: 99vw;
-    padding: 18px 2vw;
+    margin: 40px 12px;
+    padding: 30px 16px;
   }
-  .form-left, .form-right {
-    gap: 10px;
+
+  .button-wrapper-flex {
+    flex-direction: column;
+    align-items: stretch;
   }
-  .credit-card {
+
+  .subscribe-button,
+  #billing-switch {
+    width: 100%;
     padding: 12px;
-    border-radius: 10px;
-    font-size: 0.97em;
   }
-}
-
-@media (max-width: 600px) {
-  .packages {
-    padding: 8px 1vw;
-    max-width: 100vw;
-  }
-  .section-title {
-    font-size: 1.1rem;
-    margin-bottom: 16px;
-  }
-  .credit-card {
-    padding: 6px;
-    border-radius: 7px;
-    font-size: 0.95em;
-  }
-  .mastercard-logo {
-    width: 32px;
-    top: 4px;
-    right: 6px;
-  }
-  .button-wrapper {
-    margin-top: 4px;
-  }
-  .invoice-fields {
-    gap: 6px;
-  }
-  .background-grid {
-    background-size: 14px 14px;
-  }
-}
+} 

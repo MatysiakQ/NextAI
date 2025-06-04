@@ -1,12 +1,11 @@
+
 <?php
-// webhook.php (poprawiona wersja)
 require __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
-// Logowanie do pliku
 $logFile = __DIR__ . '/logs/stripe_webhook.log';
 if (!file_exists(dirname($logFile))) {
     mkdir(dirname($logFile), 0755, true);
@@ -70,28 +69,34 @@ try {
         $stmt->execute([$email]);
         $userId = $stmt->fetchColumn();
 
-        // Wstaw lub zaktualizuj subskrypcję
+        // Pobierz dane subskrypcji ze Stripe dla pełnych informacji
+        $stripeSubscription = \Stripe\Subscription::retrieve($subscriptionId);
+        $currentPeriodStart = date('Y-m-d H:i:s', $stripeSubscription->current_period_start);
+        $currentPeriodEnd = date('Y-m-d H:i:s', $stripeSubscription->current_period_end);
+
+        // Wstaw lub zaktualizuj subskrypcję z pełnymi danymi
         $stmt = $pdo->prepare("
-            INSERT INTO subscriptions (email, user_id, stripe_customer_id, stripe_subscription_id, plan, status, created_at) 
-            VALUES (?, ?, ?, ?, ?, 'active', NOW())
+            INSERT INTO subscriptions (
+                email, user_id, stripe_customer_id, stripe_subscription_id, 
+                plan, status, current_period_start, current_period_end, 
+                cancel_at_period_end, created_at
+            ) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ON DUPLICATE KEY UPDATE 
-                status = 'active',
+                status = VALUES(status),
                 plan = VALUES(plan),
+                current_period_start = VALUES(current_period_start),
+                current_period_end = VALUES(current_period_end),
+                cancel_at_period_end = VALUES(cancel_at_period_end),
                 updated_at = NOW()
         ");
-        $stmt->execute([$email, $userId, $customerId, $subscriptionId, $plan]);
+        $stmt->execute([
+            $email, $userId, $customerId, $subscriptionId, $plan, 
+            $stripeSubscription->status, $currentPeriodStart, $currentPeriodEnd,
+            $stripeSubscription->cancel_at_period_end ? 1 : 0
+        ]);
 
-        // Zapisz sesję checkout
-        $stmt = $pdo->prepare("
-            INSERT INTO checkout_sessions (stripe_session_id, email, user_id, plan, status, completed_at) 
-            VALUES (?, ?, ?, ?, 'complete', NOW())
-            ON DUPLICATE KEY UPDATE 
-                status = 'complete',
-                completed_at = NOW()
-        ");
-        $stmt->execute([$data->id, $email, $userId, $plan]);
-
-        error_log("[WEBHOOK] Subscription created: $subscriptionId for $email", 3, $logFile);
+        error_log("[WEBHOOK] Subscription created/updated: $subscriptionId for $email with full details", 3, $logFile);
     }
 
     if ($type === 'customer.subscription.updated') {
@@ -99,15 +104,20 @@ try {
         $status = $data->status;
         $currentStart = date('Y-m-d H:i:s', $data->current_period_start);
         $currentEnd = date('Y-m-d H:i:s', $data->current_period_end);
+        $cancelAtPeriodEnd = $data->cancel_at_period_end ? 1 : 0;
 
         $stmt = $pdo->prepare("
             UPDATE subscriptions 
-            SET status = ?, current_period_start = ?, current_period_end = ?, updated_at = NOW() 
+            SET status = ?, 
+                current_period_start = ?, 
+                current_period_end = ?, 
+                cancel_at_period_end = ?,
+                updated_at = NOW() 
             WHERE stripe_subscription_id = ?
         ");
-        $stmt->execute([$status, $currentStart, $currentEnd, $subId]);
+        $stmt->execute([$status, $currentStart, $currentEnd, $cancelAtPeriodEnd, $subId]);
 
-        error_log("[WEBHOOK] Subscription updated: $subId to status $status", 3, $logFile);
+        error_log("[WEBHOOK] Subscription updated: $subId to status $status, cancel_at_period_end: $cancelAtPeriodEnd", 3, $logFile);
     }
 
     if ($type === 'customer.subscription.deleted') {
@@ -129,7 +139,6 @@ try {
 } catch (Exception $e) {
     error_log("[STRIPE WEBHOOK ERROR] " . $e->getMessage() . " - Event: {$event->id}", 3, $logFile);
     
-    // Zapisz błąd w bazie
     if (isset($pdo)) {
         try {
             $stmt = $pdo->prepare("UPDATE stripe_events SET error_message = ? WHERE stripe_event_id = ?");
