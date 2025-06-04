@@ -1,4 +1,3 @@
-// subskrypcja.js
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("subscription-form");
   const billingSwitch = document.getElementById("billing-switch");
@@ -43,7 +42,9 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // Reset błędów
     errorBox.textContent = "";
+    errorBox.classList.remove("active");
     loader.classList.remove("hidden");
     successBox.classList.add("hidden");
 
@@ -53,6 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       errorBox.textContent = "Podaj poprawny adres e-mail.";
+      errorBox.classList.add("active");
       loader.classList.add("hidden");
       return;
     }
@@ -71,10 +73,12 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href = data.url;
       } else {
         errorBox.textContent = data.message || "Wystąpił błąd podczas przekierowania.";
+        errorBox.classList.add("active");
       }
     } catch (err) {
       console.error(err);
       errorBox.textContent = "Błąd połączenia z serwerem.";
+      errorBox.classList.add("active");
     } finally {
       loader.classList.add("hidden");
     }
