@@ -682,6 +682,13 @@ section {
   font-weight: bold;
   flex-wrap: wrap;
 }
+.currency {
+  position: relative;
+  font-size: 0.6rem;
+  vertical-align: sub;
+  left: 4px;
+  top: 6.2px;
+}
 .package-card .price .currency,
 .yearly-block .currency {
   font-size: 1rem;
