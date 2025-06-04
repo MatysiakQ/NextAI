@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="panel.css">
   <link rel="icon" href="account.nextai.png" type="image/x-icon" />
-
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body>
@@ -24,6 +24,7 @@
       <label for="register-password2">Powtórz hasło</label>
       <input type="password" id="register-password2" name="password2" autocomplete="new-password" required>
       <div class="button-wrapper">
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
         <button type="submit">Zarejestruj się</button>
       </div>
       <div id="register-error" style="color:#ff5c5c;margin-top:10px;"></div>

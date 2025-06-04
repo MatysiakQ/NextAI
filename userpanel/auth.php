@@ -27,6 +27,13 @@ header('Content-Type: application/json; charset=utf-8');
 
 require __DIR__ . '/../vendor/autoload.php';
 
+function verify_recaptcha($token) {
+    $secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"; // testowy sekret
+    $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$token}");
+    $result = json_decode($response, true);
+    return $result["success"] ?? false;
+}
+
 use Dotenv\Dotenv;
 use Stripe\Stripe;
 use Stripe\Exception\ApiErrorException;
@@ -97,6 +104,11 @@ switch ($action) {
         // ... keep existing code (register case implementation)
         $username = trim($_POST['username'] ?? '');
         $email = trim($_POST['email'] ?? '');
+        if (!verify_recaptcha($_POST['g-recaptcha-response'] ?? '')) {
+    echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
+    exit;
+}
+
         $password = $_POST['password'] ?? '';
         $password2 = $_POST['password2'] ?? '';
 
@@ -490,6 +502,63 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Błąd serwera podczas anulowania subskrypcji.']);
         }
         break;
+        case 'reset_password_code':
+    $email = trim($_POST['email'] ?? '');
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy email.']);
+        exit;
+    }
+    $code = strtoupper(bin2hex(random_bytes(3)));
+    $expires = date('Y-m-d H:i:s', time() + 600);
+    
+    $stmt = $pdo->prepare("UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE email = ?");
+    $stmt->execute([$code, $expires, $email]);
+
+    mail($email, "Kod resetu hasła - NextAI", "Twój kod resetu hasła to: $code", "From: no-reply@nextai.pl");
+    echo json_encode(['success' => true]);
+    break;
+
+case 'verify_reset_code':
+    $email = trim($_POST['email'] ?? '');
+    $code = trim($_POST['code'] ?? '');
+
+    $stmt = $pdo->prepare("SELECT reset_code, reset_code_expires FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user || $user['reset_code'] !== strtoupper($code) || strtotime($user['reset_code_expires']) < time()) {
+        echo json_encode(['success' => false, 'message' => 'Kod niepoprawny lub wygasły.']);
+        exit;
+    }
+    echo json_encode(['success' => true]);
+    break;
+
+case 'set_new_password_code':
+    $email = trim($_POST['email'] ?? '');
+    $code = trim($_POST['code'] ?? '');
+    $pass1 = $_POST['password'] ?? '';
+    $pass2 = $_POST['password2'] ?? '';
+
+    if ($pass1 !== $pass2 || !preg_match('/^(?=.*[A-Z])(?=.*\\d).{6,}$/', $pass1)) {
+        echo json_encode(['success' => false, 'message' => 'Hasła niepoprawne.']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("SELECT id, reset_code, reset_code_expires FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user || $user['reset_code'] !== strtoupper($code) || strtotime($user['reset_code_expires']) < time()) {
+        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy kod lub wygasł.']);
+        exit;
+    }
+
+    $hash = password_hash($pass1, PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("UPDATE users SET password = ?, reset_code = NULL, reset_code_expires = NULL WHERE email = ?");
+    $stmt->execute([$hash, $email]);
+
+    echo json_encode(['success' => true]);
+    break;
 
     default:
         http_response_code(400);

@@ -1,10 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Jeśli jesteśmy na stronie logowania lub rejestracji, sprawdzamy czy użytkownik jest zalogowany
   if (
     window.location.pathname.endsWith("login.html") ||
     window.location.pathname.endsWith("register.html")
   ) {
     fetch("auth.php?action=user_data")
-      .then(async res => {
+      .then(async (res) => {
         if (!res.ok) return { success: false };
         try {
           return await res.json();
@@ -12,12 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
           return { success: false };
         }
       })
-      .then(data => {
+      .then((data) => {
         if (data.success) window.location.href = "user_panel.html";
       });
   }
 
-  // Walidacja i efekty
+  // Funkcje pomocnicze do walidacji i wyświetlania błędów
   function markError(field, message, errorBox) {
     field.classList.add("field-error");
     if (errorBox) {
@@ -27,10 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function clearErrors(form) {
-    form.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
+    form.querySelectorAll(".field-error").forEach((el) => el.classList.remove("field-error"));
   }
 
-  // Logowanie
+  // --- LOGOWANIE ---
   const loginForm = document.getElementById("login-form");
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
@@ -45,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         markError(email, "Podaj login lub email", errorBox);
         return;
       }
-      // Pozwól na login lub email (nie wymagaj formatu email)
+      // Pozwól na login lub email (nie wymagaj formatu email, jeśli nie ma "@")
       if (email.value.includes("@")) {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
           markError(email, "Wprowadź poprawny adres e-mail.", errorBox);
@@ -57,12 +58,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // Sprawdzenie reCAPTCHA jeśli jest na stronie (opcjonalne)
+      const recaptcha = document.querySelector('.g-recaptcha-response')?.value;
+      if (document.querySelector('.g-recaptcha') && !recaptcha) {
+        errorBox.textContent = "Potwierdź, że nie jesteś robotem.";
+        errorBox.style.color = "#ff5c5c";
+        return;
+      }
+
       let data;
       try {
         const res = await fetch("auth.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}`
+          body: `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}${recaptcha ? `&g-recaptcha-response=${encodeURIComponent(recaptcha)}` : ""}`
         });
         if (!res.ok) {
           errorBox.textContent = "Błąd połączenia z serwerem.";
@@ -82,9 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (data.success) {
-        const redirect = localStorage.getItem('afterLoginRedirect');
+        const redirect = localStorage.getItem("afterLoginRedirect");
         if (redirect) {
-          localStorage.removeItem('afterLoginRedirect');
+          localStorage.removeItem("afterLoginRedirect");
           window.location.href = redirect;
         } else {
           window.location.href = "user_panel.html";
@@ -107,16 +116,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Rejestracja
+  // --- REJESTRACJA ---
   const registerForm = document.getElementById("register-form");
   if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors(registerForm);
-      const username = document.getElementById('register-username');
-      const email = document.getElementById('register-email');
-      const password = document.getElementById('register-password');
-      const password2 = document.getElementById('register-password2');
+      const username = document.getElementById("register-username");
+      const email = document.getElementById("register-email");
+      const password = document.getElementById("register-password");
+      const password2 = document.getElementById("register-password2");
       const errorBox = document.getElementById("register-error");
       errorBox.textContent = "";
 
@@ -125,7 +134,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (!/^[a-zA-Z0-9_\-\.]{3,32}$/.test(username.value.trim())) {
-        markError(username, "Nieprawidłowa nazwa użytkownika (3-32 znaki, tylko litery, cyfry, _, -, .)", errorBox);
+        markError(
+          username,
+          "Nieprawidłowa nazwa użytkownika (3-32 znaki, tylko litery, cyfry, _, -, .)",
+          errorBox
+        );
         return;
       }
       if (!email.value.trim()) {
@@ -141,11 +154,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (!/(?=.*[A-Z])(?=.*\d).{6,}/.test(password.value)) {
-        markError(password, "Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę.", errorBox);
+        markError(
+          password,
+          "Hasło musi mieć min. 6 znaków, 1 wielką literę i 1 cyfrę.",
+          errorBox
+        );
         return;
       }
       if (password.value !== password2.value) {
         markError(password2, "Hasła nie są takie same!", errorBox);
+        return;
+      }
+
+      // Sprawdzenie reCAPTCHA jeśli jest na stronie (opcjonalne)
+      const recaptcha = document.querySelector('.g-recaptcha-response')?.value;
+      if (document.querySelector('.g-recaptcha') && !recaptcha) {
+        errorBox.textContent = "Potwierdź, że nie jesteś robotem.";
+        errorBox.style.color = "#ff5c5c";
         return;
       }
 
@@ -154,9 +179,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch("auth.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `action=register&username=${encodeURIComponent(username.value.trim())}&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}`
+          body: `action=register&username=${encodeURIComponent(
+            username.value.trim()
+          )}&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(
+            password.value
+          )}&password2=${encodeURIComponent(password2.value)}${recaptcha ? `&g-recaptcha-response=${encodeURIComponent(recaptcha)}` : ""}`
         });
-        data = await res.json();
+        if (!res.ok) {
+          errorBox.textContent = "Błąd połączenia z serwerem.";
+          errorBox.style.color = "#ff5c5c";
+          return;
+        }
+        try {
+          data = await res.json();
+        } catch {
+          errorBox.textContent = "Błąd odpowiedzi serwera.";
+          errorBox.style.color = "#ff5c5c";
+          return;
+        }
       } catch {
         errorBox.textContent = "Błąd połączenia z serwerem.";
         errorBox.style.color = "#ff5c5c";
@@ -179,22 +219,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Panel użytkownika – pobierz subskrypcje i ochrona dostępu
+  // --- PANEL UŻYTKOWNIKA ---
   if (window.location.pathname.endsWith("user_panel.html")) {
     fetch("auth.php?action=user_data")
-      .then(res => {
+      .then((res) => {
         if (!res.ok) {
           window.location.href = "login.html";
           return null;
         }
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         if (!data || !data.success) {
           window.location.href = "login.html";
           return;
         }
-        // Załaduj subskrypcje tylko po potwierdzeniu że użytkownik jest zalogowany
+        // Załaduj subskrypcje po potwierdzeniu, że użytkownik jest zalogowany
         loadSubscriptionsForMainPage();
       })
       .catch(() => {
@@ -204,31 +244,34 @@ document.addEventListener("DOMContentLoaded", () => {
     // Wylogowywanie
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
-      logoutBtn.onclick = function() {
-        fetch("auth.php?action=logout").then(() => window.location.href = "login.html");
+      logoutBtn.onclick = function () {
+        fetch("auth.php?action=logout").then(() => (window.location.href = "login.html"));
       };
     }
   }
 
+  // Ładowanie subskrypcji w panelu użytkownika
   function loadSubscriptionsForMainPage() {
     fetch("auth.php?action=subscriptions")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         const list = document.getElementById("subscriptions-list");
         if (!list) return;
-        
+
         if (!data.success) {
           list.textContent = "Błąd ładowania subskrypcji.";
           return;
         }
         if (data.subscriptions && data.subscriptions.length) {
-          list.innerHTML = data.subscriptions.map(sub =>
-            `<div class="subscription-card">
-              <b>Pakiet:</b> ${sub.plan || 'N/A'}<br>
-              <b>Status:</b> ${sub.status || 'N/A'}<br>
-              <b>Data:</b> ${sub.created_at || 'N/A'}
+          list.innerHTML = data.subscriptions
+            .map(
+              (sub) => `<div class="subscription-card">
+              <b>Pakiet:</b> ${sub.plan || "N/A"}<br>
+              <b>Status:</b> ${sub.status || "N/A"}<br>
+              <b>Data:</b> ${sub.created_at || "N/A"}
             </div>`
-          ).join("");
+            )
+            .join("");
         } else {
           list.textContent = "Brak aktywnych subskrypcji.";
         }

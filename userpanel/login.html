@@ -7,6 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="panel.css">
   <link rel="icon" href="account.nextai.png" type="image/x-icon" />
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -18,14 +20,49 @@
       <input type="text" id="email" name="email" autocomplete="username" required>
       <label for="password">Hasło</label>
       <input type="password" id="password" name="password" autocomplete="current-password" required>
-      <div class="button-wrapper">
-        <button type="submit">Zaloguj się</button>
-      </div>
+<div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+
+<div class="button-wrapper">
+  <button type="submit">Zaloguj się</button>
+</div>
+<div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
+
+<div style="text-align:center;margin-top:20px;">
+  <div id="gSignInWrapper"></div>
+</div>
+
+<script>
+  window.onload = () => {
+    google.accounts.id.initialize({
+      client_id: "YOUR_TEST_CLIENT_ID.apps.googleusercontent.com",
+      callback: async (response) => {
+        const res = await fetch("auth.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `action=google_login&token=${encodeURIComponent(response.credential)}`
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = "user_panel.html";
+        } else {
+          alert(data.message || "Błąd logowania Google");
+        }
+      }
+    });
+    google.accounts.id.renderButton(document.getElementById("gSignInWrapper"), {
+      theme: "outline",
+      size: "large"
+    });
+  };
+</script>
+
+      
       <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
       <p style="text-align:center;margin-top:10px;">
         Nie masz konta? <a href="register.html">Zarejestruj się</a><br>
         <a href="reset_password_code.html" id="forgot-password-link" style="color:#0ff;">Zapomniałeś hasła?</a>
       </p>
+      
     </form>
   </section>
   <script src="auth.js"></script>
