@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -36,6 +37,12 @@
       <!-- Sekcja: Mój profil -->
       <section id="section2-profile" class="userpanel2-section active">
         <h2 class="section-title glitch" data-text="Mój profil">Mój profil</h2>
+        
+        <!-- Informacje o aktywnym pakiecie -->
+        <div id="active-package-info" class="active-package-section">
+          <p>Ładowanie informacji o pakiecie...</p>
+        </div>
+        
         <div class="profile2-avatar" id="profile2-avatar" title="Kliknij, aby zmienić avatar">
           <span id="avatar2-img"><i class="fa-solid fa-user"></i></span>
           <span class="profile2-avatar-edit">Zmień avatar</span>
@@ -83,53 +90,24 @@
       </section>
     </main>
   </div>
+
+  <!-- Modal anulowania subskrypcji -->
+  <div id="cancel-subscription-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Anulowanie subskrypcji</h3>
+      </div>
+      <div class="modal-body">
+        <p>Anulując subskrypcję akceptujesz nasze warunki rezygnacji z subskrypcji.</p>
+        <p>Czy na pewno chcesz kontynuować?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="confirm-cancel-btn" class="modal-btn cancel-btn">Chcę anulować</button>
+        <button id="keep-subscription-btn" class="modal-btn keep-btn">Zostaję przy subskrypcji</button>
+      </div>
+    </div>
+  </div>
+
   <script src="user_panel.js"></script>
-  <script>
-    // Obsługa zmiany hasła (przycisk "Zmień hasło" pokazuje formularz)
-    document.addEventListener('DOMContentLoaded', function () {
-      const changePasswordBtn = document.getElementById('change-password-btn');
-      const changePasswordForm = document.getElementById('change-password-form');
-      if (changePasswordBtn && changePasswordForm) {
-        changePasswordBtn.onclick = function () {
-          changePasswordForm.style.display = "flex";
-          changePasswordBtn.style.display = "none";
-        };
-        document.getElementById('cancel-password-btn').onclick = function () {
-          changePasswordForm.style.display = "none";
-          changePasswordBtn.style.display = "";
-          document.getElementById('profile2-old-password').value = "";
-          document.getElementById('profile2-password').value = "";
-          document.getElementById('profile2-password2').value = "";
-        };
-        document.getElementById('save-password-btn').onclick = function () {
-          const oldPass = document.getElementById('profile2-old-password').value;
-          const pass1 = document.getElementById('profile2-password').value;
-          const pass2 = document.getElementById('profile2-password2').value;
-          if (oldPass.length < 6) {
-            alert("Stare hasło musi mieć min. 6 znaków.");
-            return;
-          }
-          if (pass1.length < 6) {
-            alert("Nowe hasło musi mieć min. 6 znaków.");
-            return;
-          }
-          if (pass1 !== pass2) {
-            alert("Hasła nie są takie same!");
-            return;
-          }
-          // TODO: Wyślij na backend
-          changePasswordForm.style.display = "none";
-          changePasswordBtn.style.display = "";
-          document.getElementById('profile2-old-password').value = "";
-          document.getElementById('profile2-password').value = "";
-          document.getElementById('profile2-password2').value = "";
-          alert("Hasło zostało zmienione!");
-        };
-      }
-      document.getElementById("nav-mainpage-btn").onclick = function() {
-        window.location.href = "/";
-      };
-    });
-  </script>
 </body>
 </html>
