@@ -1,5 +1,7 @@
 {
     "require": {
-        "phpmailer/phpmailer": "^6.10"
+        "phpmailer/phpmailer": "^6.10",
+        "stripe/stripe-php": "^17.3",
+        "vlucas/phpdotenv": "^5.6"
     }
 }
