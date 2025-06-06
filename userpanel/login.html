@@ -20,7 +20,7 @@
       <input type="text" id="email" name="email" autocomplete="username" required>
       <label for="password">Hasło</label>
       <input type="password" id="password" name="password" autocomplete="current-password" required>
-<div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+<div class="g-recaptcha" data-sitekey="6LcLGFgrAAAAAGj4rbYnbm78B8K8rFUioIgTSPuG"></div>
 
 <div class="button-wrapper">
   <button type="submit">Zaloguj się</button>
@@ -28,13 +28,17 @@
 <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
 
 <div style="text-align:center;margin-top:20px;">
-  <div id="gSignInWrapper"></div>
-</div>
+<div id="gSignInWrapper"></div>
 
 <script>
-  window.onload = () => {
+  window.onload = async () => {
+    // Pobierz client_id z config.php
+    const response = await fetch("config.php");
+    const config = await response.json();
+
+    // Inicjalizacja Google Sign-In
     google.accounts.id.initialize({
-      client_id: "YOUR_TEST_CLIENT_ID.apps.googleusercontent.com",
+      client_id: config.GOOGLE_CLIENT_ID,
       callback: async (response) => {
         const res = await fetch("auth.php", {
           method: "POST",
@@ -49,13 +53,17 @@
         }
       }
     });
-    google.accounts.id.renderButton(document.getElementById("gSignInWrapper"), {
-      theme: "outline",
-      size: "large"
-    });
+
+    // Renderuj przycisk logowania
+    google.accounts.id.renderButton(
+      document.getElementById("gSignInWrapper"),
+      {
+        theme: "outline",
+        size: "large"
+      }
+    );
   };
 </script>
-
       
       <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
       <p style="text-align:center;margin-top:10px;">
