@@ -1,5 +1,5 @@
 /* subskrypcja.css – poprawiona i zoptymalizowana wersja formularza */
-@import url('../main/style.css');
+@import url('../main/main.css');
 
 :root {
   --accent-premium: #8A2BE2;
@@ -85,8 +85,13 @@ select:focus {
 }
 
 @keyframes gradient-move {
-  0% { background-position: 0%; }
-  100% { background-position: 100%; }
+  0% {
+    background-position: 0%;
+  }
+
+  100% {
+    background-position: 100%;
+  }
 }
 
 #plan option {
@@ -183,4 +188,4 @@ select:focus {
     width: 100%;
     padding: 12px;
   }
-} 
+}
