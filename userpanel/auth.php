@@ -1,6 +1,4 @@
-
 <?php
-// auth.php
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
@@ -101,7 +99,6 @@ if (!$action) {
 
 switch ($action) {
     case 'register':
-        // ... keep existing code (register case implementation)
         $username = trim($_POST['username'] ?? '');
         $email = trim($_POST['email'] ?? '');
         if (!verify_recaptcha($_POST['g-recaptcha-response'] ?? '')) {
@@ -154,7 +151,6 @@ switch ($action) {
         break;
 
     case 'login':
-        // ... keep existing code (login case implementation)
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -209,7 +205,6 @@ switch ($action) {
         break;
 
     case 'request_password_reset':
-        // ... keep existing code (password reset cases)
         $email = trim($_POST['email'] ?? '');
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             echo json_encode(['success' => false, 'message' => 'Podaj poprawny adres email.']);
