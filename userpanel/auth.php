@@ -573,6 +573,52 @@ case 'set_new_password_code':
     echo json_encode(['success' => true]);
     break;
 
+    case 'change_username':
+        if (!isset($_SESSION['user_email'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Nieautoryzowany dostęp.']);
+            exit;
+        }
+        $username = trim($_POST['username'] ?? '');
+        if (!preg_match('/^[a-zA-Z0-9_\-\.]{3,32}$/', $username)) {
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowa nazwa użytkownika (3-32 znaki, tylko litery, cyfry, _, -, .)']);
+            exit;
+        }
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? AND email != ?");
+        $stmt->execute([$username, $_SESSION['user_email']]);
+        if ($stmt->fetchColumn() > 0) {
+            echo json_encode(['success' => false, 'message' => 'Taka nazwa użytkownika już istnieje.']);
+            exit;
+        }
+        $stmt = $pdo->prepare("UPDATE users SET username = ?, updated_at = NOW() WHERE email = ?");
+        $stmt->execute([$username, $_SESSION['user_email']]);
+        $_SESSION['username'] = $username;
+        echo json_encode(['success' => true]);
+        exit;
+
+    case 'change_email':
+        if (!isset($_SESSION['user_email'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Nieautoryzowany dostęp.']);
+            exit;
+        }
+        $email = trim($_POST['email'] ?? '');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowy adres e-mail.']);
+            exit;
+        }
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ? AND email != ?");
+        $stmt->execute([$email, $_SESSION['user_email']]);
+        if ($stmt->fetchColumn() > 0) {
+            echo json_encode(['success' => false, 'message' => 'Ten email jest już zajęty.']);
+            exit;
+        }
+        $stmt = $pdo->prepare("UPDATE users SET email = ?, updated_at = NOW() WHERE email = ?");
+        $stmt->execute([$email, $_SESSION['user_email']]);
+        $_SESSION['user_email'] = $email;
+        echo json_encode(['success' => true]);
+        exit;
+
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Nieznana akcja.']);

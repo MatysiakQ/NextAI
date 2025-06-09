@@ -106,13 +106,13 @@ document.addEventListener("DOMContentLoaded", () => {
       errorBox.textContent = "";
 
       if (!username.value.trim()) {
-        markError(username, "Podaj nazwę użytkownika", errorBox);
+        markError(username, "Podaj login", errorBox);
         return;
       }
       if (!/^[a-zA-Z0-9_\-\.]{3,32}$/.test(username.value.trim())) {
         markError(
           username,
-          "Nieprawidłowa nazwa użytkownika (3-32 znaki, tylko litery, cyfry, _, -, .)",
+          "Nieprawidłowy login (3-32 znaki, tylko litery, cyfry, _, -, .)",
           errorBox
         );
         return;
@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (data.message?.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
           markError(password2, data.message, errorBox);
-        } else if (data.message?.toLowerCase().includes("nazwa")) {
+        } else if (data.message?.toLowerCase().includes("login")) {
           markError(username, data.message, errorBox);
         } else {
           errorBox.textContent = data.message || "Wystąpił błąd podczas rejestracji";

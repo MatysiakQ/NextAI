@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -37,50 +36,56 @@
       <!-- Sekcja: Mój profil -->
       <section id="section2-profile" class="userpanel2-section active">
         <h2 class="section-title glitch" data-text="Mój profil">Mój profil</h2>
-        
-        <!-- Informacje o aktywnym pakiecie -->
-        <div id="active-package-info" class="active-package-section">
-          <p>Ładowanie informacji o pakiecie...</p>
-        </div>
-        
         <div class="profile2-avatar" id="profile2-avatar" title="Kliknij, aby zmienić avatar">
           <span id="avatar2-img"><i class="fa-solid fa-user"></i></span>
           <span class="profile2-avatar-edit">Zmień avatar</span>
           <input type="file" id="avatar2-upload" accept="image/*">
         </div>
-        <form class="profile2-form" id="profile2-form" autocomplete="off">
-          <div class="form-group">
-            <label for="profile2-username">Nazwa użytkownika</label>
-            <input type="text" id="profile2-username" name="username" maxlength="32" required>
+        <div class="profile2-static-info">
+          <div class="profile2-static-row">
+            <label>Nazwa:</label>
+            <span id="profile2-username-static"></span>
           </div>
-          <div class="form-group">
-            <label for="profile2-email">Email</label>
-            <input type="email" id="profile2-email" name="email" required>
+          <div class="profile2-static-row">
+            <label>Email:</label>
+            <span id="profile2-email-static" class="profile2-email-static"></span>
           </div>
-          <div class="form-group">
-            <label>Hasło</label>
-            <div class="profile2-password-row">
-              <span class="profile2-password-value">********</span>
-              <button type="button" id="change-password-btn" class="profile2-change-btn">Zmień hasło</button>
-            </div>
-            <div id="change-password-form" class="profile2-change-form" style="display:none;">
-              <input type="password" id="profile2-old-password" placeholder="Stare hasło" autocomplete="current-password">
-              <input type="password" id="profile2-password" placeholder="Nowe hasło" autocomplete="new-password">
-              <input type="password" id="profile2-password2" placeholder="Powtórz hasło" autocomplete="new-password">
-              <button type="button" id="save-password-btn" class="profile2-save-btn">Zapisz</button>
-              <button type="button" id="cancel-password-btn" class="profile2-cancel-btn">Anuluj</button>
-            </div>
+        </div>
+        <div class="profile2-actions profile2-actions-row">
+          <button type="button" id="show-change-username-btn" class="profile2-change-btn">Zmień nazwę</button>
+          <button type="button" id="show-change-email-btn" class="profile2-change-btn">Zmień e-mail</button>
+          <button type="button" id="show-change-password-btn" class="profile2-change-btn">Zmień hasło</button>
+        </div>
+        <div id="change-username-form" class="profile2-change-form profile2-change-form-vertical" style="display:none;">
+          <input type="text" id="new-username" placeholder="Nowy login" maxlength="32">
+          <div class="profile2-change-btn-row">
+            <button type="button" id="save-username-btn" class="profile2-save-btn">Zapisz</button>
+            <button type="button" id="cancel-username-btn" class="profile2-cancel-btn">Anuluj</button>
           </div>
-          <div class="button-wrapper button-wrapper-center">
-            <button type="submit" class="subscribe-button main-save-btn"><i class="fa-solid fa-floppy-disk"></i> Zapisz zmiany</button>
+        </div>
+        <div id="change-email-form" class="profile2-change-form profile2-change-form-vertical" style="display:none;">
+          <input type="email" id="new-email" placeholder="Nowy e-mail">
+          <div class="profile2-change-btn-row">
+            <button type="button" id="save-email-btn" class="profile2-save-btn">Zapisz</button>
+            <button type="button" id="cancel-email-btn" class="profile2-cancel-btn">Anuluj</button>
           </div>
-          <div id="profile2-error" class="form-error"></div>
-          <div id="profile2-success" class="form-success" style="display:none;">Zapisano zmiany!</div>
-        </form>
+        </div>
+        <div id="change-password-form" class="profile2-change-form profile2-change-form-vertical" style="display:none;">
+          <input type="password" id="profile2-old-password" placeholder="Stare hasło" autocomplete="current-password">
+          <input type="password" id="profile2-password" placeholder="Nowe hasło" autocomplete="new-password">
+          <input type="password" id="profile2-password2" placeholder="Powtórz hasło" autocomplete="new-password">
+          <div class="profile2-change-btn-row">
+            <button type="button" id="save-password-btn" class="profile2-save-btn">Zapisz</button>
+            <button type="button" id="cancel-password-btn" class="profile2-cancel-btn">Anuluj</button>
+          </div>
+        </div>
+        <div id="profile2-error" class="form-error"></div>
+        <div id="profile2-success" class="form-success" style="display:none;">Zapisano zmiany!</div>
       </section>
       <!-- Sekcja: Moje subskrypcje -->
       <section id="section2-subscriptions" class="userpanel2-section">
         <h2 class="section-title glitch" data-text="Moje subskrypcje">Moje subskrypcje</h2>
+        <div id="active-package-info" class="active-package-section"></div>
         <div class="subscriptions2-list" id="subscriptions2-list"></div>
       </section>
       <!-- Sekcja: Moje kursy -->

@@ -1,4 +1,3 @@
-
 /* Motyw NextAI dla panelu użytkownika */
 html, body {
   min-height: 100vh;
@@ -757,4 +756,84 @@ body {
     min-width: 0;
     max-width: 100vw;
   }
+}
+
+.profile2-static-info {
+  margin: 0 auto 18px auto;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile2-static-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.08em;
+}
+.profile2-static-row label {
+  color: #0ff;
+  min-width: 70px;
+  font-weight: bold;
+}
+.profile2-email-static {
+  min-width: 0;
+  max-width: 260px;
+  display: inline-block;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  white-space: normal;
+}
+.profile2-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.profile2-actions-row {
+  flex-direction: row;
+  align-items: center;
+}
+.profile2-change-form-vertical {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+  margin: 10px auto 0 auto;
+}
+.profile2-change-form-vertical input[type="text"],
+.profile2-change-form-vertical input[type="email"],
+.profile2-change-form-vertical input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1.08em;
+  border-radius: 7px;
+  border: 1.5px solid #333;
+  background: #23272b;
+  color: #fff;
+  margin-bottom: 0;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.profile2-change-form-vertical input[type="text"]:focus,
+.profile2-change-form-vertical input[type="email"]:focus,
+.profile2-change-form-vertical input[type="password"]:focus {
+  border-color: #0ff;
+  box-shadow: 0 0 6px #0ff4;
+}
+.profile2-change-btn-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 0;
+}
+.profile2-save-btn,
+.profile2-cancel-btn {
+  min-width: 90px;
+  font-size: 1em;
+  padding: 9px 18px;
 }

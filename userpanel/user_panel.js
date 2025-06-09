@@ -1,4 +1,3 @@
-
 // Przełączanie sekcji
 const navBtns2 = {
   profile: document.getElementById('nav2-profile'),
@@ -20,13 +19,14 @@ Object.entries(navBtns2).forEach(([key, btn]) => {
       btn.classList.add('active');
       if (sections2[key]) sections2[key].classList.add('active');
 
-      // Jeśli przechodzimy do sekcji subskrypcji, załaduj je
+      // Jeśli przechodzimy do sekcji subskrypcji, załaduj je i aktywny pakiet
       if (key === 'subscriptions') {
         loadSubscriptions();
-      }
-      // Jeśli przechodzimy do profilu, załaduj aktywny pakiet
-      if (key === 'profile') {
         loadActivePackageInfo();
+      }
+      // Jeśli przechodzimy do profilu, załaduj dane użytkownika
+      if (key === 'profile') {
+        loadUserData();
       }
     });
   }
@@ -68,7 +68,7 @@ function loadActivePackageInfo() {
           </div>
         `;
 
-        // Dodaj event listener do przycisku anulowania w sekcji profilu
+        // Dodaj event listener do przycisku anulowania
         const cancelBtn = activePackageDiv.querySelector('.cancel-package-btn');
         if (cancelBtn) {
           cancelBtn.addEventListener('click', (event) => {
@@ -135,29 +135,29 @@ function loadUserData() {
       return res.json();
     })
     .then(data => {
-      const usernameInput = document.getElementById('profile2-username');
-      const emailInput = document.getElementById('profile2-email');
+      const usernameStatic = document.getElementById('profile2-username-static');
+      const emailStatic = document.getElementById('profile2-email-static');
       const avatarImg = document.getElementById('avatar2-img');
 
       if (!data.success || !data.user) {
-        if (usernameInput) usernameInput.value = "Użytkownik";
-        if (emailInput) emailInput.value = "";
+        if (usernameStatic) usernameStatic.textContent = "Użytkownik";
+        if (emailStatic) emailStatic.textContent = "";
         if (avatarImg) avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
         return;
       }
       
-      if (usernameInput) usernameInput.value = data.user.username || "Brak nazwy";
-      if (emailInput) emailInput.value = data.user.email || "";
+      if (usernameStatic) usernameStatic.textContent = data.user.username || "Brak nazwy";
+      if (emailStatic) emailStatic.textContent = data.user.email || "";
       if (avatarImg) avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
     })
     .catch(error => {
       console.error("Błąd ładowania danych użytkownika:", error);
-      const usernameInput = document.getElementById('profile2-username');
-      const emailInput = document.getElementById('profile2-email');
+      const usernameStatic = document.getElementById('profile2-username-static');
+      const emailStatic = document.getElementById('profile2-email-static');
       const avatarImg = document.getElementById('avatar2-img');
       
-      if (usernameInput) usernameInput.value = "Błąd";
-      if (emailInput) emailInput.value = "Błąd";
+      if (usernameStatic) usernameStatic.textContent = "Błąd";
+      if (emailStatic) emailStatic.textContent = "Błąd";
       if (avatarImg) avatarImg.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
     });
 }
@@ -185,7 +185,7 @@ function loadSubscriptions() {
         list.innerHTML = '';
 
         if (data.subscriptions.length === 0) {
-          list.innerHTML = '<p>Brak aktywnych subskrypcji.</p>';
+          // Nie pokazuj dolnego białego napisu, zostaw tylko kafelek z loadActivePackageInfo
           return;
         }
 
@@ -318,135 +318,224 @@ function cancelSubscription(subscriptionId) {
     });
 }
 
-// Funkcja do zmiany hasła
-function changePassword(oldPassword, newPassword, confirmPassword) {
-    if (!oldPassword || !newPassword || !confirmPassword) {
-        alert("Wszystkie pola są wymagane.");
-        return;
-    }
-
-    if (newPassword !== confirmPassword) {
-        alert("Nowe hasła nie są takie same!");
-        return;
-    }
-
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
-    if (!passwordRegex.test(newPassword)) {
-        alert("Nowe hasło musi mieć min. 6 znaków, zawierać co najmniej jedną dużą literę i jedną cyfrę.");
-        return;
-    }
-
-    fetch('auth.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            action: 'change_password',
-            oldPassword: oldPassword,
-            newPassword: newPassword,
-            confirmNewPassword: confirmPassword
-        })
-    })
-    .then(res => {
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert("Hasło zostało pomyślnie zmienione!");
-            document.getElementById('profile2-old-password').value = "";
-            document.getElementById('profile2-password').value = "";
-            document.getElementById('profile2-password2').value = "";
-            const changePasswordForm = document.getElementById('change-password-form');
-            const changePasswordBtn = document.getElementById('change-password-btn');
-            if (changePasswordForm) changePasswordForm.style.display = "none";
-            if (changePasswordBtn) changePasswordBtn.style.display = "";
-        } else {
-            alert('Błąd podczas zmiany hasła: ' + (data.message || 'Nieznany błąd'));
-        }
-    })
-    .catch(error => {
-        console.error('Błąd podczas zmiany hasła:', error);
-        alert('Wystąpił błąd podczas zmiany hasła.');
-    });
-}
-
-// Inicjalizacja ładowania danych użytkownika przy starcie
+// Obsługa formularzy zmiany danych w profilu
 document.addEventListener('DOMContentLoaded', () => {
+  // Profile change buttons
+  const showChangeUsernameBtn = document.getElementById('show-change-username-btn');
+  const showChangeEmailBtn = document.getElementById('show-change-email-btn');
+  const showChangePasswordBtn = document.getElementById('show-change-password-btn');
+  const changeUsernameForm = document.getElementById('change-username-form');
+  const changeEmailForm = document.getElementById('change-email-form');
+  const changePasswordForm = document.getElementById('change-password-form');
+  const profileError = document.getElementById('profile2-error');
+  const profileSuccess = document.getElementById('profile2-success');
+
+  if (showChangeUsernameBtn && changeUsernameForm) {
+    showChangeUsernameBtn.onclick = function() {
+      changeUsernameForm.style.display = "flex";
+      changeEmailForm.style.display = "none";
+      changePasswordForm.style.display = "none";
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+    };
+  }
+  if (showChangeEmailBtn && changeEmailForm) {
+    showChangeEmailBtn.onclick = function() {
+      changeEmailForm.style.display = "flex";
+      changeUsernameForm.style.display = "none";
+      changePasswordForm.style.display = "none";
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+    };
+  }
+  if (showChangePasswordBtn && changePasswordForm) {
+    showChangePasswordBtn.onclick = function() {
+      changePasswordForm.style.display = "flex";
+      changeUsernameForm.style.display = "none";
+      changeEmailForm.style.display = "none";
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+    };
+  }
+  // Cancel buttons
+  const cancelUsernameBtn = document.getElementById('cancel-username-btn');
+  if (cancelUsernameBtn && changeUsernameForm) {
+    cancelUsernameBtn.onclick = function() {
+      changeUsernameForm.style.display = "none";
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+      document.getElementById('new-username').value = "";
+    };
+  }
+  const cancelEmailBtn = document.getElementById('cancel-email-btn');
+  if (cancelEmailBtn && changeEmailForm) {
+    cancelEmailBtn.onclick = function() {
+      changeEmailForm.style.display = "none";
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+      document.getElementById('new-email').value = "";
+    };
+  }
+  const cancelPasswordBtn = document.getElementById('cancel-password-btn');
+  if (cancelPasswordBtn && changePasswordForm) {
+    cancelPasswordBtn.onclick = function() {
+      changePasswordForm.style.display = "none";
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+      document.getElementById('profile2-old-password').value = "";
+      document.getElementById('profile2-password').value = "";
+      document.getElementById('profile2-password2').value = "";
+    };
+  }
+
+  // Save username
+  const saveUsernameBtn = document.getElementById('save-username-btn');
+  if (saveUsernameBtn) {
+    saveUsernameBtn.onclick = function() {
+      const newUsername = document.getElementById('new-username').value.trim();
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+      if (!/^[a-zA-Z0-9_\-\.]{3,32}$/.test(newUsername)) {
+        profileError.textContent = "Nieprawidłowy login (3-32 znaki, tylko litery, cyfry, _, -, .)";
+        return;
+      }
+      fetch('auth.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=change_username&username=${encodeURIComponent(newUsername)}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          profileSuccess.textContent = "Login został zmieniony!";
+          profileSuccess.style.display = "block";
+          changeUsernameForm.style.display = "none";
+          loadUserData();
+        } else {
+          profileError.textContent = data.message || "Błąd zmiany loginu.";
+        }
+      })
+      .catch(() => {
+        profileError.textContent = "Błąd sieci.";
+      });
+    };
+  }
+
+  // Save email
+  const saveEmailBtn = document.getElementById('save-email-btn');
+  if (saveEmailBtn) {
+    saveEmailBtn.onclick = function() {
+      const newEmail = document.getElementById('new-email').value.trim();
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+        profileError.textContent = "Nieprawidłowy adres e-mail.";
+        return;
+      }
+      fetch('auth.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=change_email&email=${encodeURIComponent(newEmail)}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          profileSuccess.textContent = "E-mail został zmieniony!";
+          profileSuccess.style.display = "block";
+          changeEmailForm.style.display = "none";
+          loadUserData();
+        } else {
+          profileError.textContent = data.message || "Błąd zmiany e-maila.";
+        }
+      })
+      .catch(() => {
+        profileError.textContent = "Błąd sieci.";
+      });
+    };
+  }
+
+  // Save password
+  const savePasswordBtn = document.getElementById('save-password-btn');
+  if (savePasswordBtn) {
+    savePasswordBtn.onclick = function() {
+      const oldPass = document.getElementById('profile2-old-password').value;
+      const pass1 = document.getElementById('profile2-password').value;
+      const pass2 = document.getElementById('profile2-password2').value;
+      profileError.textContent = "";
+      profileSuccess.style.display = "none";
+      if (!oldPass || !pass1 || !pass2) {
+        profileError.textContent = "Wszystkie pola są wymagane.";
+        return;
+      }
+      if (pass1 !== pass2) {
+        profileError.textContent = "Nowe hasła nie są takie same!";
+        return;
+      }
+      if (!/^(?=.*[A-Z])(?=.*\d).{6,}$/.test(pass1)) {
+        profileError.textContent = "Nowe hasło musi mieć min. 6 znaków, zawierać co najmniej jedną dużą literę i jedną cyfrę.";
+        return;
+      }
+      fetch('auth.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'change_password',
+          oldPassword: oldPass,
+          newPassword: pass1,
+          confirmNewPassword: pass2
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          profileSuccess.textContent = "Hasło zostało zmienione!";
+          profileSuccess.style.display = "block";
+          changePasswordForm.style.display = "none";
+          document.getElementById('profile2-old-password').value = "";
+          document.getElementById('profile2-password').value = "";
+          document.getElementById('profile2-password2').value = "";
+        } else {
+          profileError.textContent = data.message || "Błąd zmiany hasła.";
+        }
+      })
+      .catch(() => {
+        profileError.textContent = "Błąd sieci.";
+      });
+    };
+  }
+
+  // Inicjalizacja ładowania danych użytkownika przy starcie
+  document.addEventListener('DOMContentLoaded', () => {
     // Sprawdzenie autoryzacji przed ładowaniem panelu
     fetch("auth.php?action=user_data")
-        .then(res => {
-            if (!res.ok) {
-                window.location.href = "login.html";
-                return;
-            }
-            return res.json();
-        })
-        .then(data => {
-            if (!data.success) {
-                window.location.href = "login.html";
-            } else {
-                loadUserData();
-                loadActivePackageInfo(); // Załaduj informacje o aktywnym pakiecie przy starcie
-            }
-        })
-        .catch(() => window.location.href = "login.html");
-
-    // Obsługa zmiany hasła
-    const changePasswordBtn = document.getElementById('change-password-btn');
-    const changePasswordForm = document.getElementById('change-password-form');
-    const cancelPasswordBtn = document.getElementById('cancel-password-btn');
-    const savePasswordBtn = document.getElementById('save-password-btn');
-
-    if (changePasswordBtn && changePasswordForm) {
-        changePasswordBtn.onclick = function() {
-            changePasswordForm.style.display = "flex";
-            changePasswordBtn.style.display = "none";
-        };
-    }
-
-    if (cancelPasswordBtn && changePasswordForm && changePasswordBtn) {
-        cancelPasswordBtn.onclick = function() {
-            changePasswordForm.style.display = "none";
-            changePasswordBtn.style.display = "";
-            document.getElementById('profile2-old-password').value = "";
-            document.getElementById('profile2-password').value = "";
-            document.getElementById('profile2-password2').value = "";
-        };
-    }
-
-    if (savePasswordBtn) {
-        savePasswordBtn.onclick = function() {
-            const oldPass = document.getElementById('profile2-old-password').value;
-            const pass1 = document.getElementById('profile2-password').value;
-            const pass2 = document.getElementById('profile2-password2').value;
-            
-            changePassword(oldPass, pass1, pass2);
-        };
-    }
-
-    // Przycisk powrotu na stronę główną
-    const navMainpageBtn = document.getElementById("nav-mainpage-btn");
-    if (navMainpageBtn) {
-        navMainpageBtn.onclick = function() {
-            window.location.href = "/";
-        };
-    }
+      .then(res => {
+        if (!res.ok) {
+          window.location.href = "login.html";
+          return;
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (!data || !data.success) {
+          window.location.href = "login.html";
+        } else {
+          loadUserData(); // <- wywołaj od razu po wejściu
+          loadActivePackageInfo();
+        }
+      })
+      .catch(() => window.location.href = "login.html");
 
     // Wylogowywanie
     const logout2Btn = document.getElementById("logout2-btn");
     if (logout2Btn) {
-        logout2Btn.onclick = function() {
-            fetch("auth.php?action=logout")
-                .then(() => window.location.href = "login.html")
-                .catch(error => {
-                    console.error("Błąd podczas wylogowywania:", error);
-                    alert("Wystąpił błąd podczas wylogowywania.");
-                });
-        };
+      logout2Btn.onclick = function() {
+          fetch("auth.php?action=logout")
+              .then(() => window.location.href = "login.html")
+              .catch(error => {
+                  console.error("Błąd podczas wylogowywania:", error);
+                  alert("Wystąpił błąd podczas wylogowywania.");
+              });
+      }
     }
 
     // Obsługa modala anulowania subskrypcji
@@ -482,4 +571,5 @@ document.addEventListener('DOMContentLoaded', () => {
             hideCancelModal();
         }
     });
+  });
 });
