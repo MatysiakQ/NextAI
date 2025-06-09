@@ -1,24 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Jeśli jesteśmy na stronie logowania lub rejestracji, sprawdzamy czy użytkownik jest zalogowany
-  if (
-    window.location.pathname.endsWith("login.html") ||
-    window.location.pathname.endsWith("register.html")
-  ) {
-    fetch("auth.php?action=user_data")
-      .then(async (res) => {
-        if (!res.ok) return { success: false };
-        try {
-          return await res.json();
-        } catch {
-          return { success: false };
-        }
-      })
-      .then((data) => {
-        if (data.success) window.location.href = "user_panel.html";
-      });
-  }
 
-  // Funkcje pomocnicze do walidacji i wyświetlania błędów
   function markError(field, message, errorBox) {
     field.classList.add("field-error");
     if (errorBox) {
@@ -31,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
     form.querySelectorAll(".field-error").forEach((el) => el.classList.remove("field-error"));
   }
 
-  // --- LOGOWANIE ---
   const loginForm = document.getElementById("login-form");
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
@@ -46,19 +26,15 @@ document.addEventListener("DOMContentLoaded", () => {
         markError(email, "Podaj login lub email", errorBox);
         return;
       }
-      // Pozwól na login lub email (nie wymagaj formatu email, jeśli nie ma "@")
-      if (email.value.includes("@")) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-          markError(email, "Wprowadź poprawny adres e-mail.", errorBox);
-          return;
-        }
+      if (email.value.includes("@") && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+        markError(email, "Wprowadź poprawny adres e-mail.", errorBox);
+        return;
       }
       if (!password.value) {
         markError(password, "Podaj hasło", errorBox);
         return;
       }
 
-      // Sprawdzenie reCAPTCHA jeśli jest na stronie (opcjonalne)
       const recaptcha = document.querySelector('.g-recaptcha-response')?.value;
       if (document.querySelector('.g-recaptcha') && !recaptcha) {
         errorBox.textContent = "Potwierdź, że nie jesteś robotem.";
@@ -71,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch("auth.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          credentials: "include",
           body: `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}${recaptcha ? `&g-recaptcha-response=${encodeURIComponent(recaptcha)}` : ""}`
         });
         if (!res.ok) {
@@ -99,14 +76,14 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = "user_panel.html";
         }
       } else {
-        if (data.message && data.message.toLowerCase().includes("nieprawidłowe")) {
+        if (data.message?.toLowerCase().includes("nieprawidłowe")) {
           errorBox.textContent = "Niepoprawny login/hasło";
           errorBox.style.color = "#ff5c5c";
           markError(email, "", null);
           markError(password, "", null);
-        } else if (data.message && data.message.toLowerCase().includes("email")) {
+        } else if (data.message?.toLowerCase().includes("email")) {
           markError(email, data.message, errorBox);
-        } else if (data.message && data.message.toLowerCase().includes("hasło")) {
+        } else if (data.message?.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
         } else {
           markError(email, data.message || "Wystąpił błąd podczas logowania", errorBox);
@@ -116,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- REJESTRACJA ---
   const registerForm = document.getElementById("register-form");
   if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
@@ -166,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Sprawdzenie reCAPTCHA jeśli jest na stronie (opcjonalne)
       const recaptcha = document.querySelector('.g-recaptcha-response')?.value;
       if (document.querySelector('.g-recaptcha') && !recaptcha) {
         errorBox.textContent = "Potwierdź, że nie jesteś robotem.";
@@ -179,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch("auth.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          credentials: "include",
           body: `action=register&username=${encodeURIComponent(
             username.value.trim()
           )}&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(
@@ -205,12 +181,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success) {
         window.location.href = "user_panel.html";
       } else {
-        if (data.message && data.message.toLowerCase().includes("email")) {
+        if (data.message?.toLowerCase().includes("email")) {
           markError(email, data.message, errorBox);
-        } else if (data.message && data.message.toLowerCase().includes("hasło")) {
+        } else if (data.message?.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
           markError(password2, data.message, errorBox);
-        } else if (data.message && data.message.toLowerCase().includes("nazwa")) {
+        } else if (data.message?.toLowerCase().includes("nazwa")) {
           markError(username, data.message, errorBox);
         } else {
           errorBox.textContent = data.message || "Wystąpił błąd podczas rejestracji";
@@ -219,9 +195,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- PANEL UŻYTKOWNIKA ---
   if (window.location.pathname.endsWith("user_panel.html")) {
-    fetch("auth.php?action=user_data")
+    fetch("auth.php?action=user_data", { credentials: "include" })
       .then((res) => {
         if (!res.ok) {
           window.location.href = "login.html";
@@ -234,25 +209,24 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = "login.html";
           return;
         }
-        // Załaduj subskrypcje po potwierdzeniu, że użytkownik jest zalogowany
         loadSubscriptionsForMainPage();
       })
       .catch(() => {
         window.location.href = "login.html";
       });
 
-    // Wylogowywanie
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
       logoutBtn.onclick = function () {
-        fetch("auth.php?action=logout").then(() => (window.location.href = "login.html"));
+        fetch("auth.php?action=logout", { credentials: "include" }).then(() => {
+          window.location.href = "login.html";
+        });
       };
     }
   }
 
-  // Ładowanie subskrypcji w panelu użytkownika
   function loadSubscriptionsForMainPage() {
-    fetch("auth.php?action=subscriptions")
+    fetch("auth.php?action=subscriptions", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         const list = document.getElementById("subscriptions-list");
@@ -262,14 +236,14 @@ document.addEventListener("DOMContentLoaded", () => {
           list.textContent = "Błąd ładowania subskrypcji.";
           return;
         }
-        if (data.subscriptions && data.subscriptions.length) {
+        if (data.subscriptions?.length) {
           list.innerHTML = data.subscriptions
             .map(
               (sub) => `<div class="subscription-card">
-              <b>Pakiet:</b> ${sub.plan || "N/A"}<br>
-              <b>Status:</b> ${sub.status || "N/A"}<br>
-              <b>Data:</b> ${sub.created_at || "N/A"}
-            </div>`
+                <b>Pakiet:</b> ${sub.plan || "N/A"}<br>
+                <b>Status:</b> ${sub.status || "N/A"}<br>
+                <b>Data:</b> ${sub.created_at || "N/A"}
+              </div>`
             )
             .join("");
         } else {

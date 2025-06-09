@@ -1,4 +1,15 @@
 <?php
+
+session_start();
+header('Content-Type: application/json; charset=utf-8');
+
+use Dotenv\Dotenv;
+use Stripe\Stripe;
+use Stripe\Exception\ApiErrorException;
+
+
+require __DIR__ . '/../vendor/autoload.php';
+
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
@@ -14,16 +25,13 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
-session_start();
 
-if (!isset($_SESSION['session_regenerated'])) {
-    session_regenerate_id(true);
-    $_SESSION['session_regenerated'] = true;
-}
+$sessionLogFile = __DIR__ . '/../session_debug.log';
+file_put_contents($sessionLogFile, "[".date("Y-m-d H:i:s")."] SESSION: ".print_r($_SESSION, true)."\n", FILE_APPEND);
+file_put_contents($sessionLogFile, "[".date("Y-m-d H:i:s")."] COOKIE: ".print_r($_COOKIE, true)."\n", FILE_APPEND);
 
-header('Content-Type: application/json; charset=utf-8');
 
-require __DIR__ . '/../vendor/autoload.php';
+
 
 function verify_recaptcha($token) {
     $secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"; // testowy sekret
@@ -32,9 +40,6 @@ function verify_recaptcha($token) {
     return $result["success"] ?? false;
 }
 
-use Dotenv\Dotenv;
-use Stripe\Stripe;
-use Stripe\Exception\ApiErrorException;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
@@ -99,86 +104,95 @@ if (!$action) {
 
 switch ($action) {
     case 'register':
-        $username = trim($_POST['username'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        if (!verify_recaptcha($_POST['g-recaptcha-response'] ?? '')) {
-    echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
+    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    if (!verify_recaptcha($_POST['g-recaptcha-response'] ?? '')) {
+        echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
+        exit;
+    }
+
+    $password = $_POST['password'] ?? '';
+    $password2 = $_POST['password2'] ?? '';
+
+    if (empty($username) || empty($email) || empty($password) || empty($password2)) {
+        echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane!']);
+        exit;
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy format adresu email.']);
+        exit;
+    }
+    if ($password !== $password2) {
+        echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
+        exit;
+    }
+    if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
+        echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, zawierać co najmniej jedną dużą literę i jedną cyfrę.']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'message' => 'Ten email jest już zarejestrowany.']);
+        exit;
+    }
+
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("INSERT INTO users (username, email, password, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
+    $stmt->execute([$username, $email, $hashed_password]);
+
+    // Po udanej rejestracji automatyczny login:
+    $user_id = $pdo->lastInsertId();
+    $_SESSION['user_id'] = $user_id;
+    $_SESSION['user_email'] = $email;
+    $_SESSION['username'] = $username;
+    $_SESSION['login_time'] = time();
+
+    setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
+     isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
+
+    echo json_encode(['success' => true, 'message' => 'Zarejestrowano pomyślnie!']);
     exit;
-}
 
-        $password = $_POST['password'] ?? '';
-        $password2 = $_POST['password2'] ?? '';
 
-        if (empty($username) || empty($email) || empty($password) || empty($password2)) {
-            echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane!']);
-            exit;
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo json_encode(['success' => false, 'message' => 'Nieprawidłowy format adresu email.']);
-            exit;
-        }
-        if ($password !== $password2) {
-            echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
-            exit;
-        }
-        if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
-            echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, zawierać co najmniej jedną dużą literę i jedną cyfrę.']);
-            exit;
-        }
+   case 'login':
+    if (!verify_recaptcha($_POST['g-recaptcha-response'] ?? '')) {
+        echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
+        exit;
+    }
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        if ($stmt->fetchColumn() > 0) {
-            echo json_encode(['success' => false, 'message' => 'Ten email jest już zarejestrowany.']);
-            exit;
-        }
+    if (empty($email) || empty($password)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane.']);
+        exit;
+    }
 
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
-        if ($stmt->execute([$username, $email, $hashed_password])) {
-            $_SESSION['user_id'] = $pdo->lastInsertId();
-            $_SESSION['user_email'] = $email;
-            $_SESSION['username'] = $username;
-            $_SESSION['login_time'] = time();
-            
-            setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
-                     isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
-            
-            echo json_encode(['success' => true, 'message' => 'Rejestracja pomyślna!']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Błąd rejestracji.']);
-        }
-        break;
+    $stmt = $pdo->prepare("SELECT id, email, username, password FROM users WHERE email = ? OR username = ?");
+    $stmt->execute([$email, $email]);
+    $user = $stmt->fetch();
 
-    case 'login':
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_email'] = $user['email'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['login_time'] = time();
 
-        if (empty($email) || empty($password)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane.']);
-            exit;
-        }
+        setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
+                 isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
 
-        $stmt = $pdo->prepare("SELECT id, email, username, password FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
+        echo json_encode(['success' => true, 'message' => 'Zalogowano pomyślnie!']);
+        exit;
+    } else {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Błędny email lub hasło.']);
+        exit;
+    }
+    break;
 
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['login_time'] = time();
-            
-            setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
-                     isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
-            
-            echo json_encode(['success' => true, 'message' => 'Zalogowano pomyślnie!']);
-        } else {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Błędny email lub hasło.']);
-        }
-        break;
+    
 
     case 'logout':
         session_unset();
@@ -311,6 +325,10 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Stare hasło jest nieprawidłowe.']);
             exit;
         }
+        if ($user && !password_verify($password, $user['password'])) {
+            error_log("[LOGIN] Niepoprawne hasło dla: $email\n", 3, __DIR__.'/../session_debug.log');
+            }
+
 
         $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?");
