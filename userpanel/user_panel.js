@@ -81,7 +81,7 @@ function loadActivePackageInfo() {
           <div class="no-package-card">
             <h4><i class="fa-solid fa-info-circle"></i> Brak aktywnego pakietu</h4>
             <p>Nie masz obecnie aktywnej subskrypcji.</p>
-            <a href="/" class="subscribe-link">Wybierz pakiet</a>
+            <a href="../sub/subskrypcja.html" class="subscribe-link">Wybierz pakiet</a>
           </div>
         `;
       }
