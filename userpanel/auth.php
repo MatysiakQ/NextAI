@@ -1,8 +1,5 @@
 <?php
 
-session_start();
-header('Content-Type: application/json; charset=utf-8');
-
 use Dotenv\Dotenv;
 use Stripe\Stripe;
 use Stripe\Exception\ApiErrorException;
@@ -10,21 +7,30 @@ use Stripe\Exception\ApiErrorException;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-ini_set('display_errors', 0);
+$cookieLifetime = 30 * 24 * 60 * 60; // 30 dni
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => $cookieLifetime,
+        'path' => '/',
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    session_start();
+}
+header('Content-Type: application/json');
+
+
+
+
 ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/php-error.log');
 error_reporting(E_ALL);
 
 $pdoErrorLogFile = __DIR__ . '/../pdo_errors.log';
 
-$cookieLifetime = 30 * 24 * 60 * 60; // 30 dni
-session_set_cookie_params([
-    'lifetime' => $cookieLifetime,
-    'path' => '/',
-    'domain' => '',
-    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
 
 $sessionLogFile = __DIR__ . '/../session_debug.log';
 file_put_contents($sessionLogFile, "[".date("Y-m-d H:i:s")."] SESSION: ".print_r($_SESSION, true)."\n", FILE_APPEND);

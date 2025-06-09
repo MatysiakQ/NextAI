@@ -828,7 +828,7 @@ body {
   display: flex;
   flex-direction: row;
   gap: 12px;
-  justify-content: flex-end;
+  justify-content: center; /* zmiana z flex-end na center */
   margin-top: 0;
 }
 .profile2-save-btn,
