@@ -371,34 +371,37 @@ switch ($action) {
         break;
 
     case 'subscriptions':
-        if (!isset($_SESSION['user_email'])) {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Nieautoryzowany dostęp. Zaloguj się, aby wyświetlić subskrypcje.']);
+        // Pobierz email z sesji
+        $email = $_SESSION['user_email'] ?? null;
+        if (!$email) {
+            echo json_encode(['success' => false, 'message' => 'Nie jesteś zalogowany.']);
             exit;
         }
 
-        $userEmail = $_SESSION['user_email'];
-
         try {
-            $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
-            $stmt->execute();
-            $tableExists = $stmt->fetch();
-            
-            if (!$tableExists) {
-                echo json_encode(['success' => true, 'subscriptions' => []]);
-                exit;
+            // Pobierz najnowszą aktywną subskrypcję
+            $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE email = ? AND (status = 'active' OR status = 'trialing') ORDER BY current_period_end DESC LIMIT 1");
+            $stmt->execute([$email]);
+            $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($sub) {
+                $plan = $sub['plan'];
+                $subscription = ($plan === 'pro') ? 'pro' : (($plan === 'basic') ? 'basic' : 'free');
+                echo json_encode([
+                    'success' => true,
+                    'subscription' => $subscription,
+                    'plan' => $plan,
+                    'status' => $sub['status'],
+                    'current_period_end' => $sub['current_period_end'],
+                    'cancel_at_period_end' => $sub['cancel_at_period_end'],
+                ]);
+            } else {
+                echo json_encode(['success' => true, 'subscription' => 'free']);
             }
-
-            $stmt = $pdo->prepare("SELECT plan, status, created_at, current_period_end, stripe_subscription_id, cancel_at_period_end FROM subscriptions WHERE email = ? ORDER BY created_at DESC");
-            $stmt->execute([$userEmail]);
-            $subscriptions = $stmt->fetchAll();
-
-            echo json_encode(['success' => true, 'subscriptions' => $subscriptions]);
-        } catch (PDOException $e) {
-            error_log("Subscriptions query error: " . $e->getMessage(), 3, $pdoErrorLogFile);
-            echo json_encode(['success' => true, 'subscriptions' => []]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Błąd bazy danych.']);
         }
-        break;
+        exit;
 
     case 'check_active_subscription':
         if (!isset($_SESSION['user_email'])) {
