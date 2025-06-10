@@ -221,8 +221,12 @@ textarea:-moz-autofill {
     font-size: 1.2em;
     padding-bottom: 3px;
   }
-  .button-wrapper {
-    margin-top: 6px;
+  .button-wrapper,
+  .contact-form .button-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
   }
   .background-grid {
     background-size: 18px 18px;
