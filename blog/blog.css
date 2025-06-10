@@ -18,17 +18,17 @@ body {
 }
 .blog-title {
   font-size: 2.6rem;
-  color: #0ff;
+  color: #232946;
   font-weight: bold;
   letter-spacing: 1.5px;
   margin-bottom: 10px;
-  text-shadow: 0 0 18px #0ff, 0 0 32px #FFD70044;
+  text-shadow: 0 2px 8px #fff, 0 0 4px #d4af37cc;
 }
 .blog-subtitle {
   font-size: 1.18rem;
-  color: #b8f6f6;
+  color: #232946;
   margin-bottom: 18px;
-  text-shadow: 0 0 8px #0ff8;
+  text-shadow: 0 1px 2px #fff;
 }
 
 .blog-main {
@@ -42,14 +42,14 @@ body {
 }
 .blog-section-title {
   font-size: 1.5rem;
-  color: #FFD700;
+  color: #232946;
   margin-bottom: 24px;
   letter-spacing: 1px;
   text-align: left;
   padding-left: 8px;
-  text-shadow: 0 0 8px #FFD70044;
+  text-shadow: 0 1px 2px #fff;
+  font-weight: bold;
 }
-
 .blog-articles-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -122,30 +122,31 @@ body {
   margin-left: 0;
 }
 .blog-article-title {
-  color: #FFD700;
+  color: #232946;
   font-size: 1.18em;
   margin-bottom: 10px;
   text-align: left;
   font-weight: bold;
   letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px #fff;
 }
 .blog-article-excerpt {
-  color: #b8f6f6;
+  color: #232946;
   font-size: 1em;
   margin-bottom: 18px;
   text-align: left;
-  text-shadow: 0 1px 8px #000a;
+  text-shadow: 0 1px 2px #fff;
   flex: 1 1 auto;
 }
 .blog-readmore-btn {
-  background: linear-gradient(90deg, #FFD700 60%, #0ff 100%);
-  color: #181a2b;
+  background: #d4af37;
+  color: #232946;
   font-weight: bold;
   border-radius: 14px;
   font-size: 1.08em;
-  box-shadow: 0 2px 8px #FFD70022;
+  box-shadow: 0 2px 8px #d4af3722;
   letter-spacing: 0.5px;
-  text-shadow: none;
+  text-shadow: 0 1px 2px #fff;
   border: none;
   padding: 10px 24px;
   cursor: pointer;
@@ -155,9 +156,9 @@ body {
   text-decoration: none;
 }
 .blog-readmore-btn:hover {
-  background: #0ff;
-  color: #232946;
-  box-shadow: 0 2px 16px #0ff8;
+  background: #232946;
+  color: #FFD700;
+  box-shadow: 0 2px 16px #d4af3788;
   transform: scale(1.06);
 }
 
@@ -167,14 +168,14 @@ body {
 }
 .blog-add-topic-btn {
   display: inline-block;
-  background: #0ff;
-  color: #181a2b;
+  background: #d4af37;
+  color: #232946;
   font-weight: bold;
   border-radius: 14px;
   font-size: 1.08em;
-  box-shadow: 0 2px 8px #0ff4;
+  box-shadow: 0 2px 8px #d4af3722;
   letter-spacing: 0.5px;
-  text-shadow: none;
+  text-shadow: 0 1px 2px #fff;
   border: none;
   padding: 10px 24px;
   cursor: pointer;
@@ -183,9 +184,9 @@ body {
   text-decoration: none;
 }
 .blog-add-topic-btn:hover {
-  background: #FFD700;
-  color: #181a2b;
-  box-shadow: 0 2px 16px #FFD70088;
+  background: #232946;
+  color: #FFD700;
+  box-shadow: 0 2px 16px #d4af3788;
   transform: scale(1.06);
 }
 @media (max-width: 600px) {
