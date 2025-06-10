@@ -9,7 +9,15 @@
   <link rel="icon" href="account.nextai.png" type="image/x-icon" />
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <meta name="google-client-id" content="">
+  <script src="https://accounts.google.com/gsi/client" async defer crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <?php
+require_once __DIR__ . '/vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__)); 
+$dotenv->load();
+$clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? '';
+?>
+<meta name="google-client-id" content="<?= htmlspecialchars($clientId) ?>">
 </head>
 
 <body>
@@ -28,20 +36,23 @@
       </div>
       <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
     </form>
-    <!-- Google Sign-In: dynamiczne ustawienie client_id przez JS -->
-    <div id="g_id_onload"
-      data-context="signin"
-      data-ux_mode="popup"
-      data-callback="handleGoogleCredential"
-      data-auto_prompt="false">
-    </div>
-    <div class="g_id_signin"
-      data-type="standard"
-      data-shape="rectangular"
-      data-theme="filled_blue"
-      data-text="sign_in_with"
-      data-size="large"
-      data-logo_alignment="left">
+    <!-- Google Sign-In: wyśrodkowany przycisk -->
+    <div style="display: flex; justify-content: center; margin: 18px 0;">
+      <div id="g_id_onload"
+        data-client_id="<?= htmlspecialchars($clientId) ?>"
+        data-context="signin"
+        data-ux_mode="popup"
+        data-callback="handleGoogleCredential"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+        data-type="standard"
+        data-shape="rectangular"
+        data-theme="filled_blue"
+        data-text="sign_in_with"
+        data-size="large"
+        data-logo_alignment="left">
+      </div>
     </div>
     <p style="text-align:center;margin-top:10px;">
       Nie masz konta?<br>
@@ -120,16 +131,37 @@
       }
     });
   </script>
-  <script>
-    // Ustaw client_id z meta tagu
-    document.addEventListener("DOMContentLoaded", function () {
-      var clientId = document.querySelector('meta[name="google-client-id"]')?.content;
-      if (clientId) {
-        document.getElementById("g_id_onload").setAttribute("data-client_id", clientId);
+<script>
+  function handleGoogleCredential(response) {
+    if (!response || !response.credential) {
+      alert("Błąd logowania Google: Brak tokenu.");
+      return;
+    }
+    fetch("google_login.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "token=" + encodeURIComponent(response.credential)
+    })
+    .then(async res => {
+      let text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        alert("Błąd połączenia z serwerem Google.\nNieprawidłowa odpowiedź serwera:\n" + text);
+        return;
       }
+      if (res.ok && data.success) {
+        window.location.href = data.redirect || "user_panel.html";
+      } else {
+        alert((data && data.message) ? data.message : "Błąd logowania Google.");
+      }
+    })
+    .catch((err) => {
+      alert("Błąd połączenia z serwerem Google.\n" + (err.message || err));
     });
-  </script>
-  <script src="google_auth.js"></script>
+  }
+</script>
 </body>
 
 </html>
