@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="panel.css">
   <link rel="icon" href="account.nextai.png" type="image/x-icon" />
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta name="google-client-id" content="">
 </head>
 
 <body>
@@ -24,48 +26,57 @@
       <label for="register-password2">Powtórz hasło</label>
       <input type="password" id="register-password2" name="password2" autocomplete="new-password" required>
       <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" style="margin-bottom:10px;"></div>
-      <div class="button-wrapper">
+      <div class="button-wrapper" style="display:flex;justify-content:center;">
         <button type="submit">Zarejestruj się</button>
       </div>
       <div id="register-error" style="color:#ff5c5c;margin-top:10px;"></div>
     </form>
-    <p style="text-align:center;margin-top:10px;">Masz już konto? <a href="login.html">Zaloguj się</a></p>
+    <!-- Google Sign-In: dynamiczne ustawienie client_id przez JS -->
+    <div id="g_id_onload"
+      data-context="signup"
+      data-ux_mode="popup"
+      data-callback="handleGoogleCredential"
+      data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+      data-type="standard"
+      data-shape="rectangular"
+      data-theme="filled_blue"
+      data-text="sign_in_with"
+      data-size="large"
+      data-logo_alignment="left">
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <span>Nie masz konta?</span><br>
+      <a href="login.html">Masz już konto? Zaloguj się</a>
+    </div>
   </section>
   <script src="auth.js"></script>
-  <div id="logout-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Wylogowano</h3>
-      </div>
-      <div class="modal-body">
-        <p>Zostałeś pomyślnie wylogowany.</p>
-      </div>
-      <div class="modal-footer">
-        <button id="logout-modal-ok-btn" class="modal-btn keep-btn">OK</button>
-      </div>
-    </div>
-  </div>
   <script>
-    function showLogoutModal() {
-      const modal = document.getElementById('logout-modal');
-      if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        const okBtn = document.getElementById('logout-modal-ok-btn');
-        if (okBtn) {
-          okBtn.onclick = function() {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            window.location.href = "login.html";
-          };
-        }
+    // Obsługa błędu "Konto o taki e-mailu już istnieje"
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("register-form");
+      const errorBox = document.getElementById("register-error");
+      if (form) {
+        form.addEventListener("submit", function (e) {
+          setTimeout(() => {
+            if (errorBox.textContent && errorBox.textContent.match(/e-?mail/i)) {
+              errorBox.textContent = "Konto o taki e-mailu już istnieje";
+            }
+          }, 100);
+        });
       }
-    }
-    if (localStorage.getItem("showLogoutModal") === "1") {
-      localStorage.removeItem("showLogoutModal");
-      showLogoutModal();
-    }
+    });
   </script>
+  <script>
+    // Ustaw client_id z JS jeśli chcesz (np. window.GOOGLE_CLIENT_ID)
+    document.addEventListener("DOMContentLoaded", function () {
+      var clientId = document.querySelector('meta[name="google-client-id"]')?.content;
+      if (clientId) {
+        document.getElementById("g_id_onload").setAttribute("data-client_id", clientId);
+      }
+    });
+  </script>
+  <script src="google_auth.js"></script>
 </body>
-
 </html>

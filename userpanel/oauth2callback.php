@@ -47,8 +47,11 @@ $userinfo = json_decode($userinfo, true);
 
 // Krok 4: Zalogowanie użytkownika (np. zapis do sesji)
 $_SESSION['user'] = $userinfo;
+$_SESSION['user_email'] = $userinfo['email'] ?? null;
+$_SESSION['username'] = $userinfo['name'] ?? ($userinfo['email'] ?? '');
+$_SESSION['login_time'] = time();
 
 // Przekierowanie do panelu
-header('Location: /userpanel/');
+header('Location: /userpanel/user_panel.html');
 exit;
 ?>

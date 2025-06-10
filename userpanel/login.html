@@ -9,6 +9,7 @@
   <link rel="icon" href="account.nextai.png" type="image/x-icon" />
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta name="google-client-id" content="">
 </head>
 
 <body>
@@ -27,8 +28,24 @@
       </div>
       <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
     </form>
+    <!-- Google Sign-In: dynamiczne ustawienie client_id przez JS -->
+    <div id="g_id_onload"
+      data-context="signin"
+      data-ux_mode="popup"
+      data-callback="handleGoogleCredential"
+      data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+      data-type="standard"
+      data-shape="rectangular"
+      data-theme="filled_blue"
+      data-text="sign_in_with"
+      data-size="large"
+      data-logo_alignment="left">
+    </div>
     <p style="text-align:center;margin-top:10px;">
-      Nie masz konta? <a href="register.html">Zarejestruj się</a><br>
+      Nie masz konta?<br>
+      <a href="register.html">Zarejestruj się</a><br>
       <a href="reset_password_code.html" id="forgot-password-link" style="color:#0ff;">Zapomniałeś hasła?</a>
     </p>
 
@@ -103,6 +120,16 @@
       }
     });
   </script>
+  <script>
+    // Ustaw client_id z meta tagu
+    document.addEventListener("DOMContentLoaded", function () {
+      var clientId = document.querySelector('meta[name="google-client-id"]')?.content;
+      if (clientId) {
+        document.getElementById("g_id_onload").setAttribute("data-client_id", clientId);
+      }
+    });
+  </script>
+  <script src="google_auth.js"></script>
 </body>
 
 </html>

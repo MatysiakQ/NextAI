@@ -181,8 +181,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success) {
         window.location.href = "user_panel.html";
       } else {
-        if (data.message?.toLowerCase().includes("e-mailu") || data.message?.toLowerCase().includes("email")) {
-          markError(email, data.message, errorBox);
+        if (
+          data.message?.toLowerCase().includes("e-mailu") ||
+          data.message?.toLowerCase().includes("email")
+        ) {
+          // Zamień komunikat na żądany
+          errorBox.textContent = "Konto o taki e-mailu już istnieje";
+          markError(email, errorBox.textContent, errorBox);
         } else if (data.message?.toLowerCase().includes("login")) {
           markError(username, data.message, errorBox);
         } else if (data.message?.toLowerCase().includes("hasło")) {
