@@ -487,8 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           isUserLoggedIn = false;
           localStorage.removeItem('nextai_logged_in');
-          localStorage.setItem('justLoggedOut', '1'); // DODAJ TO!
-          window.location.href = 'index.html';        // I TO!
+          localStorage.setItem('justLoggedOut', '1');
+          window.location.href = '/index.html'; // poprawione przekierowanie
         } catch (error) {
           console.error('Błąd podczas wylogowywania:', error);
         }
@@ -858,4 +858,17 @@ document.addEventListener('keydown', (e) => {
       document.body.classList.remove('modal-open');
     });
   }
+});
+
+// MODAL "Wylogowano" na każdej podstronie
+document.addEventListener("DOMContentLoaded", function () {
+  setTimeout(function() {
+    if (localStorage.getItem("justLoggedOut") === "1") {
+      localStorage.removeItem("justLoggedOut");
+      var modal = document.getElementById("logout-modal");
+      if (modal) {
+        modal.classList.remove("hidden");
+      }
+    }
+  }, 100);
 });

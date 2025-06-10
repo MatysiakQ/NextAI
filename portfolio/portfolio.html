@@ -14,18 +14,18 @@
   <div class="background-grid"></div>
   <nav class="navbar">
     <div class="nav-container">
-      <a href="../index.html" class="nav-logo">NextAI</a>
+      <a href="/index.html" class="nav-logo">NextAI</a>
       <button class="nav-toggle" aria-label="Toggle navigation">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
       <ul class="nav-menu">
-        <li class="nav-item"><a href="../index.html">Strona główna</a></li>
-        <li class="nav-item"><a href="portfolio.html" class="active">Nasze Boty</a></li>
-        <li class="nav-item"><a href="../courses/courses.html">Kursy</a></li>
-        <li class="nav-item"><a href="../blog/blog.html">Blog</a></li>
-        <li class="nav-item"><a href="../sub/subskrypcja.html">Subskrypcja</a></li>
+        <li class="nav-item"><a href="/index.html">Strona główna</a></li>
+        <li class="nav-item"><a href="/portfolio/portfolio.html" class="active">Nasze Boty</a></li>
+        <li class="nav-item"><a href="/courses/courses.html">Kursy</a></li>
+        <li class="nav-item"><a href="/blog/blog.html">Blog</a></li>
+        <li class="nav-item"><a href="/sub/subskrypcja.html">Subskrypcja</a></li>
         <li class="nav-item user-menu-item" style="position:relative;display:flex;align-items:center;">
           <button id="user-menu-toggle" aria-label="Menu użytkownika"
             style="background:none;border:none;cursor:pointer;padding:0;margin-left:10px;">
@@ -196,6 +196,13 @@
   <a href="http://next-ai.pl"><p>Powered by NextAI</p></a>
   <p><a href="#" id="terms-link" > Regulamin firmy NextAi.</a></p>
 </footer>
+<!-- MODAL: Wylogowano -->
+<div id="logout-modal" class="modal hidden">
+  <div class="modal-content glitch" data-text="Wylogowano!">
+    <span class="close-button" onclick="document.getElementById('logout-modal').classList.add('hidden')">×</span>
+    <p>Zostałeś pomyślnie wylogowany.</p>
+  </div>
+</div>
 <script src="portfolio.js" defer></script>
 <script src="../main/main.js" defer></script>
 </body>

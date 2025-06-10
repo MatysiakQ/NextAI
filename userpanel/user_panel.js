@@ -615,9 +615,11 @@ document.body.addEventListener("click", function (e) {
       });
   }
 });
-const mainPageBtn = document.getElementById("nav-mainpage-btn");
-if (mainPageBtn) {
-  mainPageBtn.addEventListener("click", () => {
-    window.location.href = "../index.html"; // lub np. "index.html" – zależnie gdzie jest strona główna
-  });
-}
+document.addEventListener('DOMContentLoaded', function() {
+  const mainpageBtn = document.getElementById('nav-mainpage-btn');
+  if (mainpageBtn) {
+    mainpageBtn.addEventListener('click', function() {
+      window.location.href = '/index.html';
+    });
+  }
+});

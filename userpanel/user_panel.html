@@ -114,23 +114,12 @@
   </div>
 
   <script src="user_panel.js"></script>
-<<<<<<< HEAD
-=======
-  <script>
-    // Obsługa wylogowania: po kliknięciu wyloguj przekieruj na stronę główną
-    document.addEventListener('DOMContentLoaded', function () {
-      const logoutBtn = document.getElementById('logout2-btn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          fetch('auth.php?action=logout', { credentials: 'include' })
-            .then(() => {
-              window.location.href = '/index.html';
-            });
-        });
-      }
-    });
-  </script>
->>>>>>> a7ca4886eddfd04b8367eab6b3a359017fd9f957
+  <!-- MODAL: Wylogowano -->
+  <div id="logout-modal" class="modal hidden">
+    <div class="modal-content glitch" data-text="Wylogowano!">
+      <span class="close-button" onclick="document.getElementById('logout-modal').classList.add('hidden')">×</span>
+      <p>Zostałeś pomyślnie wylogowany.</p>
+    </div>
+  </div>
 </body>
 </html>
