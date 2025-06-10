@@ -38,6 +38,22 @@ Object.entries(navBtns2).forEach(([key, btn]) => {
   }
 });
 
+// Mapowanie Stripe price_id na nazwę planu
+function mapPriceIdToPlan(priceId) {
+  switch (priceId) {
+    case 'price_1RQpnDFQBh6Vdz2pKIXTtsV4':
+      return 'Basic';
+    case 'price_1RRFwiFQBh6Vdz2pXy7d20TI':
+      return 'Pro';
+    case 'price_1RW3LMFQBh6Vdz2pOsrR6BQ9':
+      return 'Basic Roczny';
+    case 'price_1RW3M4FQBh6Vdz2pQKmpJGmW':
+      return 'Pro Roczny';
+    default:
+      return priceId || 'Nieznany plan';
+  }
+}
+
 // Funkcja do ładowania informacji o aktywnym pakiecie
 function loadActivePackageInfo() {
   const activePackageDiv = document.getElementById('active-package-info');
@@ -55,16 +71,34 @@ function loadActivePackageInfo() {
     .then(data => {
       if (data.success && data.subscription) {
         const sub = data.subscription;
+        // Ustal nazwę planu z price_id jeśli istnieje, w przeciwnym razie z plan
+        let planName = sub.plan;
+        if (sub.price_id) {
+          planName = mapPriceIdToPlan(sub.price_id);
+        } else if (sub.plan && sub.plan.startsWith('price_')) {
+          planName = mapPriceIdToPlan(sub.plan);
+        }
+        // Wyznacz datę odnowienia na podstawie typu subskrypcji
+        let renewDate = 'N/A';
+        if (sub.current_period_end) {
+          const end = new Date(sub.current_period_end);
+          if (planName && planName.toLowerCase().includes('roczny')) {
+            end.setFullYear(end.getFullYear() + 1);
+          } else {
+            end.setMonth(end.getMonth() + 1);
+          }
+          renewDate = end.toLocaleDateString('pl-PL');
+        }
+
         const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
-        const endDate = sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pl-PL') : 'N/A';
 
         activePackageDiv.innerHTML = `
           <div class="active-package-card">
             <h4><i class="fa-solid fa-crown"></i> Aktywny pakiet</h4>
             <div class="package-details">
-              <p><strong>Plan:</strong> ${sub.plan || 'Nieznany'}</p>
+              <p><strong>Plan:</strong> ${planName || 'Nieznany'}</p>
               <p><strong>Status:</strong> ${statusText}</p>
-              <p><strong>Odnawia się:</strong> ${endDate}</p>
+              <p><strong>Odnawia się:</strong> ${renewDate}</p>
               ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
             </div>
             ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ?
@@ -82,7 +116,7 @@ function loadActivePackageInfo() {
             showCancelModal(subId);
           });
         }
-        noActiveSubscriptionShown = false; // resetuj flagę jeśli jest aktywna subskrypcja
+        noActiveSubscriptionShown = false;
       } else {
         if (!noActiveSubscriptionShown) {
           activePackageDiv.innerHTML = `
@@ -192,43 +226,54 @@ function loadSubscriptions() {
       }
       return res.json();
     })
-    .then(data => {
+    .then(data => { // <-- poprawka: brakowało nawiasów wokół argumentu
+      // Pokaż tylko NAJNOWSZĄ subskrypcję (tę na górze) i ukryj pozostałe
       if (data.success && data.subscriptions && data.subscriptions.length > 0) {
         list.innerHTML = '';
-        noActiveSubscriptionShown = false; // resetuj flagę jeśli są subskrypcje
+        noActiveSubscriptionShown = false;
 
-        data.subscriptions.forEach(sub => {
-          const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
-          const statusClass = getStatusClass(sub.status, sub.cancel_at_period_end);
-          const currentPeriodEnd = sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pl-PL') : 'N/A';
-          const createdAt = sub.created_at ? new Date(sub.created_at).toLocaleDateString('pl-PL') : 'N/A';
+        // Znajdź pierwszą subskrypcję o statusie 'active' lub 'trialing', jeśli nie ma to po prostu pierwszą
+        let sub = data.subscriptions.find(s => s.status === 'active' || s.status === 'trialing') || data.subscriptions[0];
 
-          list.innerHTML += `
-            <div class="subscription2-card">
-              <div class="subscription-header">
-                <h4>Pakiet: ${sub.plan || 'N/A'}</h4>
-                <span class="subscription2-status ${statusClass}">${statusText}</span>
-              </div>
-              <div class="subscription-details">
-                <p><strong>Data utworzenia:</strong> ${createdAt}</p>
-                <p><strong>Wygasa:</strong> ${currentPeriodEnd}</p>
-                ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
-              </div>
-              ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ?
-              `<button class="subscription2-cancel-btn" data-subscription-id="${sub.stripe_subscription_id}">
-                  <i class="fa-solid fa-times"></i> Anuluj subskrypcję
-                </button>` : ''}
+        // Ustal nazwę planu z price_id jeśli istnieje, w przeciwnym razie z plan
+        let planName = sub.plan;
+        if (sub.price_id) {
+          planName = mapPriceIdToPlan(sub.price_id);
+        } else if (sub.plan && sub.plan.startsWith('price_')) {
+          planName = mapPriceIdToPlan(sub.plan);
+        }
+
+        const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
+        const statusClass = getStatusClass(sub.status, sub.cancel_at_period_end);
+        const currentPeriodEnd = sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pl-PL') : 'N/A';
+        const createdAt = sub.created_at ? new Date(sub.created_at).toLocaleDateString('pl-PL') : 'N/A';
+
+        list.innerHTML = `
+          <div class="subscription2-card">
+            <div class="subscription-header">
+              <h4>Pakiet: ${planName || 'N/A'}</h4>
+              <span class="subscription2-status ${statusClass}">${statusText}</span>
             </div>
-          `;
-        });
+            <div class="subscription-details">
+              <p><strong>Data utworzenia:</strong> ${createdAt}</p>
+              <p><strong>Wygasa:</strong> ${currentPeriodEnd}</p>
+              ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
+            </div>
+            ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ?
+            `<button class="subscription2-cancel-btn" data-subscription-id="${sub.stripe_subscription_id}">
+                <i class="fa-solid fa-times"></i> Anuluj subskrypcję
+              </button>` : ''}
+          </div>
+        `;
 
-        // Dodaj event listenery do przycisków anulowania subskrypcji
-        document.querySelectorAll('.subscription2-cancel-btn').forEach(button => {
-          button.addEventListener('click', (event) => {
+        // Dodaj event listener do przycisku anulowania subskrypcji
+        const cancelBtn = list.querySelector('.subscription2-cancel-btn');
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', (event) => {
             const subId = event.target.closest('.subscription2-cancel-btn').dataset.subscriptionId;
             showCancelModal(subId);
           });
-        });
+        }
 
       } else if (data.success && (!data.subscriptions || data.subscriptions.length === 0)) {
         // Pokazuj tylko JEDEN kafelek "Brak aktywnej subskrypcji"

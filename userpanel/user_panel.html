@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
   <meta charset="UTF-8">
   <title>Panel użytkownika – NextAI</title>
@@ -8,9 +9,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <script>
     // Blokada wejścia bez zalogowania
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
       fetch("auth.php?action=subscriptions")
-        .then(res => res.json()) 
+        .then(res => res.json())
         .then(data => {
           if (!data.success) window.location.href = "login.php";
         })
@@ -18,6 +19,7 @@
     });
   </script>
 </head>
+
 <body>
   <div class="background-grid"></div>
   <div class="userpanel2-container">
@@ -28,7 +30,8 @@
         <button id="nav2-courses"><i class="fa-solid fa-graduation-cap"></i> Moje kursy</button>
       </div>
       <div class="logout2-btn-wrapper">
-        <button id="nav-mainpage-btn" class="nav-mainpage-btn"><i class="fa-solid fa-house"></i> Powrót na stronę główną</button>
+        <button id="nav-mainpage-btn" class="nav-mainpage-btn"><i class="fa-solid fa-house"></i> Powrót na stronę
+          główną</button>
         <button id="logout2-btn"><i class="fa-solid fa-right-from-bracket"></i> Wyloguj się</button>
       </div>
     </nav>
@@ -86,7 +89,6 @@
       <section id="section2-subscriptions" class="userpanel2-section">
         <h2 class="section-title glitch" data-text="Moje subskrypcje">Moje subskrypcje</h2>
         <div id="active-package-info" class="active-package-section"></div>
-        <div class="subscriptions2-list" id="subscriptions2-list"></div>
       </section>
       <!-- Sekcja: Moje kursy -->
       <section id="section2-courses" class="userpanel2-section">
@@ -114,12 +116,6 @@
   </div>
 
   <script src="user_panel.js"></script>
-  <!-- MODAL: Wylogowano -->
-  <div id="logout-modal" class="modal hidden">
-    <div class="modal-content glitch" data-text="Wylogowano!">
-      <span class="close-button" onclick="document.getElementById('logout-modal').classList.add('hidden')">×</span>
-      <p>Zostałeś pomyślnie wylogowany.</p>
-    </div>
-  </div>
+
 </body>
 </html>
