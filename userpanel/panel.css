@@ -76,38 +76,44 @@ body {
 
 .contact-form input[type="email"],
 .contact-form input[type="password"],
-.contact-form input[type="text"] {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 7px;
-  border: 1.5px solid #333;
-  background: #222;
-  color: #fff;
+.contact-form input[type="text"],
+.contact-form input,
+.contact-form textarea {
+  padding: 10px;
+  border: 1px solid #333;
+  background: #181a2b;
+  color: #0ff;
+  border-radius: 4px;
   font-size: 1em;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border 0.2s, box-shadow 0.2s;
+  width: 100%;
   margin-bottom: 8px;
   outline: none;
 }
 
-.contact-form input:focus {
-  border-color: #0ff;
-  box-shadow: 0 0 6px #0ff4;
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border: 1.5px solid #0ff;
+  box-shadow: 0 0 8px #0ff2;
 }
 
-.button-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
 .contact-form button {
   background: #0ff;
-  color: #000;
+  color: #181a2b;
   border: none;
   padding: 10px 16px;
   border-radius: 7px;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  font-weight: bold;
+  transition: background 0.2s, color 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px #0ff3;
+}
+
+.contact-form button:hover {
+  background: #00e6e6;
+  color: #10131e;
+  box-shadow: 0 0 16px #0ff6;
 }
 
 /* Efekt błędu */
@@ -136,6 +142,18 @@ body {
   margin-top: 10px;
   text-align: center;
   min-height: 18px;
+}
+.form-success {
+  color: #0ff;
+  margin-top: 10px;
+  text-align: center;
+  display: block;
+}
+.form-error {
+  color: #ff5c5c;
+  margin-top: 10px;
+  text-align: center;
+  display: block;
 }
 
 /* Linki */
@@ -203,8 +221,12 @@ textarea:-moz-autofill {
     font-size: 1.2em;
     padding-bottom: 3px;
   }
-  .button-wrapper {
-    margin-top: 6px;
+  .button-wrapper,
+  .contact-form .button-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
   }
   .background-grid {
     background-size: 18px 18px;

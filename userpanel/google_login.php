@@ -61,7 +61,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$user) {
     // 🆕 Rejestracja użytkownika z losowym hasłem
     $fakePassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
-    $stmt = $db->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+    $stmt = $db->prepare("INSERT INTO users (username, email, password, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
     $stmt->execute([$username, $email, $fakePassword]);
     $userId = $db->lastInsertId();
 } else {
@@ -69,11 +69,15 @@ if (!$user) {
     $username = $user['username'];
 }
 
-// ✅ Zaloguj użytkownika
+// ✅ Zaloguj użytkownika (ustaw zgodnie z auth.php)
 $_SESSION['user'] = [
     'id' => $userId,
     'email' => $email,
     'name' => $username
 ];
+$_SESSION['user_id'] = $userId;
+$_SESSION['user_email'] = $email;
+$_SESSION['username'] = $username;
+$_SESSION['login_time'] = time();
 
-echo json_encode(["success" => true]);
+echo json_encode(["success" => true, "redirect" => "user_panel.html"]);

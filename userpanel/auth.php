@@ -363,34 +363,37 @@ switch ($action) {
         break;
 
     case 'subscriptions':
-        if (!isset($_SESSION['user_email'])) {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Nieautoryzowany dostęp. Zaloguj się, aby wyświetlić subskrypcje.']);
+        // Pobierz email z sesji
+        $email = $_SESSION['user_email'] ?? null;
+        if (!$email) {
+            echo json_encode(['success' => false, 'message' => 'Nie jesteś zalogowany.']);
             exit;
         }
 
-        $userEmail = $_SESSION['user_email'];
-
         try {
-            $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
-            $stmt->execute();
-            $tableExists = $stmt->fetch();
-            
-            if (!$tableExists) {
-                echo json_encode(['success' => true, 'subscriptions' => []]);
-                exit;
+            // Pobierz najnowszą aktywną subskrypcję
+            $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE email = ? AND (status = 'active' OR status = 'trialing') ORDER BY current_period_end DESC LIMIT 1");
+            $stmt->execute([$email]);
+            $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($sub) {
+                $plan = $sub['plan'];
+                $subscription = ($plan === 'pro') ? 'pro' : (($plan === 'basic') ? 'basic' : 'free');
+                echo json_encode([
+                    'success' => true,
+                    'subscription' => $subscription,
+                    'plan' => $plan,
+                    'status' => $sub['status'],
+                    'current_period_end' => $sub['current_period_end'],
+                    'cancel_at_period_end' => $sub['cancel_at_period_end'],
+                ]);
+            } else {
+                echo json_encode(['success' => true, 'subscription' => 'free']);
             }
-
-            $stmt = $pdo->prepare("SELECT plan, status, created_at, current_period_end, stripe_subscription_id, cancel_at_period_end FROM subscriptions WHERE email = ? ORDER BY created_at DESC");
-            $stmt->execute([$userEmail]);
-            $subscriptions = $stmt->fetchAll();
-
-            echo json_encode(['success' => true, 'subscriptions' => $subscriptions]);
-        } catch (PDOException $e) {
-            error_log("Subscriptions query error: " . $e->getMessage(), 3, $pdoErrorLogFile);
-            echo json_encode(['success' => true, 'subscriptions' => []]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Błąd bazy danych.']);
         }
-        break;
+        exit;
 
     case 'check_active_subscription':
         if (!isset($_SESSION['user_email'])) {
@@ -529,13 +532,35 @@ switch ($action) {
     }
     $code = strtoupper(bin2hex(random_bytes(3)));
     $expires = date('Y-m-d H:i:s', time() + 600);
-    
+
     $stmt = $pdo->prepare("UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE email = ?");
     $stmt->execute([$code, $expires, $email]);
 
-    mail($email, "Kod resetu hasła - NextAI", "Twój kod resetu hasła to: $code", "From: no-reply@nextai.pl");
-    echo json_encode(['success' => true]);
-    break;
+    // Wyślij kod przez PHPMailer (SMTP)
+    require_once __DIR__ . '/../vendor/autoload.php';
+    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = $_ENV['SMTP_HOST'];
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $_ENV['SMTP_USER'];
+        $mail->Password   = $_ENV['SMTP_PASS'];
+        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = $_ENV['SMTP_PORT'];
+
+        $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['MAIL_FROM_NAME'] ?? 'NextAI');
+        $mail->addAddress($email);
+        $mail->isHTML(false);
+        $mail->Subject = "Kod resetu hasła - NextAI";
+        $mail->Body    = "Twój kod resetu hasła to: $code\nKod jest ważny przez 10 minut.\n\nJeśli nie prosiłeś o reset hasła, zignoruj tę wiadomość.";
+
+        $mail->send();
+        echo json_encode(['success' => true]);
+    } catch (\Exception $e) {
+        error_log("[RESET PASSWORD MAIL ERROR] " . $mail->ErrorInfo, 3, __DIR__ . '/../php-error.log');
+        echo json_encode(['success' => false, 'message' => 'Nie udało się wysłać maila z kodem. Skontaktuj się z obsługą.']);
+    }
+    exit;
 
 case 'verify_reset_code':
     $email = trim($_POST['email'] ?? '');

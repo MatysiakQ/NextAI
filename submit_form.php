@@ -40,6 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email   = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
     $phone   = htmlspecialchars(trim($_POST['phone'] ?? ''));
     $message = htmlspecialchars(trim($_POST['message'] ?? ''));
+    $subject = htmlspecialchars(trim($_POST['subject'] ?? 'Nowa wiadomość z formularza kontaktowego'));
 
     // Walidacja danych
     if (!$name || !$email || !$message) {
@@ -85,16 +86,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $mail->addReplyTo($email, $name);
 
         $mail->isHTML(false);
-        $subject = $_POST['subject'] ?? 'Nowa wiadomość z formularza kontaktowego';
         $mail->Subject = $subject;
         $mail->Body    = "Imię i nazwisko: $name\n"
                        . "Email: $email\n"
+                       . "Telefon: $phone\n"
                        . "Wiadomość: $message\n";
 
         file_put_contents(__DIR__ . '/logs/last_email.txt', $mail->Body);
 
         if($mail->send()) {
             log_error("Wiadomość wysłana pomyślnie.");
+            http_response_code(200);
+            exit("Wiadomość wysłana pomyślnie.");
         } else {
             log_error("Błąd wysyłki maila: " . $mail->ErrorInfo);
             http_response_code(500);

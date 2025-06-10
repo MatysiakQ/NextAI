@@ -1,4 +1,3 @@
-
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -63,7 +62,7 @@ try {
         $subscriptionId = $data->subscription;
         $email = $data->customer_email;
         $plan = $data->metadata->plan ?? 'unknown';
-        
+
         // Pobierz user_id jeśli istnieje
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);

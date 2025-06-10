@@ -114,5 +114,23 @@
   </div>
 
   <script src="user_panel.js"></script>
+<<<<<<< HEAD
+=======
+  <script>
+    // Obsługa wylogowania: po kliknięciu wyloguj przekieruj na stronę główną
+    document.addEventListener('DOMContentLoaded', function () {
+      const logoutBtn = document.getElementById('logout2-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          fetch('auth.php?action=logout', { credentials: 'include' })
+            .then(() => {
+              window.location.href = '/index.html';
+            });
+        });
+      }
+    });
+  </script>
+>>>>>>> a7ca4886eddfd04b8367eab6b3a359017fd9f957
 </body>
 </html>
