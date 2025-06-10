@@ -181,13 +181,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success) {
         window.location.href = "user_panel.html";
       } else {
-        if (data.message?.toLowerCase().includes("email")) {
+        if (data.message?.toLowerCase().includes("e-mailu") || data.message?.toLowerCase().includes("email")) {
           markError(email, data.message, errorBox);
+        } else if (data.message?.toLowerCase().includes("login")) {
+          markError(username, data.message, errorBox);
         } else if (data.message?.toLowerCase().includes("hasło")) {
           markError(password, data.message, errorBox);
           markError(password2, data.message, errorBox);
-        } else if (data.message?.toLowerCase().includes("login")) {
-          markError(username, data.message, errorBox);
         } else {
           errorBox.textContent = data.message || "Wystąpił błąd podczas rejestracji";
         }
@@ -215,14 +215,19 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "login.html";
       });
 
-    const logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-      logoutBtn.onclick = function () {
-        fetch("auth.php?action=logout", { credentials: "include" }).then(() => {
-          window.location.href = "login.html";
-        });
-      };
-    }
+    // OBSŁUGA WSZYSTKICH PRZYCISKÓW LOGOUT
+    const logoutIds = ["logout2-btn", "logout-btn", "user-logout-btn"];
+    logoutIds.forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.onclick = function () {
+          fetch("auth.php?action=logout", { credentials: "include" }).then(() => {
+            localStorage.setItem("showLogoutModal", "1");
+            setTimeout(() => window.location.href = "/index.html", 150);
+          });
+        };
+      }
+    });
   }
 
   function loadSubscriptionsForMainPage() {

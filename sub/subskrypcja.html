@@ -90,8 +90,43 @@
       <button id="chat-send" aria-label="Wyślij wiadomość"><i class="fa fa-paper-plane"></i></button>
     </div>
   </div>
+  <div id="logout-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Wylogowano</h3>
+      </div>
+      <div class="modal-body">
+        <p>Zostałeś pomyślnie wylogowany.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="logout-modal-ok-btn" class="modal-btn keep-btn">OK</button>
+      </div>
+    </div>
+  </div>
   <script src="subskrypcja.js" defer></script>
   <script src="../main/main.js" defer></script>
+  <script src="../modal.js" defer></script>
+  <script>
+    function showLogoutModal() {
+      const modal = document.getElementById('logout-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        const okBtn = document.getElementById('logout-modal-ok-btn');
+        if (okBtn) {
+          okBtn.onclick = function () {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            window.location.href = "login.html";
+          };
+        }
+      }
+    }
+    if (localStorage.getItem("showLogoutModal") === "1") {
+      localStorage.removeItem("showLogoutModal");
+      showLogoutModal();
+    }
+  </script>
 </body>
 
 </html>
