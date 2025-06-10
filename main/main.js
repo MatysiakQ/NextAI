@@ -8,13 +8,13 @@ function getCorrectPath() {
 }
 // main.js
 document.addEventListener('DOMContentLoaded', () => {
-    window.checkLoginStatus = async function() {
+  window.checkLoginStatus = async function () {
     try {
-      const res = await fetch(getCorrectPath() + 'auth.php?action=verify', { 
+      const res = await fetch(getCorrectPath() + 'auth.php?action=verify', {
         credentials: 'include',
         cache: 'no-cache'
       });
-      
+
       // Sprawdź czy odpowiedź to JSON
       const contentType = res.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
@@ -23,9 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.cookie = 'nextai_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=lax';
         return false;
       }
-      
+
       const data = await res.json();
-      
+
       // Zapisz status w localStorage i cookie jako backup
       if (data.success && data.logged_in) {
         localStorage.setItem('nextai_logged_in', 'true');
@@ -47,15 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Funkcja inicjalizująca sprawdzanie sesji
-  window.initSessionCheck = function() {
+  window.initSessionCheck = function () {
     // Sprawdź status przy załadowaniu strony
     window.checkLoginStatus();
-    
+
     // Sprawdzaj status co 10 minut
     setInterval(() => {
       window.checkLoginStatus();
     }, 10 * 60 * 1000);
-    
+
     // Sprawdź status gdy użytkownik wraca do karty
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   if (chatSend) {
     chatSend.addEventListener('click', sendMessage);
   }
@@ -398,11 +398,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userMenuToggle && userMenu) {
     async function checkLoginStatus() {
       try {
-        const res = await fetch('../userpanel/auth.php?action=verify', { 
+        const res = await fetch('../userpanel/auth.php?action=verify', {
           credentials: 'include',
           cache: 'no-cache'
         });
-        
+
         // Sprawdź czy odpowiedź to JSON
         const contentType = res.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
@@ -411,17 +411,17 @@ document.addEventListener('DOMContentLoaded', () => {
           renderUserMenu();
           return;
         }
-        
+
         const data = await res.json();
         isUserLoggedIn = data.success && data.logged_in;
-        
+
         // Zapisz status w localStorage jako backup
         if (isUserLoggedIn) {
           localStorage.setItem('nextai_logged_in', 'true');
         } else {
           localStorage.removeItem('nextai_logged_in');
         }
-        
+
         renderUserMenu();
       } catch (error) {
         console.error('Błąd sprawdzania statusu logowania:', error);
@@ -474,14 +474,14 @@ document.addEventListener('DOMContentLoaded', () => {
     userMenu.addEventListener('click', async function (e) {
       if (e.target.id === 'user-login-btn') {
         localStorage.setItem('afterLoginRedirect', window.location.pathname);
-        window.location.href = '../userpanel/login.html';
+        window.location.href = '../userpanel/login.php';
       }
       if (e.target.id === 'user-account-btn') {
         window.location.href = '../userpanel/user_panel.html';
       }
       if (e.target.id === 'user-logout-btn') {
         try {
-          await fetch('../userpanel/auth.php?action=logout', { 
+          await fetch('../userpanel/auth.php?action=logout', {
             credentials: 'include',
             method: 'POST'
           });
@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sprawdź status logowania na starcie (na każdej stronie)
     checkLoginStatus();
-    
+
     // Sprawdzaj status co 10 minut
     setInterval(checkLoginStatus, 10 * 60 * 1000);
   }
@@ -536,11 +536,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Sprawdź status logowania przed pokazaniem modala
       let loggedIn = false;
       try {
-        const res = await fetch('../userpanel/auth.php?action=verify', { 
+        const res = await fetch('../userpanel/auth.php?action=verify', {
           credentials: 'include',
           cache: 'no-cache'
         });
-        
+
         // Sprawdź czy odpowiedź to JSON
         const contentType = res.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch {
         loggedIn = false;
       }
-      
+
       if (loggedIn) {
         if (addOpinionModal) {
           addOpinionModal.classList.remove('hidden');
@@ -862,7 +862,7 @@ document.addEventListener('keydown', (e) => {
 
 // MODAL "Wylogowano" na każdej podstronie
 document.addEventListener("DOMContentLoaded", function () {
-  setTimeout(function() {
+  setTimeout(function () {
     if (localStorage.getItem("justLoggedOut") === "1") {
       localStorage.removeItem("justLoggedOut");
       var modal = document.getElementById("logout-modal");

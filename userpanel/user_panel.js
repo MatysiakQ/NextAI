@@ -57,7 +57,7 @@ function loadActivePackageInfo() {
         const sub = data.subscription;
         const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
         const endDate = sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pl-PL') : 'N/A';
-        
+
         activePackageDiv.innerHTML = `
           <div class="active-package-card">
             <h4><i class="fa-solid fa-crown"></i> Aktywny pakiet</h4>
@@ -67,8 +67,8 @@ function loadActivePackageInfo() {
               <p><strong>Odnawia się:</strong> ${endDate}</p>
               ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
             </div>
-            ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ? 
-              `<button class="cancel-package-btn" data-subscription-id="${sub.stripe_subscription_id}">
+            ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ?
+            `<button class="cancel-package-btn" data-subscription-id="${sub.stripe_subscription_id}">
                 <i class="fa-solid fa-times"></i> Anuluj subskrypcję
               </button>` : ''}
           </div>
@@ -113,7 +113,7 @@ function getStatusText(status, cancelAtPeriodEnd) {
   if (cancelAtPeriodEnd) {
     return 'W trakcie anulowania';
   }
-  
+
   switch (status) {
     case 'active':
       return 'Aktywna';
@@ -157,7 +157,7 @@ function loadUserData() {
         if (avatarImg) avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
         return;
       }
-      
+
       if (usernameStatic) usernameStatic.textContent = data.user.username || "Brak nazwy";
       if (emailStatic) emailStatic.textContent = data.user.email || "";
       if (avatarImg) avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
@@ -167,7 +167,7 @@ function loadUserData() {
       const usernameStatic = document.getElementById('profile2-username-static');
       const emailStatic = document.getElementById('profile2-email-static');
       const avatarImg = document.getElementById('avatar2-img');
-      
+
       if (usernameStatic) usernameStatic.textContent = "Błąd";
       if (emailStatic) emailStatic.textContent = "Błąd";
       if (avatarImg) avatarImg.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
@@ -183,14 +183,14 @@ function loadSubscriptions() {
 
   fetch('auth.php?action=subscriptions')
     .then(res => {
-        if (!res.ok) {
-            if (res.status === 401) {
-                window.location.href = "login.html";
-                return;
-            }
-            throw new Error(`HTTP error! status: ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = "login.php";
+          return;
         }
-        return res.json();
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
     })
     .then(data => {
       if (data.success && data.subscriptions && data.subscriptions.length > 0) {
@@ -214,8 +214,8 @@ function loadSubscriptions() {
                 <p><strong>Wygasa:</strong> ${currentPeriodEnd}</p>
                 ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
               </div>
-              ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ? 
-                `<button class="subscription2-cancel-btn" data-subscription-id="${sub.stripe_subscription_id}">
+              ${sub.status === 'active' && !sub.cancel_at_period_end && sub.stripe_subscription_id ?
+              `<button class="subscription2-cancel-btn" data-subscription-id="${sub.stripe_subscription_id}">
                   <i class="fa-solid fa-times"></i> Anuluj subskrypcję
                 </button>` : ''}
             </div>
@@ -261,7 +261,7 @@ function getStatusClass(status, cancelAtPeriodEnd) {
   if (cancelAtPeriodEnd) {
     return 'pending-cancel';
   }
-  
+
   switch (status) {
     case 'active':
       return 'active';
@@ -284,11 +284,11 @@ function showCancelModal(subscriptionId) {
     console.error('Modal anulowania subskrypcji nie został znaleziony');
     return;
   }
-  
+
   // Przechowaj ID subskrypcji w modalu
   modal.dataset.subscriptionId = subscriptionId;
   modal.style.display = 'flex';
-  
+
   // Zablokuj przewijanie tła
   document.body.style.overflow = 'hidden';
 }
@@ -305,40 +305,40 @@ function hideCancelModal() {
 
 // Funkcja do anulowania subskrypcji
 function cancelSubscription(subscriptionId) {
-    if (!subscriptionId) {
-        alert('Błąd: Brak ID subskrypcji');
-        return;
-    }
+  if (!subscriptionId) {
+    alert('Błąd: Brak ID subskrypcji');
+    return;
+  }
 
-    // Ukryj modal
-    hideCancelModal();
+  // Ukryj modal
+  hideCancelModal();
 
-    fetch('auth.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ action: 'cancel_subscription', subscriptionId: subscriptionId })
-    })
+  fetch('auth.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ action: 'cancel_subscription', subscriptionId: subscriptionId })
+  })
     .then(res => {
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
     })
     .then(data => {
-        if (data.success) {
-            alert('Anulowanie subskrypcji zostało zainicjowane.');
-            // Odśwież listę subskrypcji i informacje o pakiecie
-            loadSubscriptions();
-            loadActivePackageInfo();
-        } else {
-            alert('Błąd podczas anulowania subskrypcji: ' + (data.message || 'Nieznany błąd'));
-        }
+      if (data.success) {
+        alert('Anulowanie subskrypcji zostało zainicjowane.');
+        // Odśwież listę subskrypcji i informacje o pakiecie
+        loadSubscriptions();
+        loadActivePackageInfo();
+      } else {
+        alert('Błąd podczas anulowania subskrypcji: ' + (data.message || 'Nieznany błąd'));
+      }
     })
     .catch(error => {
-        console.error('Błąd sieci podczas anulowania subskrypcji:', error);
-        alert('Wystąpił błąd sieci podczas anulowania subskrypcji.');
+      console.error('Błąd sieci podczas anulowania subskrypcji:', error);
+      alert('Wystąpił błąd sieci podczas anulowania subskrypcji.');
     });
 }
 
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileSuccess = document.getElementById('profile2-success');
 
   if (showChangeUsernameBtn && changeUsernameForm) {
-    showChangeUsernameBtn.onclick = function() {
+    showChangeUsernameBtn.onclick = function () {
       changeUsernameForm.style.display = "flex";
       changeEmailForm.style.display = "none";
       changePasswordForm.style.display = "none";
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
   if (showChangeEmailBtn && changeEmailForm) {
-    showChangeEmailBtn.onclick = function() {
+    showChangeEmailBtn.onclick = function () {
       changeEmailForm.style.display = "flex";
       changeUsernameForm.style.display = "none";
       changePasswordForm.style.display = "none";
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
   if (showChangePasswordBtn && changePasswordForm) {
-    showChangePasswordBtn.onclick = function() {
+    showChangePasswordBtn.onclick = function () {
       changePasswordForm.style.display = "flex";
       changeUsernameForm.style.display = "none";
       changeEmailForm.style.display = "none";
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Cancel buttons
   const cancelUsernameBtn = document.getElementById('cancel-username-btn');
   if (cancelUsernameBtn && changeUsernameForm) {
-    cancelUsernameBtn.onclick = function() {
+    cancelUsernameBtn.onclick = function () {
       changeUsernameForm.style.display = "none";
       profileError.textContent = "";
       profileSuccess.style.display = "none";
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const cancelEmailBtn = document.getElementById('cancel-email-btn');
   if (cancelEmailBtn && changeEmailForm) {
-    cancelEmailBtn.onclick = function() {
+    cancelEmailBtn.onclick = function () {
       changeEmailForm.style.display = "none";
       profileError.textContent = "";
       profileSuccess.style.display = "none";
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const cancelPasswordBtn = document.getElementById('cancel-password-btn');
   if (cancelPasswordBtn && changePasswordForm) {
-    cancelPasswordBtn.onclick = function() {
+    cancelPasswordBtn.onclick = function () {
       changePasswordForm.style.display = "none";
       profileError.textContent = "";
       profileSuccess.style.display = "none";
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Save username
   const saveUsernameBtn = document.getElementById('save-username-btn');
   if (saveUsernameBtn) {
-    saveUsernameBtn.onclick = function() {
+    saveUsernameBtn.onclick = function () {
       const newUsername = document.getElementById('new-username').value.trim();
       profileError.textContent = "";
       profileSuccess.style.display = "none";
@@ -428,27 +428,27 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `action=change_username&username=${encodeURIComponent(newUsername)}`
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          profileSuccess.textContent = "Login został zmieniony!";
-          profileSuccess.style.display = "block";
-          changeUsernameForm.style.display = "none";
-          loadUserData();
-        } else {
-          profileError.textContent = data.message || "Błąd zmiany loginu.";
-        }
-      })
-      .catch(() => {
-        profileError.textContent = "Błąd sieci.";
-      });
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            profileSuccess.textContent = "Login został zmieniony!";
+            profileSuccess.style.display = "block";
+            changeUsernameForm.style.display = "none";
+            loadUserData();
+          } else {
+            profileError.textContent = data.message || "Błąd zmiany loginu.";
+          }
+        })
+        .catch(() => {
+          profileError.textContent = "Błąd sieci.";
+        });
     };
   }
 
   // Save email
   const saveEmailBtn = document.getElementById('save-email-btn');
   if (saveEmailBtn) {
-    saveEmailBtn.onclick = function() {
+    saveEmailBtn.onclick = function () {
       const newEmail = document.getElementById('new-email').value.trim();
       profileError.textContent = "";
       profileSuccess.style.display = "none";
@@ -461,27 +461,27 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `action=change_email&email=${encodeURIComponent(newEmail)}`
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          profileSuccess.textContent = "E-mail został zmieniony!";
-          profileSuccess.style.display = "block";
-          changeEmailForm.style.display = "none";
-          loadUserData();
-        } else {
-          profileError.textContent = data.message || "Błąd zmiany e-maila.";
-        }
-      })
-      .catch(() => {
-        profileError.textContent = "Błąd sieci.";
-      });
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            profileSuccess.textContent = "E-mail został zmieniony!";
+            profileSuccess.style.display = "block";
+            changeEmailForm.style.display = "none";
+            loadUserData();
+          } else {
+            profileError.textContent = data.message || "Błąd zmiany e-maila.";
+          }
+        })
+        .catch(() => {
+          profileError.textContent = "Błąd sieci.";
+        });
     };
   }
 
   // Save password
   const savePasswordBtn = document.getElementById('save-password-btn');
   if (savePasswordBtn) {
-    savePasswordBtn.onclick = function() {
+    savePasswordBtn.onclick = function () {
       const oldPass = document.getElementById('profile2-old-password').value;
       const pass1 = document.getElementById('profile2-password').value;
       const pass2 = document.getElementById('profile2-password2').value;
@@ -509,22 +509,22 @@ document.addEventListener('DOMContentLoaded', () => {
           confirmNewPassword: pass2
         })
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          profileSuccess.textContent = "Hasło zostało zmienione!";
-          profileSuccess.style.display = "block";
-          changePasswordForm.style.display = "none";
-          document.getElementById('profile2-old-password').value = "";
-          document.getElementById('profile2-password').value = "";
-          document.getElementById('profile2-password2').value = "";
-        } else {
-          profileError.textContent = data.message || "Błąd zmiany hasła.";
-        }
-      })
-      .catch(() => {
-        profileError.textContent = "Błąd sieci.";
-      });
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            profileSuccess.textContent = "Hasło zostało zmienione!";
+            profileSuccess.style.display = "block";
+            changePasswordForm.style.display = "none";
+            document.getElementById('profile2-old-password').value = "";
+            document.getElementById('profile2-password').value = "";
+            document.getElementById('profile2-password2').value = "";
+          } else {
+            profileError.textContent = data.message || "Błąd zmiany hasła.";
+          }
+        })
+        .catch(() => {
+          profileError.textContent = "Błąd sieci.";
+        });
     };
   }
 
@@ -533,25 +533,25 @@ document.addEventListener('DOMContentLoaded', () => {
   fetch("auth.php?action=user_data")
     .then(res => {
       if (!res.ok) {
-        window.location.href = "login.html";
+        window.location.href = "login.php";
         return;
       }
       return res.json();
     })
     .then(data => {
       if (!data || !data.success) {
-        window.location.href = "login.html";
+        window.location.href = "login.php";
       } else {
         loadUserData(); // <- wywołaj od razu po wejściu
         loadActivePackageInfo();
       }
     })
-    .catch(() => window.location.href = "login.html");
+    .catch(() => window.location.href = "login.php");
 
   // Wylogowywanie (poprawiona obsługa: przekierowanie na stronę główną po wylogowaniu)
   const logout2Btn = document.getElementById("logout2-btn");
   if (logout2Btn) {
-    logout2Btn.onclick = function() {
+    logout2Btn.onclick = function () {
       fetch("auth.php?action=logout", { credentials: "include" })
         .then(() => {
           localStorage.setItem("justLoggedOut", "1");
@@ -570,32 +570,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('cancel-subscription-modal');
 
   if (confirmCancelBtn) {
-      confirmCancelBtn.addEventListener('click', () => {
-          const subscriptionId = modal?.dataset.subscriptionId;
-          if (subscriptionId) {
-              cancelSubscription(subscriptionId);
-          }
-      });
+    confirmCancelBtn.addEventListener('click', () => {
+      const subscriptionId = modal?.dataset.subscriptionId;
+      if (subscriptionId) {
+        cancelSubscription(subscriptionId);
+      }
+    });
   }
 
   if (keepSubscriptionBtn) {
-      keepSubscriptionBtn.addEventListener('click', hideCancelModal);
+    keepSubscriptionBtn.addEventListener('click', hideCancelModal);
   }
 
   // Zamykanie modala po kliknięciu na tło
   if (modal) {
-      modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-              hideCancelModal();
-          }
-      });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        hideCancelModal();
+      }
+    });
   }
 
   // Zamykanie modala klawiszem Escape
   document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-          hideCancelModal();
-      }
+    if (e.key === 'Escape') {
+      hideCancelModal();
+    }
   });
 });
 
@@ -615,10 +615,10 @@ document.body.addEventListener("click", function (e) {
       });
   }
 });
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const mainpageBtn = document.getElementById('nav-mainpage-btn');
   if (mainpageBtn) {
-    mainpageBtn.addEventListener('click', function() {
+    mainpageBtn.addEventListener('click', function () {
       window.location.href = '/index.html';
     });
   }
