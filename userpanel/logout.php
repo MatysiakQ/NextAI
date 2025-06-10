@@ -13,13 +13,13 @@ if ($wasLoggedIn) {
     echo json_encode([
         'success' => true, 
         'message' => 'Zostałeś pomyślnie wylogowany.',
-        'redirectTo' => 'login.html'
+        'redirectTo' => '/index.html'
     ]);
 } else {
     echo json_encode([
         'success' => false, 
         'message' => 'Nie byłeś zalogowany.',
-        'redirectTo' => 'login.html'
+        'redirectTo' => '/index.html'
     ]);
 }
 ?>

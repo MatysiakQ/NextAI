@@ -539,7 +539,7 @@
     <div id="success-modal" class="modal hidden">
       <div class="modal-content glitch" data-text="Wiadomość wysłana!">
         <span class="close-button" onclick="document.getElementById('success-modal').classList.add('hidden')">×</span>
-        <p>Dziękujemy za wiadomość! Skontaktujemy się z Tobą niebawem.</p>
+        <p id="success-modal-message">Dziękujemy za wiadomość! Skontaktujemy się z Tobą niebawem.</p>
       </div>
     </div>
 
@@ -677,8 +677,33 @@
           }
         });
       });
+      // MODAL PO WYLOGOWANIU
+      document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function() {
+          if (localStorage.getItem("justLoggedOut") === "1") {
+            localStorage.removeItem("justLoggedOut");
+            var modal = document.getElementById("logout-modal");
+            if (modal) {
+              modal.classList.remove("hidden");
+            }
+          }
+        }, 100); // opóźnienie, by mieć pewność, że modal jest w DOM
+      });
+      // WYLOGOWANIE I PRZEŁADOWANIE STRONY
+      function logoutAndReload() {
+        localStorage.setItem("justLoggedOut", "1");
+        window.location.href = "index.html";
+      }
     </script>
 
+    <!-- ...istniejące modale... -->
+    <div id="logout-modal" class="modal hidden">
+      <div class="modal-content glitch" data-text="Wylogowano!">
+        <span class="close-button" onclick="document.getElementById('logout-modal').classList.add('hidden')">×</span>
+        <p>Zostałeś pomyślnie wylogowany.</p>
+      </div>
+    </div>
+    <!-- ... -->
 
 </body>
 

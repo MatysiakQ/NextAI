@@ -487,9 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           isUserLoggedIn = false;
           localStorage.removeItem('nextai_logged_in');
-          renderUserMenu();
-          userMenu.classList.add('hidden');
-          userMenuToggle.classList.remove('active');
+          localStorage.setItem('justLoggedOut', '1'); // DODAJ TO!
+          window.location.href = 'index.html';        // I TO!
         } catch (error) {
           console.error('Błąd podczas wylogowywania:', error);
         }

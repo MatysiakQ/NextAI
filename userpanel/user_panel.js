@@ -554,7 +554,8 @@ document.addEventListener('DOMContentLoaded', () => {
     logout2Btn.onclick = function() {
       fetch("auth.php?action=logout", { credentials: "include" })
         .then(() => {
-          window.location.href = "/";
+          localStorage.setItem("justLoggedOut", "1");
+          window.location.href = "/index.html";
         })
         .catch(error => {
           console.error("Błąd podczas wylogowywania:", error);
@@ -605,7 +606,8 @@ document.body.addEventListener("click", function (e) {
     fetch("auth.php?action=logout", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
-        window.location.href = data.redirectTo || "login.html";
+        localStorage.setItem("justLoggedOut", "1");
+        window.location.href = data.redirectTo || "/index.html";
       })
       .catch(error => {
         console.error("Błąd podczas wylogowywania:", error);
