@@ -10,6 +10,9 @@ const sections2 = {
   courses: document.getElementById('section2-courses')
 };
 
+// Flaga do kontroli wyświetlania panelu "Brak aktywnej subskrypcji"
+let noActiveSubscriptionShown = false;
+
 // Obsługa nawigacji
 Object.entries(navBtns2).forEach(([key, btn]) => {
   if (btn) {
@@ -18,6 +21,9 @@ Object.entries(navBtns2).forEach(([key, btn]) => {
       Object.values(sections2).forEach(s => s && s.classList.remove('active'));
       btn.classList.add('active');
       if (sections2[key]) sections2[key].classList.add('active');
+
+      // Resetuj flagę przy każdej zmianie sekcji
+      noActiveSubscriptionShown = false;
 
       // Jeśli przechodzimy do sekcji subskrypcji, załaduj je i aktywny pakiet
       if (key === 'subscriptions') {
@@ -76,14 +82,20 @@ function loadActivePackageInfo() {
             showCancelModal(subId);
           });
         }
+        noActiveSubscriptionShown = false; // resetuj flagę jeśli jest aktywna subskrypcja
       } else {
-        activePackageDiv.innerHTML = `
-          <div class="no-package-card">
-            <h4><i class="fa-solid fa-info-circle"></i> Brak aktywnego pakietu</h4>
-            <p>Nie masz obecnie aktywnej subskrypcji.</p>
-            <a href="../sub/subskrypcja.html" class="subscribe-link">Wybierz pakiet</a>
-          </div>
-        `;
+        if (!noActiveSubscriptionShown) {
+          activePackageDiv.innerHTML = `
+            <div class="no-package-card">
+              <h4><i class="fa-solid fa-info-circle"></i> Brak aktywnego pakietu</h4>
+              <p>Nie masz obecnie aktywnej subskrypcji.</p>
+              <a href="../sub/subskrypcja.html" class="subscribe-link">Wybierz pakiet</a>
+            </div>
+          `;
+          noActiveSubscriptionShown = true;
+        } else {
+          activePackageDiv.innerHTML = '';
+        }
       }
     })
     .catch(error => {
@@ -181,13 +193,9 @@ function loadSubscriptions() {
         return res.json();
     })
     .then(data => {
-      if (data.success && data.subscriptions) {
+      if (data.success && data.subscriptions && data.subscriptions.length > 0) {
         list.innerHTML = '';
-
-        if (data.subscriptions.length === 0) {
-          // Nie pokazuj dolnego białego napisu, zostaw tylko kafelek z loadActivePackageInfo
-          return;
-        }
+        noActiveSubscriptionShown = false; // resetuj flagę jeśli są subskrypcje
 
         data.subscriptions.forEach(sub => {
           const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
@@ -222,13 +230,29 @@ function loadSubscriptions() {
           });
         });
 
+      } else if (data.success && (!data.subscriptions || data.subscriptions.length === 0)) {
+        // Pokazuj tylko JEDEN kafelek "Brak aktywnej subskrypcji"
+        if (!noActiveSubscriptionShown) {
+          list.innerHTML = `
+            <div class="no-package-card">
+              <h4><i class="fa-solid fa-info-circle"></i> Brak aktywnej subskrypcji</h4>
+              <p>Nie masz obecnie aktywnej subskrypcji.</p>
+              <a href="../sub/subskrypcja.html" class="subscribe-link">Wybierz pakiet</a>
+            </div>
+          `;
+          noActiveSubscriptionShown = true;
+        } else {
+          list.innerHTML = '';
+        }
       } else {
         list.innerHTML = `<p>Błąd ładowania subskrypcji: ${data.message || 'Nieznany błąd'}</p>`;
       }
     })
     .catch(error => {
       console.error('Błąd pobierania subskrypcji:', error);
-      list.innerHTML = '<p>Wystąpił błąd podczas ładowania subskrypcji.</p>';
+      if (list.innerHTML === '' || list.innerHTML.includes('Ładowanie subskrypcji')) {
+        list.innerHTML = '<p>Wystąpił błąd podczas ładowania subskrypcji.</p>';
+      }
     });
 }
 

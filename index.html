@@ -523,7 +523,7 @@
 
     <section id="contact" class="contact spotlight">
       <h2 class="section-title glitch" data-text="Skontaktuj się z nami">Skontaktuj się z nami</h2>
-      <form class="contact-form">
+      <form class="contact-form" id="main-contact-form">
         <label for="name">Imię</label>
         <input id="name" type="text" name="name" placeholder="Imię" required />
         <label for="email">Email</label>
@@ -531,6 +531,8 @@
         <label for="message">Wiadomość</label>
         <textarea id="message" name="message" placeholder="Wiadomość" required></textarea>
         <button type="submit">Wyślij</button>
+        <div id="main-contact-error" class="form-error" style="display:none;"></div>
+        <div id="main-contact-success" class="form-success" style="display:none;">Wiadomość wysłana!</div>
       </form>
     </section>
 
@@ -633,6 +635,45 @@
             // NIE pokazuj modala!
             // document.getElementById('add-opinion-modal').classList.add('hidden');
             setTimeout(() => { info.style.display = 'none'; }, 4000);
+          }
+        });
+      });
+      // Obsługa formularza kontaktowego (AJAX)
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("main-contact-form");
+        if (!form) return;
+        const errorBox = document.getElementById("main-contact-error");
+        const successBox = document.getElementById("main-contact-success");
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          errorBox.style.display = "none";
+          successBox.style.display = "none";
+          const name = form.name.value.trim();
+          const email = form.email.value.trim();
+          const message = form.message.value.trim();
+          if (!name || !email || !message) {
+            errorBox.textContent = "Wszystkie pola są wymagane.";
+            errorBox.style.display = "block";
+            return;
+          }
+          try {
+            const res = await fetch("submit_form.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&message=${encodeURIComponent(message)}`
+            });
+            const text = await res.text();
+            if (res.ok && text.match(/wysłana/i)) {
+              successBox.textContent = "Wiadomość wysłana!";
+              successBox.style.display = "block";
+              form.reset();
+            } else {
+              errorBox.textContent = text || "Błąd wysyłki formularza.";
+              errorBox.style.display = "block";
+            }
+          } catch (err) {
+            errorBox.textContent = "Błąd połączenia z serwerem.";
+            errorBox.style.display = "block";
           }
         });
       });
