@@ -591,18 +591,6 @@
       </div>
     </div>
 
-    <div id="logout-modal" class="modal-overlay" style="display:none;">
-      <div class="modal-content">
-        <div class="modal-header">  
-          <h3>Wylogowano</h3>
-        </div>
-        <div class="modal-body">
-          <p>Zostałeś pomyślnie wylogowany.</p>
-        </div>
-        <div class="modal-footer">
-          <button id="logout-modal-ok-btn" class="modal-btn keep-btn">OK</button>
-        </div>
-      </div>
     </div>
     <footer class="site-footer">
       <p>&copy; 2025 NextAI. Wszelkie prawa zastrzeżone.</p>
@@ -614,9 +602,6 @@
 
     <script src="main/main.js" defer></script>
     <script src="main/lock-hero.js"></script>
-    <script src="userpanel/auth.js" defer></script>
-    <script src="userpanel/user_panel.js" defer></script>
-    <script src="modal.js" defer></script>
     <script>
       // Sprawdzanie zalogowania (asynchronicznie, cache wynik)
       let isUserLoggedIn = false;
@@ -652,6 +637,7 @@
         });
       });
     </script>
+
 
 </body>
 

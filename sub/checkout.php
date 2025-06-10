@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 header('Content-Type: application/json; charset=utf-8');
@@ -99,7 +98,7 @@ try {
             'quantity' => 1,
         ]],
         'mode' => 'subscription',
-        'success_url' => 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/../user_panel.html?success=1',
+        'success_url' => 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/subskrypcja.html?success=1',
         'cancel_url' => 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/subskrypcja.html?canceled=1',
         'metadata' => [
             'plan' => $plan,

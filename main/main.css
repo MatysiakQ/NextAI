@@ -2547,6 +2547,8 @@ textarea:-moz-autofill {
     display: flex;
   }
 }
+<<<<<<< HEAD
+=======
   .modal-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -2620,5 +2622,6 @@ textarea:-moz-autofill {
     color: #fff;
     box-shadow: 0 0 16px #ff5c5c88;
   }
+>>>>>>> a7ca4886eddfd04b8367eab6b3a359017fd9f957
 
 

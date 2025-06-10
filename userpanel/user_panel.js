@@ -329,8 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const changePasswordForm = document.getElementById('change-password-form');
   const profileError = document.getElementById('profile2-error');
   const profileSuccess = document.getElementById('profile2-success');
-  const logoutIds = ["logout2-btn", "logout-btn", "user-logout-btn"];
-
 
   if (showChangeUsernameBtn && changeUsernameForm) {
     showChangeUsernameBtn.onclick = function() {
@@ -527,24 +525,20 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(() => window.location.href = "login.html");
 
-    // Wylogowywanie (obsługa wszystkich przycisków z logoutIds)
-    logoutIds.forEach(id => {
-      const btn = document.getElementById(id);
-      if (btn) {
-        btn.addEventListener("click", () => {
-          console.log(`🔒 Wylogowanie przez: ${id}`);
-          fetch("auth.php?action=logout", { credentials: "include" })
-            .then(() => {
-              localStorage.setItem("showLogoutModal", "1");
-              setTimeout(() => window.location.href = "/index.html", 300);
-            })
-            .catch(err => {
-              console.error("❌ Błąd wylogowania:", err);
-              alert("Wystąpił błąd podczas wylogowywania.");
-            });
-        });
-      }
-    });
+    // Wylogowywanie (poprawiona obsługa: przekierowanie na stronę główną po wylogowaniu)
+    const logout2Btn = document.getElementById("logout2-btn");
+    if (logout2Btn) {
+      logout2Btn.onclick = function() {
+        fetch("auth.php?action=logout", { credentials: "include" })
+          .then(() => {
+            window.location.href = "/";
+          })
+          .catch(error => {
+            console.error("Błąd podczas wylogowywania:", error);
+            alert("Wystąpił błąd podczas wylogowywania.");
+          });
+      };
+    }
 
     // Obsługa modala anulowania subskrypcji
     const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
@@ -580,11 +574,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
   });
-
+  // Globalna obsługa dowolnego przycisku wylogowania
+document.body.addEventListener("click", function (e) {
+  const target = e.target.closest("#logout-btn, #logout2-btn");
+  if (target) {
+    fetch("auth.php?action=logout", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        window.location.href = data.redirectTo || "login.html";
+      })
+      .catch(error => {
+        console.error("Błąd podczas wylogowywania:", error);
+        alert("Wystąpił błąd podczas wylogowywania.");
+      });
+  }
+});
   const mainPageBtn = document.getElementById("nav-mainpage-btn");
   if (mainPageBtn) {
     mainPageBtn.addEventListener("click", () => {
-      window.location.href = "../index.html";
+      window.location.href = "../index.html"; // lub np. "index.html" – zależnie gdzie jest strona główna
     });
   }
+
 });

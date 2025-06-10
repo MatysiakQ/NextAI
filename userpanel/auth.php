@@ -137,18 +137,10 @@ switch ($action) {
         exit;
     }
 
-    // Sprawdź czy email już istnieje
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
     $stmt->execute([$email]);
     if ($stmt->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'Istnieje już użytkownik o takim e-mailu.']);
-        exit;
-    }
-    // Sprawdź czy login już istnieje
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
-    $stmt->execute([$username]);
-    if ($stmt->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'Istnieje już użytkownik o takim loginie.']);
+        echo json_encode(['success' => false, 'message' => 'Ten email jest już zarejestrowany.']);
         exit;
     }
 
@@ -623,11 +615,10 @@ case 'set_new_password_code':
             echo json_encode(['success' => false, 'message' => 'Nieprawidłowa nazwa użytkownika (3-32 znaki, tylko litery, cyfry, _, -, .)']);
             exit;
         }
-        // Sprawdź czy login już istnieje (nie pozwól na powielenie)
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? AND email != ?");
         $stmt->execute([$username, $_SESSION['user_email']]);
         if ($stmt->fetchColumn() > 0) {
-            echo json_encode(['success' => false, 'message' => 'Istnieje już użytkownik o takim loginie.']);
+            echo json_encode(['success' => false, 'message' => 'Taka nazwa użytkownika już istnieje.']);
             exit;
         }
         $stmt = $pdo->prepare("UPDATE users SET username = ?, updated_at = NOW() WHERE email = ?");
@@ -647,11 +638,10 @@ case 'set_new_password_code':
             echo json_encode(['success' => false, 'message' => 'Nieprawidłowy adres e-mail.']);
             exit;
         }
-        // Sprawdź czy email już istnieje (nie pozwól na powielenie)
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ? AND email != ?");
         $stmt->execute([$email, $_SESSION['user_email']]);
         if ($stmt->fetchColumn() > 0) {
-            echo json_encode(['success' => false, 'message' => 'Istnieje już użytkownik o takim e-mailu.']);
+            echo json_encode(['success' => false, 'message' => 'Ten email jest już zajęty.']);
             exit;
         }
         $stmt = $pdo->prepare("UPDATE users SET email = ?, updated_at = NOW() WHERE email = ?");

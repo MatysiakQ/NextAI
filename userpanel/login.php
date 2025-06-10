@@ -29,8 +29,62 @@ $clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? '';
       <input type="text" id="email" name="email" autocomplete="username" required>
       <label for="password">Hasło</label>
       <input type="password" id="password" name="password" autocomplete="current-password" required>
-      <div class="g-recaptcha" data-sitekey="6LcLGFgrAAAAAGj4rbYnbm78B8K8rFUioIgTSPuG"></div>
+<div class="g-recaptcha" data-sitekey="6LcLGFgrAAAAAGj4rbYnbm78B8K8rFUioIgTSPuG"></div>
 
+<<<<<<< HEAD
+<div class="button-wrapper">
+  <button type="submit">Zaloguj się</button>
+</div>
+<div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
+
+<div style="text-align:center;margin-top:20px;">
+<div id="gSignInWrapper"></div>
+
+<script>
+  window.onload = async () => {
+    // Pobierz client_id z config.php
+    const response = await fetch("config.php");
+    const config = await response.json();
+
+    // Inicjalizacja Google Sign-In
+    google.accounts.id.initialize({
+      client_id: config.GOOGLE_CLIENT_ID,
+      callback: async (response) => {
+        const res = await fetch("auth.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `action=google_login&token=${encodeURIComponent(response.credential)}`
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = "user_panel.html";
+        } else {
+          alert(data.message || "Błąd logowania Google");
+        }
+      }
+    });
+
+    // Renderuj przycisk logowania
+    google.accounts.id.renderButton(
+      document.getElementById("gSignInWrapper"),
+      {
+        theme: "outline",
+        size: "large"
+      }
+    );
+  };
+</script>
+      
+      <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
+      <p style="text-align:center;margin-top:10px;">
+        Nie masz konta? <a href="register.html">Zarejestruj się</a><br>
+        <a href="reset_password_code.html" id="forgot-password-link" style="color:#0ff;">Zapomniałeś hasła?</a>
+      </p>
+      
+    </form>
+  </section>
+  <script src="auth.js"></script>
+=======
       <div class="button-wrapper" style="display:flex;justify-content:center;">
         <button type="submit">Zaloguj się</button>
       </div>
@@ -160,8 +214,14 @@ $clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? '';
     .catch((err) => {
       alert("Błąd połączenia z serwerem Google.\n" + (err.message || err));
     });
+<<<<<<< HEAD:userpanel/login.php
   }
 </script>
+=======
+  </script>
+  <script src="google_auth.js"></script>
+>>>>>>> a7ca4886eddfd04b8367eab6b3a359017fd9f957
+>>>>>>> 0a192182b63af85167ecf84166e8430662d1d41d:userpanel/login.html
 </body>
 
 </html>
