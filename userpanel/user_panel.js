@@ -529,76 +529,76 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Inicjalizacja ładowania danych użytkownika przy starcie
-  document.addEventListener('DOMContentLoaded', () => {
-    // Sprawdzenie autoryzacji przed ładowaniem panelu
-    fetch("auth.php?action=user_data")
-      .then(res => {
-        if (!res.ok) {
-          window.location.href = "login.html";
-          return;
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (!data || !data.success) {
-          window.location.href = "login.html";
-        } else {
-          loadUserData(); // <- wywołaj od razu po wejściu
-          loadActivePackageInfo();
-        }
-      })
-      .catch(() => window.location.href = "login.html");
+  // Sprawdzenie autoryzacji przed ładowaniem panelu
+  fetch("auth.php?action=user_data")
+    .then(res => {
+      if (!res.ok) {
+        window.location.href = "login.html";
+        return;
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (!data || !data.success) {
+        window.location.href = "login.html";
+      } else {
+        loadUserData(); // <- wywołaj od razu po wejściu
+        loadActivePackageInfo();
+      }
+    })
+    .catch(() => window.location.href = "login.html");
 
-    // Wylogowywanie (poprawiona obsługa: przekierowanie na stronę główną po wylogowaniu)
-    const logout2Btn = document.getElementById("logout2-btn");
-    if (logout2Btn) {
-      logout2Btn.onclick = function() {
-        fetch("auth.php?action=logout", { credentials: "include" })
-          .then(() => {
-            window.location.href = "/";
-          })
-          .catch(error => {
-            console.error("Błąd podczas wylogowywania:", error);
-            alert("Wystąpił błąd podczas wylogowywania.");
-          });
-      };
-    }
-
-    // Obsługa modala anulowania subskrypcji
-    const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
-    const keepSubscriptionBtn = document.getElementById('keep-subscription-btn');
-    const modal = document.getElementById('cancel-subscription-modal');
-
-    if (confirmCancelBtn) {
-        confirmCancelBtn.addEventListener('click', () => {
-            const subscriptionId = modal?.dataset.subscriptionId;
-            if (subscriptionId) {
-                cancelSubscription(subscriptionId);
-            }
+  // Wylogowywanie (poprawiona obsługa: przekierowanie na stronę główną po wylogowaniu)
+  const logout2Btn = document.getElementById("logout2-btn");
+  if (logout2Btn) {
+    logout2Btn.onclick = function() {
+      fetch("auth.php?action=logout", { credentials: "include" })
+        .then(() => {
+          window.location.href = "/";
+        })
+        .catch(error => {
+          console.error("Błąd podczas wylogowywania:", error);
+          alert("Wystąpił błąd podczas wylogowywania.");
         });
-    }
+    };
+  }
 
-    if (keepSubscriptionBtn) {
-        keepSubscriptionBtn.addEventListener('click', hideCancelModal);
-    }
+  // Obsługa modala anulowania subskrypcji
+  const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+  const keepSubscriptionBtn = document.getElementById('keep-subscription-btn');
+  const modal = document.getElementById('cancel-subscription-modal');
 
-    // Zamykanie modala po kliknięciu na tło
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                hideCancelModal();
-            }
-        });
-    }
+  if (confirmCancelBtn) {
+      confirmCancelBtn.addEventListener('click', () => {
+          const subscriptionId = modal?.dataset.subscriptionId;
+          if (subscriptionId) {
+              cancelSubscription(subscriptionId);
+          }
+      });
+  }
 
-    // Zamykanie modala klawiszem Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            hideCancelModal();
-        }
-    });
+  if (keepSubscriptionBtn) {
+      keepSubscriptionBtn.addEventListener('click', hideCancelModal);
+  }
+
+  // Zamykanie modala po kliknięciu na tło
+  if (modal) {
+      modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+              hideCancelModal();
+          }
+      });
+  }
+
+  // Zamykanie modala klawiszem Escape
+  document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+          hideCancelModal();
+      }
   });
-  // Globalna obsługa dowolnego przycisku wylogowania
+});
+
+// Globalna obsługa dowolnego przycisku wylogowania
 document.body.addEventListener("click", function (e) {
   const target = e.target.closest("#logout-btn, #logout2-btn");
   if (target) {
@@ -613,11 +613,9 @@ document.body.addEventListener("click", function (e) {
       });
   }
 });
-  const mainPageBtn = document.getElementById("nav-mainpage-btn");
-  if (mainPageBtn) {
-    mainPageBtn.addEventListener("click", () => {
-      window.location.href = "../index.html"; // lub np. "index.html" – zależnie gdzie jest strona główna
-    });
-  }
-
-});
+const mainPageBtn = document.getElementById("nav-mainpage-btn");
+if (mainPageBtn) {
+  mainPageBtn.addEventListener("click", () => {
+    window.location.href = "../index.html"; // lub np. "index.html" – zależnie gdzie jest strona główna
+  });
+}

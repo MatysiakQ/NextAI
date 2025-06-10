@@ -41,6 +41,7 @@
       <div class="button-wrapper" style="display:flex;justify-content:center;">
         <button type="submit">Zaloguj się</button>
       </div>
+      <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
       <!-- Google Login -->
       <div style="display:flex; justify-content:center; margin-top:20px;">
         <div id="g_id_onload"
@@ -103,18 +104,33 @@
       form?.addEventListener("submit", async function (e) {
         e.preventDefault();
         errorBox.textContent = "";
+
+        // Sprawdź czy reCAPTCHA jest załadowana i zaznaczona
+        let recaptchaToken = "";
+        try {
+          if (typeof grecaptcha !== "undefined") {
+            recaptchaToken = grecaptcha.getResponse();
+          }
+        } catch {}
+        if (!recaptchaToken) {
+          errorBox.textContent = "Potwierdź, że nie jesteś robotem.";
+          return;
+        }
+
         try {
           const res = await fetch("auth.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `action=login&email=${encodeURIComponent(form.email.value)}&password=${encodeURIComponent(form.password.value)}&g-recaptcha-response=${encodeURIComponent(grecaptcha.getResponse())}`
+            body: `action=login&email=${encodeURIComponent(form.email.value)}&password=${encodeURIComponent(form.password.value)}&g-recaptcha-response=${encodeURIComponent(recaptchaToken)}`
           });
           if (res.status === 401) {
             errorBox.textContent = "Błędny login lub hasło.";
+            grecaptcha.reset();
             return;
           }
           if (!res.ok) {
             errorBox.textContent = "Błąd połączenia z serwerem.";
+            grecaptcha.reset();
             return;
           }
           const data = await res.json();
@@ -122,9 +138,11 @@
             window.location.href = "user_panel.html";
           } else {
             errorBox.textContent = data.message || "Błąd logowania.";
+            grecaptcha.reset();
           }
         } catch {
           errorBox.textContent = "Błąd połączenia z serwerem.";
+          if (typeof grecaptcha !== "undefined") grecaptcha.reset();
         }
       });
     });

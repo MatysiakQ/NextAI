@@ -366,32 +366,26 @@ switch ($action) {
         // Pobierz email z sesji
         $email = $_SESSION['user_email'] ?? null;
         if (!$email) {
-            echo json_encode(['success' => false, 'message' => 'Nie jesteś zalogowany.']);
+            echo json_encode(['success' => false, 'message' => 'Nie jesteś zalogowany.', 'subscriptions' => []]);
             exit;
         }
 
         try {
-            // Pobierz najnowszą aktywną subskrypcję
-            $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE email = ? AND (status = 'active' OR status = 'trialing') ORDER BY current_period_end DESC LIMIT 1");
+            // Pobierz WSZYSTKIE subskrypcje użytkownika (nie tylko jedną)
+            $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE email = ? ORDER BY created_at DESC");
             $stmt->execute([$email]);
-            $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+            $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if ($sub) {
-                $plan = $sub['plan'];
-                $subscription = ($plan === 'pro') ? 'pro' : (($plan === 'basic') ? 'basic' : 'free');
+            if ($subs && count($subs) > 0) {
                 echo json_encode([
                     'success' => true,
-                    'subscription' => $subscription,
-                    'plan' => $plan,
-                    'status' => $sub['status'],
-                    'current_period_end' => $sub['current_period_end'],
-                    'cancel_at_period_end' => $sub['cancel_at_period_end'],
+                    'subscriptions' => $subs
                 ]);
             } else {
-                echo json_encode(['success' => true, 'subscription' => 'free']);
+                echo json_encode(['success' => true, 'subscriptions' => []]);
             }
         } catch (Exception $e) {
-            echo json_encode(['success' => false, 'message' => 'Błąd bazy danych.']);
+            echo json_encode(['success' => false, 'message' => 'Błąd bazy danych.', 'subscriptions' => []]);
         }
         exit;
 
