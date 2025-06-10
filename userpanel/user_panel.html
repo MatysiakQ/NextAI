@@ -12,9 +12,9 @@
       fetch("auth.php?action=subscriptions")
         .then(res => res.json()) 
         .then(data => {
-          if (!data.success) window.location.href = "login.html";
+          if (!data.success) window.location.href = "login.php";
         })
-        .catch(() => window.location.href = "login.html");
+        .catch(() => window.location.href = "login.php");
     });
   </script>
 </head>

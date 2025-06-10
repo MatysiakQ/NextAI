@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
             Aby zakupić subskrypcję musisz się zalogować
           </p>
           <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-            <a href="../userpanel/login.html" style="
+            <a href="../userpanel/login.php" style="
               background: linear-gradient(135deg, #0ff, #00bcd4);
               color: #000;
               padding: 12px 24px;

@@ -20,6 +20,23 @@ $payload = @file_get_contents("php://input");
 $sigHeader = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
 $event = null;
 
+
+function mapPriceIdToPlan($priceId)
+{
+    switch ($priceId) {
+        case 'price_1RQpnDFQBh6Vdz2pKIXTtsV4':
+            return 'Basic';
+        case 'price_1RRFwiFQBh6Vdz2pXy7d20TI':
+            return 'Pro';
+        case 'price_1RW3LMFQBh6Vdz2pOsrR6BQ9':
+            return 'Basic Roczny';
+        case 'price_1RW3M4FQBh6Vdz2pQKmpJGmW':
+            return 'Pro Roczny';
+        default:
+            return $priceId ?: 'Nieznany plan';
+    }
+}
+
 try {
     $event = Webhook::constructEvent(
         $payload,
@@ -102,10 +119,12 @@ try {
         // Ustal plan na podstawie Stripe (product/price)
         $plan = 'unknown';
         if (!empty($stripeSubscription->items->data[0]->price->id)) {
-            $plan = $stripeSubscription->items->data[0]->price->id;
+            $priceId = $stripeSubscription->items->data[0]->price->id ?? null;
+            $plan = mapPriceIdToPlan($priceId);
         } elseif (!empty($data->metadata->plan)) {
             $plan = $data->metadata->plan;
         }
+
 
         $status = $stripeSubscription->status;
         $currentPeriodStart = date('Y-m-d H:i:s', $stripeSubscription->current_period_start);
@@ -128,6 +147,9 @@ try {
             cancel_at_period_end = VALUES(cancel_at_period_end),
             updated_at = NOW()
     ");
+
+        error_log("[WEBHOOK DEBUG] plan do bazy: $plan", 3, $logFile);
+
         $stmt->execute([
             $email,
             $userId,
@@ -154,16 +176,16 @@ try {
         // Ustal plan na podstawie Stripe (product/price)
         $plan = null;
         if (!empty($data->items->data[0]->price->id)) {
-            $plan = $data->items->data[0]->price->id;
+            $plan = mapPriceIdToPlan($data->items->data[0]->price->id ?? null);
         }
 
         $sql = "
-            UPDATE subscriptions 
-            SET status = ?, 
-                current_period_start = ?, 
-                current_period_end = ?, 
-                cancel_at_period_end = ?,
-                updated_at = NOW()";
+        UPDATE subscriptions 
+        SET status = ?, 
+            current_period_start = ?, 
+            current_period_end = ?, 
+            cancel_at_period_end = ?,
+            updated_at = NOW()";
         $params = [$status, $currentStart, $currentEnd, $cancelAtPeriodEnd];
 
         if ($plan) {

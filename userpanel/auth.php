@@ -196,8 +196,6 @@ switch ($action) {
         echo json_encode(['success' => false, 'message' => 'Błędny email lub hasło.']);
         exit;
     }
-    break;
-
     
 
     case 'logout':
