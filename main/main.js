@@ -247,10 +247,44 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
+  let lastChatSendTime = 0;
+
+  function showChatCooldown() {
+    // Zablokuj input i przycisk wysyłania
+    if (chatQuestion) chatQuestion.disabled = true;
+    if (chatSend) chatSend.disabled = true;
+  }
+
+  function hideChatCooldown() {
+    // Odblokuj input i przycisk wysyłania
+    if (chatQuestion) chatQuestion.disabled = false;
+    if (chatSend) chatSend.disabled = false;
+  }
+
   async function sendMessage() {
     if (!chatQuestion) return;
     const text = chatQuestion.value.trim();
     if (!text) return;
+
+    const now = Date.now();
+    const diff = now - lastChatSendTime;
+    if (diff < 5000) {
+      showChatCooldown();
+      // Dodaj powiadomienie i usuń je po 4 sekundach
+      const warnMsg = document.createElement('div');
+      warnMsg.className = 'chat-message bot';
+      warnMsg.innerHTML = '<span class="sender">NextAI</span><span style="color:#ff5c5c;">Możesz wysłać kolejną wiadomość dopiero za 5 sekund.</span>';
+      chatBody.appendChild(warnMsg);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      setTimeout(() => {
+        if (warnMsg.parentNode) warnMsg.parentNode.removeChild(warnMsg);
+        hideChatCooldown();
+      }, 5000);
+      return;
+    }
+    lastChatSendTime = now;
+    hideChatCooldown();
+
     appendMessage('Ty', text, 'user');
     chatQuestion.value = '';
     appendMessage('NextAI', '<span style="opacity:.7;">piszę odpowiedź<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span></span>', 'bot');
