@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, 3000);
 
- 
+
 
   // Animacja wejścia kafelków portfolio (feature-card, portfolio-card)
   const cards = document.querySelectorAll('.portfolio-card, .feature-card:not(.robot-card), .portfolio-card-alt');
@@ -46,31 +46,46 @@ document.querySelectorAll('.video-btn').forEach(btn => {
     const videoSrc = btn.getAttribute('data-video');
     const modal = document.getElementById('videoModal');
     const video = document.getElementById('videoPlayer');
-    video.querySelector('source').src = videoSrc;
-    video.load();
-    video.play();
+    // Zamiast video wyświetl komunikat o produkcji filmu
+    modal.querySelector('.video-modal-content').innerHTML = `
+      <span class="close-btn">&times;</span>
+      <div style="padding:40px 0;text-align:center;">
+        <i class="fa-solid fa-video-slash" style="font-size:3em;color:#FFD700;margin-bottom:18px;"></i>
+        <h3 style="color:#0ff;margin-bottom:16px;">Filmik w trakcie produkcji</h3>
+        <p style="color:#b8f6f6;font-size:1.15em;">Zapraszamy niebawem do obejrzenia prezentacji tego wdrożenia!</p>
+      </div>
+    `;
     modal.style.display = 'flex';
     setTimeout(() => {
       modal.querySelector('.close-btn')?.focus();
     }, 100);
+    // Obsługa zamknięcia
+    modal.querySelector('.close-btn').onclick = () => {
+      modal.style.display = 'none';
+      // Przywróć oryginalną zawartość video po zamknięciu
+      modal.querySelector('.video-modal-content').innerHTML = `
+        <span class="close-btn">&times;</span>
+        <video id="videoPlayer" width="100%" controls autoplay>
+          <source src="" type="video/mp4" />
+          Twój przeglądarka nie obsługuje HTML5 Video.
+        </video>
+      `;
+    };
+    // Dodaj obsługę zamykania po kliknięciu poza modal-content
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+        // Przywróć oryginalną zawartość video po zamknięciu
+        modal.querySelector('.video-modal-content').innerHTML = `
+          <span class="close-btn">&times;</span>
+          <video id="videoPlayer" width="100%" controls autoplay>
+            <source src="" type="video/mp4" />
+            Twój przeglądarka nie obsługuje HTML5 Video.
+          </video>
+        `;
+      }
+    };
   });
-});
-
-document.querySelector('.close-btn').addEventListener('click', () => {
-  const modal = document.getElementById('videoModal');
-  const video = document.getElementById('videoPlayer');
-  video.pause();
-  video.currentTime = 0;
-  modal.style.display = 'none';
-});
-
-
-window.addEventListener('click', (e) => {
-  const modal = document.getElementById('videoModal');
-  if (e.target === modal) {
-    document.getElementById('videoFrame').src = '';
-    modal.style.display = 'none';
-  }
 });
 
 // Zamknięcie modala klawiszem Escape
