@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (menu) menu.appendChild(indicator);
 
   let hoveredLink = null;
+  let navMenuHovered = false;
 
   // Funkcja do ustawiania wskaźnika na danym linku
   function updateIndicator(link) {
@@ -96,7 +97,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ustaw wskaźnik na aktywny element przy załadowaniu strony
   setIndicatorToActive();
 
-  // Hover na linku: wskaźnik pod linkiem pod kursorem
+  // Nowa logika wskaźnika: pointerenter/pointerleave na całym menu
+  if (menu) {
+    menu.addEventListener('pointerenter', () => {
+      navMenuHovered = true;
+    });
+    menu.addEventListener('pointerleave', () => {
+      navMenuHovered = false;
+      hoveredLink = null;
+      setIndicatorToActive();
+    });
+  }
+
   links.forEach(link => {
     link.addEventListener('mouseenter', () => {
       hoveredLink = link;
@@ -104,12 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     link.addEventListener('mouseleave', () => {
       hoveredLink = null;
-      // Sprawdź, czy żaden inny link nie jest hoverowany
+      // Nie wracaj na aktywny, dopóki kursor jest w menu
       setTimeout(() => {
-        if (!document.querySelector('.nav-item a:hover')) {
-          setIndicatorToActive();
-        }
-      }, 100);
+        if (!navMenuHovered) setIndicatorToActive();
+      }, 10);
     });
     link.addEventListener('touchend', () => {
       hoveredLink = null;
@@ -124,20 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setIndicatorToActive();
     });
   }
-
-  let debounceTimeout;
-
-  links.forEach(link => {
-    link.addEventListener('mouseleave', () => {
-      hoveredLink = null;
-      clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(() => {
-        if (!document.querySelector('.nav-item a:hover')) {
-          setIndicatorToActive();
-        }
-      }, 100);
-    });
-  });
 
   // SLIDER
   let current = 0;
