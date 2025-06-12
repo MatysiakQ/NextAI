@@ -2515,7 +2515,8 @@ textarea:-moz-autofill {
 .testimonial-text {
   margin-top: 4px;
   color: #eee;
-  font-size: 1.08em;
+  font-size: 0.95em;
+  /* zmniejszona czcionka */
   line-height: 1.6;
   font-style: italic;
   text-align: center;
@@ -2523,6 +2524,8 @@ textarea:-moz-autofill {
   display: flex;
   align-items: center;
   justify-content: center;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .testimonial-controls {
