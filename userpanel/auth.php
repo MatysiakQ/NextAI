@@ -139,7 +139,23 @@ switch ($action) {
             exit;
         }
         if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
-            echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, zawierać co najmniej jedną dużą literę i jedną cyfrę.']);
+            echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, zawierać co najmniej jedną wielką literę i jedną cyfrę.']);
+            exit;
+        }
+
+        // Sprawdź czy login już istnieje
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        if ($stmt->fetchColumn() > 0) {
+            echo json_encode(['success' => false, 'message' => 'Taki login jest już zajęty.']);
+            exit;
+        }
+
+        // Sprawdź czy email już istnieje
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetchColumn() > 0) {
+            echo json_encode(['success' => false, 'message' => 'Ten email jest już zajęty.']);
             exit;
         }
 
@@ -202,9 +218,40 @@ switch ($action) {
 
             $mail->setFrom($_ENV['SMTP_FROM'] ?? 'no-reply@nextai.pl', $_ENV['MAIL_FROM_NAME'] ?? 'NextAI');
             $mail->addAddress($email);
-            $mail->isHTML(false);
+            $mail->isHTML(true);
             $mail->Subject = "Kod weryfikacyjny rejestracji - NextAI";
-            $mail->Body = "Twój kod weryfikacyjny to: $verify_code\nKod jest ważny przez 30 minut.\n\nJeśli nie rejestrowałeś się na NextAI, zignoruj tę wiadomość.";
+            $mail->Body = '<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Kod weryfikacyjny</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f6f8fa; margin: 0; padding: 0; }
+    .container { background-color: #ffffff; max-width: 600px; margin: 40px auto; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+    .header { text-align: center; padding-bottom: 20px; }
+    .header h1 { color: #333; }
+    .content { font-size: 16px; color: #444; line-height: 1.6; }
+    .code-box { background-color: #f0f0f0; border-radius: 8px; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0; color: #2a7ae2; }
+    .footer { margin-top: 30px; font-size: 12px; color: #999; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Potwierdzenie rejestracji</h1>
+    </div>
+    <div class="content">
+      <p>Dziękujemy za rejestrację w serwisie <strong>NextAI</strong>.</p>
+      <p>Aby dokończyć proces rejestracji, prosimy o wpisanie poniższego kodu weryfikacyjnego:</p>
+      <div class="code-box">' . htmlspecialchars($verify_code) . '</div>
+      <p>Jeśli nie rejestrowałeś się na naszej stronie, po prostu zignoruj tę wiadomość.</p>
+    </div>
+    <div class="footer">
+      &copy; 2025 NextAI. Wszelkie prawa zastrzeżone.
+    </div>
+  </div>
+</body>
+</html>';
 
             $mail->send();
             echo json_encode(['success' => true, 'verify_required' => true, 'message' => 'Na Twój email wysłaliśmy kod weryfikacyjny. Sprawdź skrzynkę i wpisz kod na stronie.']);
