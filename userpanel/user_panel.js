@@ -801,33 +801,188 @@ const ALL_COURSES = [
   },
 ];
 
-// Funkcja do pobrania poziomu dostępu użytkownika (free/basic/pro)
-async function getUserCourseAccessLevel() {
+// Dodaj globalny stan filtrów i wyszukiwania
+let courseFilters = {
+  access: 'all', // all | free | basic | pro | enterprise
+  status: 'all', // all | started | completed
+  search: ''
+};
+
+// Przykładowy status ukończenia kursów (w praktyce pobierz z backendu/usera)
+let userCourseStatus = {}; // { [courseId]: 'started' | 'completed' }
+
+// Funkcja do pobrania statusów kursów użytkownika (tu: localStorage demo)
+function getUserCourseStatuses() {
   try {
-    const res = await fetch('auth.php?action=check_active_subscription', { credentials: 'include' });
-    const data = await res.json();
-    if (data.success && data.subscription && data.subscription.plan) {
-      const plan = (data.subscription.plan || '').toLowerCase();
-      if (plan.includes('pro')) return 'pro';
-      if (plan.includes('basic')) return 'basic';
-    }
-    return 'free';
+    const data = localStorage.getItem('userCourseStatus');
+    if (data) userCourseStatus = JSON.parse(data);
+    else userCourseStatus = {};
   } catch {
-    return 'free';
+    userCourseStatus = {};
   }
 }
 
-// Funkcja do pobrania kursów z backendu (np. z pliku PHP/JSON)
+// Funkcja do ustawiania statusu kursu (demo, w praktyce zapisz na backendzie)
+function setUserCourseStatus(courseId, status) {
+  userCourseStatus[courseId] = status;
+  localStorage.setItem('userCourseStatus', JSON.stringify(userCourseStatus));
+}
+
+// Funkcja do pobrania kursów z backendu (z pliku JSON)
 async function fetchAllCoursesFromBackend() {
   try {
     const res = await fetch('/courses/courses.json', { credentials: 'omit', cache: 'no-store' });
     if (!res.ok) return [];
     const data = await res.json();
-    // Oczekiwany format: [{title, desc, access, link}, ...]
+    // Oczekiwany format: [{id, title, desc, access, link}, ...]
     return Array.isArray(data) ? data : [];
   } catch (e) {
     return [];
   }
+}
+
+// Nowy panel filtrów kursów (nie modal na całą stronę, tylko wysuwane okienko)
+function renderCourseFilters(container, onChange) {
+  // Przycisk otwierający panel
+  container.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between;margin-bottom:18px;position:relative;">
+      <input type="text" id="course-search-input" placeholder="Szukaj kursu..." style="flex:1 1 180px;max-width:260px;padding:8px 12px;border-radius:8px;border:1px solid #222;background:#181a2b;color:#0ff;font-size:1em;">
+      <button id="toggle-filters-btn" style="background:#0ff;color:#181818;padding:8px 18px;border-radius:7px;font-weight:bold;border:none;cursor:pointer;transition:background 0.2s;">Filtruj <i class="fa fa-filter"></i></button>
+      <div id="course-filters-panel"
+        style="display:none;position:absolute;top:110%;right:0;z-index:1000;background:#181a2b;border-radius:18px;box-shadow:0 4px 32px #000a;padding:32px 24px 20px 24px;min-width:340px;max-width:95vw;transition:opacity 0.2s;opacity:1;">
+        <button id="close-filters-panel" style="position:absolute;top:10px;right:14px;background:none;border:none;color:#0ff;font-size:1.5em;cursor:pointer;"><i class="fa fa-times"></i></button>
+        <div style="margin-bottom:24px;">
+          <div style="color:#0ff;font-weight:bold;font-size:1.1em;margin-bottom:10px;">Rodzaj pakietu</div>
+          <div style="display:flex;gap:14px;">
+            <div class="filter-square filter-access" data-value="free" tabindex="0" style="flex:1;min-width:70px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0;border-radius:10px;background:#0ff1;color:#0ff;font-weight:bold;font-size:1.05em;transition:all 0.15s;border:2px solid #0ff;">
+              DARMOWE
+            </div>
+            <div class="filter-square filter-access" data-value="basic" tabindex="0" style="flex:1;min-width:70px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0;border-radius:10px;background:#ffd70022;color:#FFD700;font-weight:bold;font-size:1.05em;transition:all 0.15s;border:2px solid #FFD700;">
+              BASIC
+            </div>
+            <div class="filter-square filter-access" data-value="pro" tabindex="0" style="flex:1;min-width:70px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0;border-radius:10px;background:#00ffae22;color:#00ffae;font-weight:bold;font-size:1.05em;transition:all 0.15s;border:2px solid #00ffae;">
+              PRO
+            </div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="color:#0ff;font-weight:bold;font-size:1.1em;margin-bottom:10px;">Status kursu</div>
+          <div style="display:flex;gap:14px;">
+            <div class="filter-square filter-status" data-value="completed" tabindex="0" style="flex:1;min-width:70px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0;border-radius:10px;background:#00ffae22;color:#00ffae;font-weight:bold;font-size:1.05em;transition:all 0.15s;border:2px solid #00ffae;">
+              Ukończony
+            </div>
+            <div class="filter-square filter-status" data-value="started" tabindex="0" style="flex:1;min-width:70px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0;border-radius:10px;background:#ffd70022;color:#FFD700;font-weight:bold;font-size:1.05em;transition:all 0.15s;border:2px solid #FFD700;">
+              Rozpoczęty
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+          <button id="clear-filters-btn" style="background:#232946;color:#0ff;padding:7px 15px;border-radius:7px;font-size:1em;font-weight:bold;border:none;cursor:pointer;transition:background 0.2s;">Wyczyść</button>
+          <button id="apply-filters-btn" style="background:#0ff;color:#181818;padding:7px 15px;border-radius:7px;font-size:1em;font-weight:bold;border:none;cursor:pointer;transition:background 0.2s;">Zastosuj</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Obsługa wyszukiwarki
+  container.querySelector('#course-search-input').addEventListener('input', e => {
+    courseFilters.search = e.target.value.trim().toLowerCase();
+    onChange();
+  });
+
+  // Panel filtrów
+  const panel = container.querySelector('#course-filters-panel');
+  const toggleBtn = container.querySelector('#toggle-filters-btn');
+  const closeBtn = container.querySelector('#close-filters-panel');
+
+  // Otwieranie panelu
+  toggleBtn.onclick = () => {
+    panel.style.display = 'block';
+    setTimeout(() => { panel.style.opacity = '1'; }, 10);
+    // Zaznacz aktywne filtry
+    panel.querySelectorAll('.filter-access').forEach(el => {
+      el.classList.toggle('active', (courseFilters.accessArr || []).includes(el.dataset.value));
+      el.style.boxShadow = el.classList.contains('active') ? '0 0 0 3px #0ff8' : '';
+      el.style.background = el.classList.contains('active') ? '#0ff4' : el.style.background;
+      if (el.dataset.value === 'basic') el.style.background = el.classList.contains('active') ? '#ffd70066' : '#ffd70022';
+      if (el.dataset.value === 'pro') el.style.background = el.classList.contains('active') ? '#00ffae66' : '#00ffae22';
+    });
+    panel.querySelectorAll('.filter-status').forEach(el => {
+      el.classList.toggle('active', (courseFilters.statusArr || []).includes(el.dataset.value));
+      el.style.boxShadow = el.classList.contains('active') ? '0 0 0 3px #0ff8' : '';
+      el.style.background = el.classList.contains('active') ? '#0ff4' : el.style.background;
+      if (el.dataset.value === 'started') el.style.background = el.classList.contains('active') ? '#ffd70066' : '#ffd70022';
+      if (el.dataset.value === 'completed') el.style.background = el.classList.contains('active') ? '#00ffae66' : '#00ffae22';
+    });
+  };
+  // Zamknięcie panelu
+  closeBtn.onclick = () => {
+    panel.style.opacity = '0';
+    setTimeout(() => { panel.style.display = 'none'; }, 150);
+  };
+  // Zamknięcie kliknięciem poza panel
+  document.addEventListener('mousedown', function (e) {
+    if (panel.style.display === 'block' && !panel.contains(e.target) && !toggleBtn.contains(e.target)) {
+      panel.style.opacity = '0';
+      setTimeout(() => { panel.style.display = 'none'; }, 150);
+    }
+  });
+  // Zamknięcie klawiszem Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && panel.style.display === 'block') {
+      panel.style.opacity = '0';
+      setTimeout(() => { panel.style.display = 'none'; }, 150);
+    }
+  });
+
+  // Obsługa wyboru kwadracików (multi-select)
+  if (!courseFilters.accessArr) courseFilters.accessArr = [];
+  if (!courseFilters.statusArr) courseFilters.statusArr = [];
+  panel.querySelectorAll('.filter-access').forEach(el => {
+    el.onclick = () => {
+      const val = el.dataset.value;
+      if (courseFilters.accessArr.includes(val)) {
+        courseFilters.accessArr = courseFilters.accessArr.filter(v => v !== val);
+      } else {
+        courseFilters.accessArr.push(val);
+      }
+      el.classList.toggle('active');
+      el.style.boxShadow = el.classList.contains('active') ? '0 0 0 3px #0ff8' : '';
+      el.style.background = el.classList.contains('active') ? '#0ff4' : (val === 'basic' ? '#ffd70022' : val === 'pro' ? '#00ffae22' : '#0ff1');
+      if (val === 'basic' && el.classList.contains('active')) el.style.background = '#ffd70066';
+      if (val === 'pro' && el.classList.contains('active')) el.style.background = '#00ffae66';
+    };
+  });
+  panel.querySelectorAll('.filter-status').forEach(el => {
+    el.onclick = () => {
+      const val = el.dataset.value;
+      if (courseFilters.statusArr.includes(val)) {
+        courseFilters.statusArr = courseFilters.statusArr.filter(v => v !== val);
+      } else {
+        courseFilters.statusArr.push(val);
+      }
+      el.classList.toggle('active');
+      el.style.boxShadow = el.classList.contains('active') ? '0 0 0 3px #0ff8' : '';
+      el.style.background = el.classList.contains('active') ? '#0ff4' : (val === 'started' ? '#ffd70022' : '#00ffae22');
+      if (val === 'started' && el.classList.contains('active')) el.style.background = '#ffd70066';
+      if (val === 'completed' && el.classList.contains('active')) el.style.background = '#00ffae66';
+    };
+  });
+
+  // Zastosuj filtry
+  panel.querySelector('#apply-filters-btn').onclick = () => {
+    panel.style.opacity = '0';
+    setTimeout(() => { panel.style.display = 'none'; }, 150);
+    onChange();
+  };
+  // Wyczyść filtry
+  panel.querySelector('#clear-filters-btn').onclick = () => {
+    courseFilters.accessArr = [];
+    courseFilters.statusArr = [];
+    onChange();
+    panel.style.opacity = '0';
+    setTimeout(() => { panel.style.display = 'none'; }, 150);
+  };
 }
 
 // Funkcja do renderowania kursów w sekcji "Moje kursy"
@@ -840,41 +995,131 @@ async function renderUserCourses() {
     container.id = 'user-courses-list';
     coursesSection.appendChild(container);
   }
+  // Zwiększ rozmiar okna "Moje kursy"
+  coursesSection.style.minHeight = '700px';
+  coursesSection.style.maxWidth = '1200px';
+  coursesSection.style.margin = '0 auto';
+
   container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px 0;">Ładowanie kursów...</div>';
 
-  // Jeśli użytkownik nie ma subskrypcji (niezalogowany lub brak suba), getUserCourseAccessLevel zwróci 'free'
-  const [accessLevel, allCourses] = await Promise.all([
-    getUserCourseAccessLevel(),
-    fetchAllCoursesFromBackend()
-  ]);
+  // Pobierz statusy kursów użytkownika (demo: localStorage)
+  getUserCourseStatuses();
 
-  // Pokazuj zawsze kursy darmowe, nawet jeśli accessLevel to 'free'
-  const visibleCourses = allCourses.filter(course => {
-    if (course.access === 'free') return true;
-    if (course.access === 'basic' && (accessLevel === 'basic' || accessLevel === 'pro')) return true;
-    if (course.access === 'pro' && accessLevel === 'pro') return true;
-    return false;
-  });
-
-  if (visibleCourses.length === 0) {
-    container.innerHTML = '<div style="color:#ff5c5c;text-align:center;padding:30px 0;">Nie masz dostępu do żadnych kursów.<br><a href="../sub/subskrypcja.html" style="color:#0ff;text-decoration:underline;">Aktywuj subskrypcję</a></div>';
+  let accessLevel = 'free';
+  let allCourses = [];
+  try {
+    [accessLevel, allCourses] = await Promise.all([
+      getUserCourseAccessLevel(),
+      fetchAllCoursesFromBackend()
+    ]);
+  } catch (err) {
+    console.error('Błąd pobierania kursów lub uprawnień:', err);
+    container.innerHTML = '<div style="color:#ff5c5c;text-align:center;padding:30px 0;">Błąd ładowania kursów. Spróbuj odświeżyć stronę.</div>';
     return;
   }
 
+  // Jeśli fetchAllCoursesFromBackend zwraca pustą tablicę lub błąd
+  if (!Array.isArray(allCourses) || allCourses.length === 0) {
+    container.innerHTML = '<div style="color:#ff5c5c;text-align:center;padding:30px 0;">Brak kursów do wyświetlenia.<br>Skontaktuj się z administratorem lub spróbuj później.</div>';
+    console.error('Brak kursów lub nie udało się pobrać pliku courses.json');
+    return;
+  }
+
+  // Sekcja filtrów i wyszukiwarki
+  let filtersDiv = document.getElementById('user-courses-filters');
+  if (!filtersDiv) {
+    filtersDiv = document.createElement('div');
+    filtersDiv.id = 'user-courses-filters';
+    coursesSection.insertBefore(filtersDiv, container);
+  }
+  renderCourseFilters(filtersDiv, () => renderUserCourses());
+
+  // Filtrowanie wg uprawnień
+  let visibleCourses = allCourses.filter(course => {
+    if (course.access === 'free') return true;
+    if (course.access === 'basic' && (accessLevel === 'basic' || accessLevel === 'pro' || accessLevel === 'enterprise')) return true;
+    if (course.access === 'pro' && (accessLevel === 'pro' || accessLevel === 'enterprise')) return true;
+    if (course.access === 'enterprise' && accessLevel === 'enterprise') return true;
+    return false;
+  });
+
+  // Filtrowanie po rodzaju pakietu (multi)
+  if (courseFilters.accessArr && courseFilters.accessArr.length > 0) {
+    visibleCourses = visibleCourses.filter(c => courseFilters.accessArr.includes(c.access));
+  }
+  // Filtrowanie po statusie ukończenia (multi)
+  if (courseFilters.statusArr && courseFilters.statusArr.length > 0) {
+    visibleCourses = visibleCourses.filter(c => courseFilters.statusArr.includes(userCourseStatus[c.id]));
+  }
+  // Filtrowanie po nazwie (wyszukiwarka)
+  if (courseFilters.search) {
+    visibleCourses = visibleCourses.filter(c => c.title.toLowerCase().includes(courseFilters.search));
+  }
+
+  if (visibleCourses.length === 0) {
+    container.innerHTML = '<div style="color:#ff5c5c;text-align:center;padding:30px 0;">Nie znaleziono kursów.<br><a href="../sub/subskrypcja.html" style="color:#0ff;text-decoration:underline;">Aktywuj subskrypcję</a></div>';
+    return;
+  }
+
+  // Wyświetlanie w dwóch kolumnach, ładniejsze kafelki
   container.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:18px;">
-      ${visibleCourses.map(course => `
-        <div class="user-course-card" style="background:#181818;border-radius:12px;padding:18px 16px;box-shadow:0 2px 12px #0003;">
-          <div style="font-size:1.15em;font-weight:bold;color:#0ff;">${course.title}</div>
-          <div style="color:#ccc;margin:6px 0 10px 0;">${course.desc}</div>
-          <span class="user-course-badge" style="display:inline-block;padding:3px 12px;border-radius:8px;font-size:0.95em;background:${course.access==='pro' ? '#00ffae22' : course.access==='basic' ? '#ffd70022' : '#0ff2'};color:${course.access==='pro' ? '#00ffae' : course.access==='basic' ? '#FFD700' : '#0ff'};">
-            ${course.access === 'pro' ? 'PRO' : course.access === 'basic' ? 'BASIC' : 'DARMOWY'}
-          </span>
-          <div style="margin-top:12px;">
-            <a href="/courses/${course.link}" class="user-course-link-btn" style="background:#0ff;color:#181818;padding:8px 18px;border-radius:7px;font-weight:bold;text-decoration:none;transition:background 0.2s;">Przejdź do kursu</a>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;">
+      ${visibleCourses.map(course => {
+        // Kolor i tekst badge
+        let badgeColor = '#0ff', badgeBg = '#0ff1', badgeText = 'DARMOWY';
+        if (course.access === 'basic') { badgeColor = '#FFD700'; badgeBg = '#ffd70022'; badgeText = 'BASIC'; }
+        if (course.access === 'pro') { badgeColor = '#00ffae'; badgeBg = '#00ffae22'; badgeText = 'PRO'; }
+        if (course.access === 'enterprise') { badgeColor = '#ff5c5c'; badgeBg = '#ff5c5c22'; badgeText = 'ENTERPRISE'; }
+        // Status ukończenia
+        const status = userCourseStatus[course.id] || 'notstarted';
+        let statusLabel = '';
+        if (status === 'started') statusLabel = `<span class="course-status started" style="background:#ffd70022;color:#FFD700;border-radius:6px;padding:2px 10px;margin-left:8px;font-size:0.93em;">Rozpoczęty</span>`;
+        if (status === 'completed') statusLabel = `<span class="course-status completed" style="background:#00ffae22;color:#00ffae;border-radius:6px;padding:2px 10px;margin-left:8px;font-size:0.93em;">Ukończony</span>`;
+        return `
+        <div class="user-course-card" style="background:linear-gradient(120deg,#181818 80%,#232946 100%);border-radius:18px;padding:22px 20px 20px 20px;box-shadow:0 2px 18px #0005;position:relative;overflow:hidden;transition:box-shadow 0.2s;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+            <span class="user-course-badge" style="display:inline-block;padding:4px 16px;border-radius:12px;font-size:1em;font-weight:bold;background:${badgeBg};color:${badgeColor};box-shadow:0 1px 6px ${badgeBg};letter-spacing:1px;">
+              ${badgeText}
+            </span>
+            ${statusLabel}
+          </div>
+          <div style="font-size:1.18em;font-weight:bold;color:#fff;margin-bottom:7px;letter-spacing:0.5px;">${course.title}</div>
+          <div style="color:#b8f6f6;margin:0 0 18px 0;font-size:1em;opacity:0.92;">${course.desc}</div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <a href="/courses/${course.link}" class="user-course-link-btn" style="background:linear-gradient(90deg,#0ff,#00ffae);color:#181818;padding:9px 22px;border-radius:8px;font-weight:bold;text-decoration:none;transition:background 0.2s,box-shadow 0.2s;box-shadow:0 2px 8px #0ff2;font-size:1em;">Przejdź do kursu</a>
+            <button type="button" class="user-course-status-btn" data-course-id="${course.id}" style="background:#232946;color:#0ff;padding:8px 14px;border-radius:8px;font-size:0.98em;font-weight:bold;border:none;cursor:pointer;transition:background 0.2s;">${status === 'completed' ? 'Oznacz jako rozpoczęty' : 'Oznacz jako ukończony'}</button>
           </div>
         </div>
-      `).join('')}
+        `;
+      }).join('')}
     </div>
   `;
+
+  // Obsługa przycisków statusu ukończenia
+  container.querySelectorAll('.user-course-status-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const courseId = this.dataset.courseId;
+      const current = userCourseStatus[courseId];
+      if (current === 'completed') setUserCourseStatus(courseId, 'started');
+      else setUserCourseStatus(courseId, 'completed');
+      renderUserCourses();
+    });
+  });
+}
+
+// Funkcja do pobrania poziomu dostępu użytkownika (free/basic/pro/enterprise)
+async function getUserCourseAccessLevel() {
+  try {
+    const res = await fetch('auth.php?action=check_active_subscription', { credentials: 'include' });
+    const data = await res.json();
+    if (data.success && data.subscription && data.subscription.plan) {
+      const plan = (data.subscription.plan || '').toLowerCase();
+      if (plan.includes('enterprise')) return 'enterprise';
+      if (plan.includes('pro')) return 'pro';
+      if (plan.includes('basic')) return 'basic';
+    }
+    return 'free';
+  } catch {
+    return 'free';
+  }
 }
