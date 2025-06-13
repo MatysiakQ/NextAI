@@ -467,14 +467,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isUserLoggedIn) {
         userMenu.innerHTML = `
           <button type="button" id="user-login-btn">Zaloguj się</button>
-          <a href="#faq">FAQ</a>
           <a href="#" id="user-terms-link">Regulamin</a>
           <a href="#contact">Pomoc</a>
         `;
       } else {
         userMenu.innerHTML = `
           <button type="button" id="user-account-btn">Moje konto</button>
-          <a href="#faq">FAQ</a>
           <a href="#" id="user-terms-link">Regulamin</a>
           <a href="#contact">Pomoc</a>
           <button type="button" id="user-logout-btn">Wyloguj się</button>

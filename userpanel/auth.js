@@ -93,6 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Usuń/zakomentuj całą obsługę registerForm:
+  /*
   const registerForm = document.getElementById("register-form");
   if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
@@ -178,9 +180,10 @@ document.addEventListener("DOMContentLoaded", () => {
         errorBox.style.color = "#ff5c5c";
         return;
       }
-      if (data.success) {
+      // Zmiana: jeśli verify_required, nie przekierowuj, tylko pokaż formularz kodu (obsługuje to register.html)
+      if (data.success && !data.verify_required) {
         window.location.href = "user_panel.html";
-      } else {
+      } else if (!data.success) {
         if (data.message?.toLowerCase().includes("email")) {
           markError(email, data.message, errorBox);
         } else if (data.message?.toLowerCase().includes("hasło")) {
@@ -194,6 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  */
 
   if (window.location.pathname.endsWith("user_panel.html")) {
     fetch("auth.php?action=user_data", { credentials: "include" })

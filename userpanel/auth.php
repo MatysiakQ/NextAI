@@ -33,13 +33,14 @@ $pdoErrorLogFile = __DIR__ . '/../pdo_errors.log';
 
 
 $sessionLogFile = __DIR__ . '/../session_debug.log';
-file_put_contents($sessionLogFile, "[".date("Y-m-d H:i:s")."] SESSION: ".print_r($_SESSION, true)."\n", FILE_APPEND);
-file_put_contents($sessionLogFile, "[".date("Y-m-d H:i:s")."] COOKIE: ".print_r($_COOKIE, true)."\n", FILE_APPEND);
+file_put_contents($sessionLogFile, "[" . date("Y-m-d H:i:s") . "] SESSION: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+file_put_contents($sessionLogFile, "[" . date("Y-m-d H:i:s") . "] COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
 
 
 
 
-function verify_recaptcha($token) {
+function verify_recaptcha($token)
+{
     $secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"; // testowy sekret
     $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$token}");
     $result = json_decode($response, true);
@@ -84,7 +85,7 @@ try {
     exit;
 }
 
-set_exception_handler(function($e) use ($pdoErrorLogFile) {
+set_exception_handler(function ($e) use ($pdoErrorLogFile) {
     error_log("UNCAUGHT ERROR: " . $e->getMessage() . " on line " . $e->getLine() . " in " . $e->getFile(), 3, $pdoErrorLogFile);
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Wystąpił nieoczekiwany błąd serwera.']);
@@ -93,6 +94,7 @@ set_exception_handler(function($e) use ($pdoErrorLogFile) {
 
 $action = $_GET['action'] ?? $_POST['action'] ?? null;
 
+// Dodaj obsługę JSON dla wszystkich akcji
 $input = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
     $inputRaw = file_get_contents('php://input');
@@ -110,101 +112,171 @@ if (!$action) {
 
 switch ($action) {
     case 'register':
-    $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    if (!verify_recaptcha($_POST['g-recaptcha-response'] ?? '')) {
-        echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
+        $username = trim($_POST['username'] ?? $input['username'] ?? '');
+        $email = trim($_POST['email'] ?? $input['email'] ?? '');
+        $recaptcha = $_POST['g-recaptcha-response'] ?? $input['g-recaptcha-response'] ?? '';
+        if (!$recaptcha) {
+            echo json_encode(['success' => false, 'message' => 'Potwierdź, że nie jesteś robotem.']);
+            exit;
+        }
+        if (!verify_recaptcha($recaptcha)) {
+            echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
+            exit;
+        }
+        $password = $_POST['password'] ?? $input['password'] ?? '';
+        $password2 = $_POST['password2'] ?? $input['password2'] ?? '';
+
+        if (empty($username) || empty($email) || empty($password) || empty($password2)) {
+            echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane!']);
+            exit;
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowy format adresu email.']);
+            exit;
+        }
+        if ($password !== $password2) {
+            echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
+            exit;
+        }
+        if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
+            echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, zawierać co najmniej jedną dużą literę i jedną cyfrę.']);
+            exit;
+        }
+
+        // Dodaj sprawdzenie czy kolumny is_verified, verify_code, verify_code_expires istnieją
+        try {
+            $checkCols = $pdo->query("SHOW COLUMNS FROM users LIKE 'is_verified'")->fetch();
+            if (!$checkCols) {
+                echo json_encode(['success' => false, 'message' => 'Błąd konfiguracji bazy danych: Brak kolumny is_verified w tabeli users. Skontaktuj się z administratorem.']);
+                exit;
+            }
+            $checkCols = $pdo->query("SHOW COLUMNS FROM users LIKE 'verify_code'")->fetch();
+            if (!$checkCols) {
+                echo json_encode(['success' => false, 'message' => 'Błąd konfiguracji bazy danych: Brak kolumny verify_code w tabeli users. Skontaktuj się z administratorem.']);
+                exit;
+            }
+            $checkCols = $pdo->query("SHOW COLUMNS FROM users LIKE 'verify_code_expires'")->fetch();
+            if (!$checkCols) {
+                echo json_encode(['success' => false, 'message' => 'Błąd konfiguracji bazy danych: Brak kolumny verify_code_expires w tabeli users. Skontaktuj się z administratorem.']);
+                exit;
+            }
+        } catch (Exception $e) {
+            error_log("[REGISTER COLUMN CHECK ERROR] " . $e->getMessage(), 3, __DIR__ . '/../php-error.log');
+            echo json_encode(['success' => false, 'message' => 'Błąd bazy danych podczas sprawdzania kolumn. Skontaktuj się z administratorem.']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetchColumn() > 0) {
+            echo json_encode(['success' => false, 'message' => 'Ten email jest już zarejestrowany.']);
+            exit;
+        }
+
+        // Wygeneruj kod weryfikacyjny
+        $verify_code = strtoupper(bin2hex(random_bytes(3)));
+        $verify_expires = date('Y-m-d H:i:s', time() + 1800); // 30 minut
+
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        try {
+            $stmt = $pdo->prepare("INSERT INTO users (username, email, password, created_at, updated_at, is_verified, verify_code, verify_code_expires) VALUES (?, ?, ?, NOW(), NOW(), 0, ?, ?)");
+            $stmt->execute([$username, $email, $hashed_password, $verify_code, $verify_expires]);
+        } catch (Exception $e) {
+            error_log("[REGISTER INSERT ERROR] " . $e->getMessage(), 3, __DIR__ . '/../php-error.log');
+            echo json_encode(['success' => false, 'message' => 'Błąd bazy danych podczas rejestracji. Skontaktuj się z administratorem.']);
+            exit;
+        }
+
+        // Wyślij kod na email
+        require_once __DIR__ . '/../vendor/autoload.php';
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = $_ENV['SMTP_HOST'] ?? '';
+            $mail->SMTPAuth = true;
+            $mail->Username = $_ENV['SMTP_USER'] ?? '';
+            $mail->Password = $_ENV['SMTP_PASS'] ?? '';
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = $_ENV['SMTP_PORT'] ?? 587;
+
+            $mail->setFrom($_ENV['SMTP_FROM'] ?? 'no-reply@nextai.pl', $_ENV['MAIL_FROM_NAME'] ?? 'NextAI');
+            $mail->addAddress($email);
+            $mail->isHTML(false);
+            $mail->Subject = "Kod weryfikacyjny rejestracji - NextAI";
+            $mail->Body = "Twój kod weryfikacyjny to: $verify_code\nKod jest ważny przez 30 minut.\n\nJeśli nie rejestrowałeś się na NextAI, zignoruj tę wiadomość.";
+
+            $mail->send();
+            echo json_encode(['success' => true, 'verify_required' => true, 'message' => 'Na Twój email wysłaliśmy kod weryfikacyjny. Sprawdź skrzynkę i wpisz kod na stronie.']);
+        } catch (\Exception $e) {
+            error_log("[REGISTER VERIFY MAIL ERROR] " . $mail->ErrorInfo, 3, __DIR__ . '/../php-error.log');
+            echo json_encode(['success' => false, 'message' => 'Nie udało się wysłać maila z kodem weryfikacyjnym. Skontaktuj się z obsługą.']);
+        }
         exit;
-    }
-
-    $password = $_POST['password'] ?? '';
-    $password2 = $_POST['password2'] ?? '';
-
-    if (empty($username) || empty($email) || empty($password) || empty($password2)) {
-        echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane!']);
-        exit;
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy format adresu email.']);
-        exit;
-    }
-    if ($password !== $password2) {
-        echo json_encode(['success' => false, 'message' => 'Hasła nie są takie same!']);
-        exit;
-    }
-    if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{6,}$/', $password)) {
-        echo json_encode(['success' => false, 'message' => 'Hasło musi mieć min. 6 znaków, zawierać co najmniej jedną dużą literę i jedną cyfrę.']);
-        exit;
-    }
-
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-    if ($stmt->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'Ten email jest już zarejestrowany.']);
-        exit;
-    }
-
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO users (username, email, password, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
-    $stmt->execute([$username, $email, $hashed_password]);
-
-    // Po udanej rejestracji automatyczny login:
-    $user_id = $pdo->lastInsertId();
-    $_SESSION['user_id'] = $user_id;
-    $_SESSION['user_email'] = $email;
-    $_SESSION['username'] = $username;
-    $_SESSION['login_time'] = time();
-
-    setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
-     isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
-
-    echo json_encode(['success' => true, 'message' => 'Zarejestrowano pomyślnie!']);
-    exit;
 
 
-   case 'login':
-    if (!verify_recaptcha($_POST['g-recaptcha-response'] ?? '')) {
-        echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
-        exit;
-    }
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    case 'login':
+        $recaptcha = $_POST['g-recaptcha-response'] ?? $input['g-recaptcha-response'] ?? '';
+        if (!$recaptcha) {
+            echo json_encode(['success' => false, 'message' => 'Potwierdź, że nie jesteś robotem.']);
+            exit;
+        }
+        if (!verify_recaptcha($recaptcha)) {
+            echo json_encode(['success' => false, 'message' => 'Błąd reCAPTCHA.']);
+            exit;
+        }
+        $email = trim($_POST['email'] ?? $input['email'] ?? '');
+        $password = $_POST['password'] ?? $input['password'] ?? '';
 
-    if (empty($email) || empty($password)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane.']);
-        exit;
-    }
+        if (empty($email) || empty($password)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane.']);
+            exit;
+        }
 
-    $stmt = $pdo->prepare("SELECT id, email, username, password FROM users WHERE email = ? OR username = ?");
-    $stmt->execute([$email, $email]);
-    $user = $stmt->fetch();
+        $stmt = $pdo->prepare("SELECT id, email, username, password FROM users WHERE email = ? OR username = ?");
+        $stmt->execute([$email, $email]);
+        $user = $stmt->fetch();
 
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_email'] = $user['email'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['login_time'] = time();
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['login_time'] = time();
 
-        setcookie('nextai_session', 'active', time() + $cookieLifetime, '/', '', 
-                 isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
+            setcookie(
+                'nextai_session',
+                'active',
+                time() + $cookieLifetime,
+                '/',
+                '',
+                isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+                true
+            );
 
-        echo json_encode(['success' => true, 'message' => 'Zalogowano pomyślnie!']);
-        exit;
-    } else {
-        http_response_code(401);
-        echo json_encode(['success' => false, 'message' => 'Błędny email lub hasło.']);
-        exit;
-    }
-    
+            echo json_encode(['success' => true, 'message' => 'Zalogowano pomyślnie!']);
+            exit;
+        } else {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Błędny email lub hasło.']);
+            exit;
+        }
+
 
     case 'logout':
         session_unset();
         session_destroy();
-        
-        setcookie('nextai_session', '', time() - 3600, '/', '', 
-                 isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
-        
+
+        setcookie(
+            'nextai_session',
+            '',
+            time() - 3600,
+            '/',
+            '',
+            isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+            true
+        );
+
         echo json_encode(['success' => true]);
         break;
 
@@ -330,8 +402,8 @@ switch ($action) {
             exit;
         }
         if ($user && !password_verify($password, $user['password'])) {
-            error_log("[LOGIN] Niepoprawne hasło dla: $email\n", 3, __DIR__.'/../session_debug.log');
-            }
+            error_log("[LOGIN] Niepoprawne hasło dla: $email\n", 3, __DIR__ . '/../session_debug.log');
+        }
 
 
         $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -400,7 +472,7 @@ switch ($action) {
             $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
             $stmt->execute();
             $tableExists = $stmt->fetch();
-            
+
             if (!$tableExists) {
                 echo json_encode(['success' => true, 'subscription' => null]);
                 exit;
@@ -420,10 +492,12 @@ switch ($action) {
                 if (!empty($_ENV['STRIPE_SECRET_KEY']) && $subscription['stripe_subscription_id']) {
                     try {
                         $stripeSubscription = \Stripe\Subscription::retrieve($subscription['stripe_subscription_id']);
-                        
-                        if ($stripeSubscription->status !== $subscription['status'] || 
-                            $stripeSubscription->cancel_at_period_end != $subscription['cancel_at_period_end']) {
-                            
+
+                        if (
+                            $stripeSubscription->status !== $subscription['status'] ||
+                            $stripeSubscription->cancel_at_period_end != $subscription['cancel_at_period_end']
+                        ) {
+
                             $stmt = $pdo->prepare("
                                 UPDATE subscriptions 
                                 SET status = ?, cancel_at_period_end = ?, current_period_end = ?, updated_at = NOW() 
@@ -435,7 +509,7 @@ switch ($action) {
                                 date('Y-m-d H:i:s', $stripeSubscription->current_period_end),
                                 $subscription['stripe_subscription_id']
                             ]);
-                            
+
                             $subscription['status'] = $stripeSubscription->status;
                             $subscription['cancel_at_period_end'] = $stripeSubscription->cancel_at_period_end;
                             $subscription['current_period_end'] = date('Y-m-d H:i:s', $stripeSubscription->current_period_end);
@@ -444,12 +518,12 @@ switch ($action) {
                         error_log("Stripe API Error in check_active_subscription: " . $e->getMessage(), 3, $pdoErrorLogFile);
                     }
                 }
-                
+
                 echo json_encode(['success' => true, 'subscription' => $subscription]);
             } else {
                 echo json_encode(['success' => true, 'subscription' => null]);
             }
-            
+
         } catch (PDOException $e) {
             error_log("Database error in check_active_subscription: " . $e->getMessage(), 3, $pdoErrorLogFile);
             echo json_encode(['success' => false, 'message' => 'Błąd bazy danych']);
@@ -481,7 +555,7 @@ switch ($action) {
             // Pobierz subskrypcję ze Stripe
             $stripeSubscription = \Stripe\Subscription::retrieve($subscriptionId);
             $stripeCustomer = \Stripe\Customer::retrieve($stripeSubscription->customer);
-            
+
             // Sprawdź czy użytkownik ma prawo anulować tę subskrypcję
             if ($stripeCustomer->email !== $_SESSION['user_email']) {
                 http_response_code(403);
@@ -498,7 +572,7 @@ switch ($action) {
             $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
             $stmt->execute();
             $tableExists = $stmt->fetch();
-            
+
             if ($tableExists) {
                 $stmt = $pdo->prepare("UPDATE subscriptions SET cancel_at_period_end = 1, updated_at = NOW() WHERE stripe_subscription_id = ? AND email = ?");
                 $stmt->execute([$subscriptionId, $_SESSION['user_email']]);
@@ -516,85 +590,86 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Błąd serwera podczas anulowania subskrypcji.']);
         }
         break;
-        case 'reset_password_code':
-    $email = trim($_POST['email'] ?? '');
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy email.']);
+    case 'reset_password_code':
+        $email = trim($_POST['email'] ?? '');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowy email.']);
+            exit;
+        }
+        $code = strtoupper(bin2hex(random_bytes(3)));
+        $expires = date('Y-m-d H:i:s', time() + 600);
+
+        $stmt = $pdo->prepare("UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE email = ?");
+        $stmt->execute([$code, $expires, $email]);
+
+        // Wyślij kod przez PHPMailer (SMTP)
+        require_once __DIR__ . '/../vendor/autoload.php';
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = $_ENV['SMTP_HOST'];
+            $mail->SMTPAuth = true;
+            $mail->Username = $_ENV['SMTP_USER'];
+            $mail->Password = $_ENV['SMTP_PASS'];
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = $_ENV['SMTP_PORT'];
+
+            $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['MAIL_FROM_NAME'] ?? 'NextAI');
+            $mail->addAddress($email);
+            $mail->isHTML(false);
+            $mail->Subject = "Kod resetu hasła - NextAI";
+            $mail->Body = "Twój kod resetu hasła to: $code\nKod jest ważny przez 10 minut.\n\nJeśli nie prosiłeś o reset hasła, zignoruj tę wiadomość.";
+
+            $mail->send();
+            echo json_encode(['success' => true]);
+        } catch (\Exception $e) {
+            error_log("[RESET PASSWORD MAIL ERROR] " . $mail->ErrorInfo, 3, __DIR__ . '/../php-error.log');
+            echo json_encode(['success' => false, 'message' => 'Nie udało się wysłać maila z kodem. Skontaktuj się z obsługą.']);
+        }
         exit;
-    }
-    $code = strtoupper(bin2hex(random_bytes(3)));
-    $expires = date('Y-m-d H:i:s', time() + 600);
 
-    $stmt = $pdo->prepare("UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE email = ?");
-    $stmt->execute([$code, $expires, $email]);
+    case 'verify_reset_code':
+        $email = trim($_POST['email'] ?? '');
+        $code = trim($_POST['code'] ?? '');
 
-    // Wyślij kod przez PHPMailer (SMTP)
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-    try {
-        $mail->isSMTP();
-        $mail->Host       = $_ENV['SMTP_HOST'];
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $_ENV['SMTP_USER'];
-        $mail->Password   = $_ENV['SMTP_PASS'];
-        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = $_ENV['SMTP_PORT'];
+        $stmt = $pdo->prepare("SELECT reset_code, reset_code_expires FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
 
-        $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['MAIL_FROM_NAME'] ?? 'NextAI');
-        $mail->addAddress($email);
-        $mail->isHTML(false);
-        $mail->Subject = "Kod resetu hasła - NextAI";
-        $mail->Body    = "Twój kod resetu hasła to: $code\nKod jest ważny przez 10 minut.\n\nJeśli nie prosiłeś o reset hasła, zignoruj tę wiadomość.";
-
-        $mail->send();
+        if (!$user || $user['reset_code'] !== strtoupper($code) || strtotime($user['reset_code_expires']) < time()) {
+            echo json_encode(['success' => false, 'message' => 'Kod niepoprawny lub wygasły.']);
+            exit;
+        }
         echo json_encode(['success' => true]);
-    } catch (\Exception $e) {
-        error_log("[RESET PASSWORD MAIL ERROR] " . $mail->ErrorInfo, 3, __DIR__ . '/../php-error.log');
-        echo json_encode(['success' => false, 'message' => 'Nie udało się wysłać maila z kodem. Skontaktuj się z obsługą.']);
-    }
-    exit;
+        break;
 
-case 'verify_reset_code':
-    $email = trim($_POST['email'] ?? '');
-    $code = trim($_POST['code'] ?? '');
+    case 'set_new_password_code':
+        // Pobierz dane z POST lub JSON
+        $email = trim($_POST['email'] ?? $input['email'] ?? '');
+        $code = trim($_POST['code'] ?? $input['code'] ?? '');
+        $pass1 = $_POST['password'] ?? $input['password'] ?? '';
+        $pass2 = $_POST['password2'] ?? $input['password2'] ?? '';
 
-    $stmt = $pdo->prepare("SELECT reset_code, reset_code_expires FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch();
+        if ($pass1 !== $pass2 || !preg_match('/^(?=.*[A-Z])(?=.*\\d).{6,}$/', $pass1)) {
+            echo json_encode(['success' => false, 'message' => 'Hasła niepoprawne.']);
+            exit;
+        }
 
-    if (!$user || $user['reset_code'] !== strtoupper($code) || strtotime($user['reset_code_expires']) < time()) {
-        echo json_encode(['success' => false, 'message' => 'Kod niepoprawny lub wygasły.']);
-        exit;
-    }
-    echo json_encode(['success' => true]);
-    break;
+        $stmt = $pdo->prepare("SELECT id, reset_code, reset_code_expires FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
 
-case 'set_new_password_code':
-    $email = trim($_POST['email'] ?? '');
-    $code = trim($_POST['code'] ?? '');
-    $pass1 = $_POST['password'] ?? '';
-    $pass2 = $_POST['password2'] ?? '';
+        if (!$user || $user['reset_code'] !== strtoupper($code) || strtotime($user['reset_code_expires']) < time()) {
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowy kod lub wygasł.']);
+            exit;
+        }
 
-    if ($pass1 !== $pass2 || !preg_match('/^(?=.*[A-Z])(?=.*\\d).{6,}$/', $pass1)) {
-        echo json_encode(['success' => false, 'message' => 'Hasła niepoprawne.']);
-        exit;
-    }
+        $hash = password_hash($pass1, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("UPDATE users SET password = ?, reset_code = NULL, reset_code_expires = NULL WHERE email = ?");
+        $stmt->execute([$hash, $email]);
 
-    $stmt = $pdo->prepare("SELECT id, reset_code, reset_code_expires FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch();
-
-    if (!$user || $user['reset_code'] !== strtoupper($code) || strtotime($user['reset_code_expires']) < time()) {
-        echo json_encode(['success' => false, 'message' => 'Nieprawidłowy kod lub wygasł.']);
-        exit;
-    }
-
-    $hash = password_hash($pass1, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("UPDATE users SET password = ?, reset_code = NULL, reset_code_expires = NULL WHERE email = ?");
-    $stmt->execute([$hash, $email]);
-
-    echo json_encode(['success' => true]);
-    break;
+        echo json_encode(['success' => true]);
+        break;
 
     case 'change_username':
         if (!isset($_SESSION['user_email'])) {
@@ -640,6 +715,39 @@ case 'set_new_password_code':
         $stmt->execute([$email, $_SESSION['user_email']]);
         $_SESSION['user_email'] = $email;
         echo json_encode(['success' => true]);
+        exit;
+
+    case 'verify_email_code':
+        // Pobierz dane z POST lub JSON
+        $email = trim($_POST['email'] ?? $input['email'] ?? '');
+        $code = trim($_POST['code'] ?? $input['code'] ?? '');
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !$code) {
+            echo json_encode(['success' => false, 'message' => 'Nieprawidłowy email lub kod.']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT id, verify_code, verify_code_expires, is_verified FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            echo json_encode(['success' => false, 'message' => 'Nie znaleziono użytkownika.']);
+            exit;
+        }
+        if ($user['is_verified']) {
+            echo json_encode(['success' => true, 'already_verified' => true, 'message' => 'Email już został potwierdzony.']);
+            exit;
+        }
+        if ($user['verify_code'] !== strtoupper($code) || strtotime($user['verify_code_expires']) < time()) {
+            echo json_encode(['success' => false, 'message' => 'Kod niepoprawny lub wygasły.']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("UPDATE users SET is_verified = 1, verify_code = NULL, verify_code_expires = NULL WHERE id = ?");
+        $stmt->execute([$user['id']]);
+
+        echo json_encode(['success' => true, 'message' => 'Adres email został potwierdzony. Możesz się teraz zalogować.']);
         exit;
 
     default:

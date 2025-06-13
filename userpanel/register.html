@@ -25,15 +25,27 @@
       <input type="password" id="register-password" name="password" autocomplete="new-password" required>
       <label for="register-password2">Powtórz hasło</label>
       <input type="password" id="register-password2" name="password2" autocomplete="new-password" required>
-      <div class="g-recaptcha" data-sitekey="6LcLGFgrAAAAAGj4rbYnbm78B8K8rFUioIgTSPuG" style="margin-bottom:10px;"></div>
+      <div class="g-recaptcha" data-sitekey="6LcLGFgrAAAAAGj4rbYnbm78B8K8rFUioIgTSPuG" style="margin-bottom:10px;">
+      </div>
       <div class="button-wrapper" style="display:flex;justify-content:center;">
         <button type="submit">Zarejestruj się</button>
       </div>
       <div id="register-error" style="color:#ff5c5c;margin-top:10px;"></div>
     </form>
+    <!-- Nowy formularz kodu weryfikacyjnego -->
+    <form id="verify-email-form" class="contact-form" style="max-width:300px;margin:auto;display:none;">
+      <label for="verify-email-code">Kod weryfikacyjny z maila</label>
+      <input type="text" id="verify-email-code" maxlength="8" required>
+      <div class="button-wrapper" style="display:flex;justify-content:center;">
+        <button type="submit">Potwierdź email</button>
+      </div>
+      <div id="verify-email-error" style="color:#ff5c5c;margin-top:10px;"></div>
+      <div id="verify-email-success" style="color:#0ff;margin-top:10px;display:none;">Adres email został potwierdzony!
+        Możesz się teraz zalogować.</div>
+    </form>
     <div style="text-align:center;margin-top:10px;">
       <span>Nie masz konta?</span><br>
-      <a href="login.html">Masz już konto? Zaloguj się</a>
+      <a href="login.php">Masz już konto? Zaloguj się</a>
     </div>
   </section>
   <script src="auth.js"></script>
@@ -42,6 +54,12 @@
     document.addEventListener("DOMContentLoaded", function () {
       const form = document.getElementById("register-form");
       const errorBox = document.getElementById("register-error");
+      const verifyForm = document.getElementById("verify-email-form");
+      const verifyCodeInput = document.getElementById("verify-email-code");
+      const verifyError = document.getElementById("verify-email-error");
+      const verifySuccess = document.getElementById("verify-email-success");
+      let lastRegisterEmail = "";
+
       if (form) {
         form.addEventListener("submit", function (e) {
           setTimeout(() => {
@@ -49,6 +67,81 @@
               errorBox.textContent = "Konto o taki e-mailu już istnieje";
             }
           }, 100);
+        });
+      }
+
+      // Obsługa rejestracji z kodem
+      if (form) {
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          errorBox.textContent = "";
+          verifyForm.style.display = "none";
+          verifyError.textContent = "";
+          verifySuccess.style.display = "none";
+          // ...walidacja jak dotychczas...
+          const username = document.getElementById("register-username").value.trim();
+          const email = document.getElementById("register-email").value.trim();
+          const password = document.getElementById("register-password").value;
+          const password2 = document.getElementById("register-password2").value;
+          const recaptcha = document.querySelector('.g-recaptcha-response')?.value;
+          if (!username || !email || !password || !password2) return;
+          // ...możesz dodać walidację jak w auth.js...
+          let data;
+          try {
+            const res = await fetch("auth.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              credentials: "include",
+              body: `action=register&username=${encodeURIComponent(username)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&password2=${encodeURIComponent(password2)}${recaptcha ? `&g-recaptcha-response=${encodeURIComponent(recaptcha)}` : ""}`
+            });
+            data = await res.json();
+          } catch {
+            errorBox.textContent = "Błąd połączenia z serwerem.";
+            return;
+          }
+          if (data.success && data.verify_required) {
+            lastRegisterEmail = email;
+            form.style.display = "none";
+            verifyForm.style.display = "";
+            verifyError.textContent = "";
+            verifySuccess.style.display = "none";
+          } else if (data.success) {
+            window.location.href = "user_panel.html";
+          } else {
+            errorBox.textContent = data.message || "Wystąpił błąd podczas rejestracji";
+          }
+        });
+      }
+
+      // Obsługa formularza kodu weryfikacyjnego
+      if (verifyForm) {
+        verifyForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          verifyError.textContent = "";
+          verifySuccess.style.display = "none";
+          const code = verifyCodeInput.value.trim();
+          if (!code || !lastRegisterEmail) {
+            verifyError.textContent = "Podaj kod i email.";
+            return;
+          }
+          try {
+            const res = await fetch("auth.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              credentials: "include",
+              body: `action=verify_email_code&email=${encodeURIComponent(lastRegisterEmail)}&code=${encodeURIComponent(code)}`
+            });
+            const data = await res.json();
+            if (data.success) {
+              verifySuccess.style.display = "block";
+              verifyError.textContent = "";
+              setTimeout(() => { window.location.href = "login.php"; }, 2000);
+            } else {
+              verifyError.textContent = data.message || "Błąd weryfikacji kodu.";
+            }
+          } catch {
+            verifyError.textContent = "Błąd połączenia z serwerem.";
+          }
         });
       }
     });
@@ -60,6 +153,6 @@
       }
     });
   </script>
-  <script src="google_auth.js"></script>
 </body>
+
 </html>
