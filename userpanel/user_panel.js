@@ -194,7 +194,13 @@ function loadUserData() {
 
       if (usernameStatic) usernameStatic.textContent = data.user.username || "Brak nazwy";
       if (emailStatic) emailStatic.textContent = data.user.email || "";
-      if (avatarImg) avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
+      if (avatarImg) {
+        if (data.user.avatar) {
+          avatarImg.innerHTML = `<img src="${data.user.avatar}?${Date.now()}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        } else {
+          avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
+        }
+      }
     })
     .catch(error => {
       console.error("Błąd ładowania danych użytkownika:", error);
@@ -667,4 +673,109 @@ document.addEventListener('DOMContentLoaded', function () {
       window.location.href = '/index.html';
     });
   }
+});
+
+// Obsługa uploadu avatara
+document.addEventListener('DOMContentLoaded', () => {
+  const avatarDiv = document.getElementById('profile2-avatar');
+  const avatarInput = document.getElementById('avatar2-upload');
+  const avatarImg = document.getElementById('avatar2-img');
+  const avatarError = document.getElementById('avatar2-error');
+  const avatarRemoveBtn = document.getElementById('avatar2-remove-btn');
+
+  if (avatarDiv && avatarInput) {
+    avatarDiv.addEventListener('click', (e) => {
+      if (e.target !== avatarInput) avatarInput.click();
+    });
+
+    avatarInput.addEventListener('change', async function () {
+      avatarError.textContent = '';
+      const file = this.files && this.files[0];
+      if (!file) return;
+
+      // Walidacja typu
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        avatarError.textContent = 'Dozwolone formaty: JPG, PNG, WEBP.';
+        this.value = '';
+        return;
+      }
+      // Walidacja rozmiaru
+      if (file.size > 2 * 1024 * 1024) {
+        avatarError.textContent = 'Maksymalny rozmiar pliku to 2MB.';
+        this.value = '';
+        return;
+      }
+
+      // Podgląd avatara (opcjonalnie)
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        if (avatarImg) {
+          avatarImg.innerHTML = `<img src="${e.target.result}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        }
+      };
+      reader.readAsDataURL(file);
+
+      // Wysyłka do backendu
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const res = await fetch('upload_avatar.php', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (!data.success) {
+          avatarError.textContent = data.message || 'Błąd podczas zapisu avatara.';
+          // Przywróć domyślną ikonę jeśli błąd
+          avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
+        } else if (data.url) {
+          // Ustaw nowy avatar (jeśli backend zwraca url)
+          avatarImg.innerHTML = `<img src="${data.url}?${Date.now()}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        }
+      } catch (err) {
+        avatarError.textContent = 'Błąd sieci podczas zapisu avatara.';
+        avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
+      }
+    });
+  }
+
+  // Obsługa usuwania avatara
+  if (avatarRemoveBtn) {
+    avatarRemoveBtn.addEventListener('click', async function () {
+      avatarError.textContent = '';
+      if (!confirm('Czy na pewno chcesz usunąć avatar?')) return;
+      try {
+        const res = await fetch('upload_avatar.php', {
+          method: 'POST',
+          body: new URLSearchParams({ action: 'remove' }),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success) {
+          avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
+        } else {
+          avatarError.textContent = data.message || 'Błąd podczas usuwania avatara.';
+        }
+      } catch {
+        avatarError.textContent = 'Błąd sieci podczas usuwania avatara.';
+      }
+    });
+  }
+
+  // Inicjalne załadowanie avatara
+  fetch('auth.php?action=user_data')
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.user && data.user.avatar) {
+        avatarImg.innerHTML = `<img src="${data.user.avatar}?${Date.now()}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      } else {
+        avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
+      }
+    })
+    .catch(() => {
+      avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
+    });
 });

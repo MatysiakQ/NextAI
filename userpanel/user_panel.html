@@ -42,8 +42,13 @@
         <div class="profile2-avatar" id="profile2-avatar" title="Kliknij, aby zmienić avatar">
           <span id="avatar2-img"><i class="fa-solid fa-user"></i></span>
           <span class="profile2-avatar-edit">Zmień avatar</span>
-          <input type="file" id="avatar2-upload" accept="image/*">
+          <input type="file" id="avatar2-upload" accept="image/png,image/jpeg,image/webp">
         </div>
+        <div class="profile2-avatar-remove-wrapper" style="text-align:center;margin-bottom:10px;">
+          <button type="button" id="avatar2-remove-btn" class="profile2-cancel-btn" style="margin-top:8px;">Usuń
+            avatar</button>
+        </div>
+        <div id="avatar2-error" class="form-error"></div>
         <div class="profile2-static-info">
           <div class="profile2-static-row">
             <label>Nazwa:</label>
@@ -118,4 +123,5 @@
   <script src="user_panel.js"></script>
 
 </body>
+
 </html>

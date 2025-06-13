@@ -471,7 +471,23 @@ switch ($action) {
         $stmt->execute([$_SESSION['user_email']]);
         $user = $stmt->fetch();
 
+        // Dodaj ścieżkę do avatara jeśli plik istnieje
+        $avatar = null;
+        if ($user && $user['email']) {
+            $avatarDir = realpath(__DIR__ . '/../uploads/avatars/');
+            $emailHash = md5(strtolower(trim($user['email'])));
+            $found = false;
+            foreach (['jpg', 'png', 'webp'] as $ext) {
+                $path = $avatarDir . DIRECTORY_SEPARATOR . $emailHash . '.' . $ext;
+                if (file_exists($path)) {
+                    $avatar = '/uploads/avatars/' . $emailHash . '.' . $ext;
+                    $found = true;
+                    break;
+                }
+            }
+        }
         if ($user) {
+            $user['avatar'] = $avatar;
             echo json_encode(['success' => true, 'user' => $user]);
         } else {
             http_response_code(404);
