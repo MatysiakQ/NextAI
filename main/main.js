@@ -582,42 +582,120 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Funkcja do renderowania opinii z bazy
+  // Główna funkcja pobierania opinii
   async function fetchAndRenderOpinions() {
     const testimonialSlider = document.querySelector('.testimonial-slider');
     if (!testimonialSlider) return;
     try {
-      const res = await fetch('main/get_opinions.php', { cache: 'no-store' });
+      // Dodaj parametr czasowy, by zawsze pobierać świeże dane (omija cache)
+      const res = await fetch('main/opinions_to_db/get_opinions.php?ts=' + Date.now(), { cache: 'no-store' });
       const opinions = await res.json();
       testimonialSlider.innerHTML = '';
-      opinions.forEach(op => {
+      opinions.forEach((op, i) => {
         const card = document.createElement('div');
         card.className = 'testimonial-card';
         card.innerHTML = `
-          <span class="testimonial-avatar"
-            style="background:#fff;display:flex;align-items:center;justify-content:center;">
-            <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
-              <circle cx="27" cy="20" r="12" fill="#e0e0e0" />
-              <ellipse cx="27" cy="41" rx="16" ry="10" fill="#e0e0e0" />
-            </svg>
-          </span>
-          <span class="testimonial-name">${op.name ? op.name : 'Anonimowy'}</span>
-          <span class="testimonial-stars">
-            ${'<i class="fa fa-star"></i>'.repeat(Number(op.stars))}
-            ${Number(op.stars) < 5 ? '<i class="fa-regular fa-star"></i>'.repeat(5 - Number(op.stars)) : ''}
-          </span>
-          <p class="testimonial-text" style="font-size:0.95em;">${op.text}</p>
-        `;
+        <span class="testimonial-avatar">
+          <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
+            <circle cx="27" cy="20" r="12" fill="#e0e0e0" />
+            <ellipse cx="27" cy="41" rx="16" ry="10" fill="#e0e0e0" />
+          </svg>
+        </span>
+        <span class="testimonial-name">${op.name ? op.name : 'Anonimowy'}</span>
+        <span class="testimonial-stars">
+          ${'<i class="fa fa-star"></i>'.repeat(Number(op.stars))}
+          ${Number(op.stars) < 5 ? '<i class="fa-regular fa-star"></i>'.repeat(5 - Number(op.stars)) : ''}
+        </span>
+        <p class="testimonial-text">${op.text || ''}</p>
+      `;
         testimonialSlider.appendChild(card);
       });
-      if (window.updateTestimonials) window.updateTestimonials();
+      // Zawsze uruchom slider po załadowaniu opinii
+      setTimeout(() => {
+        if (typeof initTestimonialSlider === 'function') {
+          initTestimonialSlider();
+        } else if (typeof window.initTestimonialSlider === 'function') {
+          window.initTestimonialSlider();
+        }
+      }, 0);
+      // Pokaż kontrolki jeśli są opinie
+      const controls = document.querySelector('.testimonial-controls');
+      if (controls) {
+        controls.style.display = opinions.length > 0 ? 'flex' : 'none';
+      }
     } catch (e) {
-      // fallback: nie rób nic
+      console.error('Błąd pobierania opinii:', e);
     }
   }
 
-  // Wywołaj na starcie
-  document.addEventListener('DOMContentLoaded', fetchAndRenderOpinions);
+  // Slider zawsze podpinaj do nowych kart!
+  function initTestimonialSlider() {
+    const testimonialCards = document.querySelectorAll('.testimonial-card');
+    const prevBtn = document.querySelector('.testimonial-prev');
+    const nextBtn = document.querySelector('.testimonial-next');
+    if (!testimonialCards.length) return;
+
+    let idx = 0;
+    let autoInterval = null;
+
+    function updateTestimonials() {
+      const cardsArr = Array.from(document.querySelectorAll('.testimonial-card'));
+      cardsArr.forEach((el, i) => {
+        el.classList.remove('left', 'center', 'right', 'hidden');
+        if (i === idx % cardsArr.length) {
+          el.classList.add('left');
+        } else if (i === (idx + 1) % cardsArr.length) {
+          el.classList.add('center');
+        } else if (i === (idx + 2) % cardsArr.length) {
+          el.classList.add('right');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+    }
+
+    function nextTestimonial() {
+      const cardsArr = Array.from(document.querySelectorAll('.testimonial-card'));
+      idx = (idx + 1) % cardsArr.length;
+      updateTestimonials();
+    }
+
+    function prevTestimonial() {
+      const cardsArr = Array.from(document.querySelectorAll('.testimonial-card'));
+      idx = (idx - 1 + cardsArr.length) % cardsArr.length;
+      updateTestimonials();
+    }
+
+    function startAutoSlide() {
+      if (autoInterval) clearInterval(autoInterval);
+      autoInterval = setInterval(nextTestimonial, 5000);
+    }
+
+    // Usuwamy stare eventy, żeby nie dublować!
+    if (prevBtn) {
+      const newPrev = prevBtn.cloneNode(true);
+      prevBtn.parentNode.replaceChild(newPrev, prevBtn);
+      newPrev.addEventListener('click', () => {
+        prevTestimonial();
+        startAutoSlide();
+      });
+    }
+    if (nextBtn) {
+      const newNext = nextBtn.cloneNode(true);
+      nextBtn.parentNode.replaceChild(newNext, nextBtn);
+      newNext.addEventListener('click', () => {
+        nextTestimonial();
+        startAutoSlide();
+      });
+    }
+
+    updateTestimonials();
+    startAutoSlide();
+  }
+
+  // NA SAMYM DOLE PLIKU!
+  window.addEventListener('load', fetchAndRenderOpinions);
+
 
   // Zmieniona obsługa przycisku "Dodaj opinię"
   if (addOpinionBtn) {
@@ -701,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Zapisz opinię do bazy danych przez PHP
       try {
-        const resp = await fetch('main/add_opinion.php', {
+        const resp = await fetch('main/opinions_to_db/add_opinion.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -890,62 +968,6 @@ if (contactForm) {
     }
   });
 }
-
-// Testimonials slider
-(function () {
-  const testimonials = document.querySelectorAll('.testimonial-card');
-  const prevBtn = document.querySelector('.testimonial-prev');
-  const nextBtn = document.querySelector('.testimonial-next');
-  if (!testimonials.length) return;
-  let idx = 0;
-  let autoInterval = null;
-
-  // Uczyń updateTestimonials globalnym, by można było go wywołać po dodaniu opinii
-  window.updateTestimonials = function updateTestimonials() {
-    const testimonialsArr = Array.from(document.querySelectorAll('.testimonial-card'));
-    testimonialsArr.forEach((el, i) => {
-      el.classList.remove('left', 'center', 'right', 'hidden');
-      if (i === idx % testimonialsArr.length) {
-        el.classList.add('left');
-      } else if (i === (idx + 1) % testimonialsArr.length) {
-        el.classList.add('center');
-      } else if (i === (idx + 2) % testimonialsArr.length) {
-        el.classList.add('right');
-      } else {
-        el.classList.add('hidden');
-      }
-    });
-  };
-
-  function nextTestimonial() {
-    const testimonialsArr = Array.from(document.querySelectorAll('.testimonial-card'));
-    idx = (idx + 1) % testimonialsArr.length;
-    window.updateTestimonials();
-  }
-
-  function prevTestimonial() {
-    const testimonialsArr = Array.from(document.querySelectorAll('.testimonial-card'));
-    idx = (idx - 1 + testimonialsArr.length) % testimonialsArr.length;
-    window.updateTestimonials();
-  }
-
-  function startAutoSlide() {
-    if (autoInterval) clearInterval(autoInterval);
-    autoInterval = setInterval(nextTestimonial, 5000);
-  }
-
-  window.updateTestimonials();
-  startAutoSlide();
-
-  prevBtn?.addEventListener('click', () => {
-    prevTestimonial();
-    startAutoSlide();
-  });
-  nextBtn?.addEventListener('click', () => {
-    nextTestimonial();
-    startAutoSlide();
-  });
-})();
 
 // Newsletter form
 const newsletterForm = document.querySelector('.newsletter-form');
