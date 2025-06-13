@@ -531,6 +531,25 @@ switch ($action) {
 
         $userEmail = $_SESSION['user_email'];
 
+        // MAPOWANIE price_id na nazwę planu
+        function mapPriceIdToPlanNameAndPeriod($priceIdOrPlan) {
+            $map = [
+                // price_id => [plan_name, period]
+                'price_1RQpnDFQBh6Vdz2pKIXTtsV4' => ['basic', 'monthly'],
+                'price_1RRFwiFQBh6Vdz2pXy7d20TI' => ['pro', 'monthly'],
+                'price_1RW3LMFQBh6Vdz2pOsrR6BQ9' => ['basic', 'yearly'],
+                'price_1RW3M4FQBh6Vdz2pQKmpJGmW' => ['pro', 'yearly'],
+                'price_1RZcpVFQBh6Vdz2pWJambttr' => ['basic', 'monthly'], // lub 'yearly' jeśli to roczny
+            ];
+            if (in_array(strtolower($priceIdOrPlan), ['basic', 'pro', 'enterprise'])) {
+                return [strtolower($priceIdOrPlan), 'monthly'];
+            }
+            if (isset($map[$priceIdOrPlan])) {
+                return $map[$priceIdOrPlan];
+            }
+            return [$priceIdOrPlan, 'unknown'];
+        }
+
         try {
             $stmt = $pdo->prepare("SHOW TABLES LIKE 'subscriptions'");
             $stmt->execute();
@@ -542,16 +561,25 @@ switch ($action) {
             }
 
             $stmt = $pdo->prepare("
-                SELECT plan, status, created_at, current_period_end, stripe_subscription_id, cancel_at_period_end 
-                FROM subscriptions 
-                WHERE email = ? AND (status = 'active' OR status = 'trialing') 
-                ORDER BY created_at DESC 
+                SELECT plan, status, created_at, current_period_end, stripe_subscription_id, cancel_at_period_end, price_id
+                FROM subscriptions
+                WHERE email = ? AND (status = 'active' OR status = 'trialing')
+                ORDER BY created_at DESC
                 LIMIT 1
             ");
             $stmt->execute([$userEmail]);
             $subscription = $stmt->fetch();
 
             if ($subscription) {
+                // Mapuj plan na nazwę
+                $planRaw = $subscription['plan'] ?? '';
+                $priceId = $subscription['price_id'] ?? '';
+                list($planName, $planPeriod) = mapPriceIdToPlanNameAndPeriod($priceId ?: $planRaw);
+
+                $subscription['plan_name'] = $planName;
+                $subscription['plan_period'] = $planPeriod;
+
+                // ...istniejący kod Stripe API sync...
                 if (!empty($_ENV['STRIPE_SECRET_KEY']) && $subscription['stripe_subscription_id']) {
                     try {
                         $stripeSubscription = \Stripe\Subscription::retrieve($subscription['stripe_subscription_id']);

@@ -75,13 +75,8 @@ function loadActivePackageInfo() {
     .then(data => {
       if (data.success && data.subscription) {
         const sub = data.subscription;
-        // Ustal nazwę planu z price_id jeśli istnieje, w przeciwnym razie z plan
-        let planName = sub.plan;
-        if (sub.price_id) {
-          planName = mapPriceIdToPlan(sub.price_id);
-        } else if (sub.plan && sub.plan.startsWith('price_')) {
-          planName = mapPriceIdToPlan(sub.plan);
-        }
+        // Użyj plan_name jeśli jest, fallback na plan
+        let planName = sub.plan_name || sub.plan;
         // Wyznacz datę odnowienia na podstawie typu subskrypcji
         let renewDate = 'N/A';
         if (sub.current_period_end) {
@@ -96,11 +91,16 @@ function loadActivePackageInfo() {
 
         const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
 
+        let planPeriod = sub.plan_period || '';
+        let planPeriodLabel = '';
+        if (planPeriod === 'yearly') planPeriodLabel = ' (roczny)';
+        if (planPeriod === 'monthly') planPeriodLabel = ' (miesięczny)';
+
         activePackageDiv.innerHTML = `
           <div class="active-package-card">
             <h4><i class="fa-solid fa-crown"></i> Aktywny pakiet</h4>
             <div class="package-details">
-              <p><strong>Plan:</strong> ${planName || 'Nieznany'}</p>
+              <p><strong>Plan:</strong> ${planName || 'Nieznany'}${planPeriodLabel}</p>
               <p><strong>Status:</strong> ${statusText}</p>
               <p><strong>Odnawia się:</strong> ${renewDate}</p>
               ${sub.cancel_at_period_end ? '<div class="cancel-notice"><i class="fa-solid fa-exclamation-triangle"></i> Subskrypcja zostanie anulowana po zakończeniu okresu rozliczeniowego</div>' : ''}
@@ -242,16 +242,10 @@ function loadSubscriptions() {
         list.innerHTML = '';
         noActiveSubscriptionShown = false;
 
-        // Znajdź pierwszą subskrypcję o statusie 'active' lub 'trialing', jeśli nie ma to po prostu pierwszą
         let sub = data.subscriptions.find(s => s.status === 'active' || s.status === 'trialing') || data.subscriptions[0];
 
-        // Ustal nazwę planu z price_id jeśli istnieje, w przeciwnym razie z plan
-        let planName = sub.plan;
-        if (sub.price_id) {
-          planName = mapPriceIdToPlan(sub.price_id);
-        } else if (sub.plan && sub.plan.startsWith('price_')) {
-          planName = mapPriceIdToPlan(sub.plan);
-        }
+        // Użyj plan_name jeśli jest, fallback na plan
+        let planName = sub.plan_name || sub.plan;
 
         const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
         const statusClass = getStatusClass(sub.status, sub.cancel_at_period_end);
@@ -1112,8 +1106,13 @@ async function getUserCourseAccessLevel() {
   try {
     const res = await fetch('auth.php?action=check_active_subscription', { credentials: 'include' });
     const data = await res.json();
-    if (data.success && data.subscription && data.subscription.plan) {
-      const plan = (data.subscription.plan || '').toLowerCase();
+    if (data.success && data.subscription) {
+      // Użyj plan_name jeśli jest, fallback na plan, a jeśli nie ma - zmapuj price_id
+      let plan = data.subscription.plan_name || data.subscription.plan;
+      if ((!plan || plan === 'Nieznany plan') && data.subscription.price_id) {
+        plan = mapPriceIdToPlan(data.subscription.price_id);
+      }
+      plan = (plan || '').toLowerCase();
       if (plan.includes('enterprise')) return 'enterprise';
       if (plan.includes('pro')) return 'pro';
       if (plan.includes('basic')) return 'basic';
