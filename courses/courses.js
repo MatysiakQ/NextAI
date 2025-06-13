@@ -69,10 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sprawdź uprawnienia użytkownika (czy ma subskrypcję)
   async function checkSubscription() {
     try {
-      const res = await fetch('../userpanel/auth.php?action=check_active_subscription', { credentials: 'include' });
+      const res = await fetch('/userpanel/auth.php?action=check_active_subscription', { credentials: 'include' });
       const data = await res.json();
-      if (data.success && data.subscription && data.subscription.plan) {
-        const plan = (data.subscription.plan || '').toLowerCase();
+      if (data.success && data.subscription) {
+        // Użyj plan_name jeśli jest, fallback na plan
+        const plan = (data.subscription.plan_name || data.subscription.plan || '').toLowerCase();
         if (plan.includes('pro')) userAccess = 'pro';
         else if (plan.includes('basic')) userAccess = 'basic';
         else userAccess = 'free';
