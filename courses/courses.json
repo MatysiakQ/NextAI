@@ -1,0 +1,121 @@
+[
+  {
+    "id": "free-ai-intro",
+    "title": "Wprowadzenie do AI",
+    "desc": "Podstawy sztucznej inteligencji i jej zastosowania w biznesie.",
+    "access": "free",
+    "link": "free-ai-intro.html"
+  },
+  {
+    "id": "free-chatbots",
+    "title": "Chatboty – od zera",
+    "desc": "Dowiedz się jak działają chatboty i jak je wykorzystać w firmie.",
+    "access": "free",
+    "link": "free-chatbots.html"
+  },
+  {
+    "id": "basic-rpa",
+    "title": "Automatyzacje biznesowe z RPA",
+    "desc": "Praktyczne workflowy, integracje API, automatyzacja faktur i powiadomień.",
+    "access": "basic",
+    "link": "basic-rpa.html"
+  },
+  {
+    "id": "basic-meetings",
+    "title": "Bot do umawiania spotkań",
+    "desc": "Tworzenie bota do rezerwacji spotkań i integracja z kalendarzem Google.",
+    "access": "basic",
+    "link": "basic-meetings.html"
+  },
+  {
+    "id": "basic-mailing",
+    "title": "Automatyzacja mailingu",
+    "desc": "Budowa automatycznych kampanii e-mail i powiadomień dla klientów.",
+    "access": "basic",
+    "link": "basic-mailing.html"
+  },
+  {
+    "id": "basic-hr-onboarding",
+    "title": "Bot HR – onboarding pracowników",
+    "desc": "Automatyzacja procesu wdrożenia nowych pracowników w firmie.",
+    "access": "basic",
+    "link": "basic-hr-onboarding.html"
+  },
+  {
+    "id": "basic-complaints",
+    "title": "Bot do obsługi reklamacji",
+    "desc": "Tworzenie bota do przyjmowania i obsługi reklamacji klientów.",
+    "access": "basic",
+    "link": "basic-complaints.html"
+  },
+  {
+    "id": "pro-ai-analytics",
+    "title": "AI w praktyce – analizy i predykcje",
+    "desc": "Uczenie maszynowe, analiza danych i wdrożenia AI w firmie.",
+    "access": "pro",
+    "link": "pro-ai-analytics.html"
+  },
+  {
+    "id": "pro-saas-api",
+    "title": "Integracje SaaS i API",
+    "desc": "Łączenie narzędzi online, automatyczne raporty, synchronizacja danych.",
+    "access": "pro",
+    "link": "pro-saas-api.html"
+  },
+  {
+    "id": "pro-teams",
+    "title": "Warsztaty: AI dla zespołów",
+    "desc": "Szkolenia dla firm – wdrożenia AI, automatyzacje, bezpieczeństwo danych.",
+    "access": "pro",
+    "link": "pro-teams.html"
+  },
+  {
+    "id": "pro-ml-advanced",
+    "title": "Zaawansowane uczenie maszynowe",
+    "desc": "Techniki ML, deep learning, praktyczne projekty AI.",
+    "access": "pro",
+    "link": "pro-ml-advanced.html"
+  },
+  {
+    "id": "pro-ai-security",
+    "title": "Bezpieczeństwo AI i danych",
+    "desc": "Ochrona danych, bezpieczeństwo modeli i wdrożeń AI.",
+    "access": "pro",
+    "link": "pro-ai-security.html"
+  },
+  {
+    "id": "pro-custom-agents",
+    "title": "Tworzenie własnych agentów AI",
+    "desc": "Budowa i wdrożenie własnych agentów konwersacyjnych.",
+    "access": "pro",
+    "link": "pro-custom-agents.html"
+  },
+  {
+    "id": "pro-ai-databases",
+    "title": "Integracja AI z bazami danych",
+    "desc": "Łączenie modeli AI z relacyjnymi i nierelacyjnymi bazami danych.",
+    "access": "pro",
+    "link": "pro-ai-databases.html"
+  },
+  {
+    "id": "pro-ai-iot",
+    "title": "AI w IoT i automatyce",
+    "desc": "Wykorzystanie AI w urządzeniach IoT i automatyzacji przemysłowej.",
+    "access": "pro",
+    "link": "pro-ai-iot.html"
+  },
+  {
+    "id": "pro-nlp",
+    "title": "Przetwarzanie języka naturalnego (NLP)",
+    "desc": "Analiza tekstu, chatboty, generowanie treści z AI.",
+    "access": "pro",
+    "link": "pro-nlp.html"
+  },
+  {
+    "id": "pro-business-analytics",
+    "title": "AI w analizie biznesowej",
+    "desc": "Wykorzystanie AI do raportowania i predykcji w biznesie.",
+    "access": "pro",
+    "link": "pro-business-analytics.html"
+  }
+]

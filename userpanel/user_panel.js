@@ -34,6 +34,10 @@ Object.entries(navBtns2).forEach(([key, btn]) => {
       if (key === 'profile') {
         loadUserData();
       }
+      // Po przejściu do sekcji "Moje kursy" wyświetl kursy
+      if (key === 'courses') {
+        renderUserCourses();
+      }
     });
   }
 });
@@ -371,13 +375,8 @@ function cancelSubscription(subscriptionId) {
     },
     body: JSON.stringify({ action: 'cancel_subscription', subscriptionId: subscriptionId })
   })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then(data => {
+    .then(res => res.json())
+    .then(data => { // <-- poprawka tutaj
       if (data.success) {
         alert('Anulowanie subskrypcji zostało zainicjowane.');
         // Odśwież listę subskrypcji i informacje o pakiecie
@@ -779,3 +778,103 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarImg.innerHTML = '<i class="fa-solid fa-user"></i>';
     });
 });
+
+// Lista kursów (możesz rozbudować o pobieranie z backendu)
+const ALL_COURSES = [
+  {
+    id: 'free-1',
+    title: 'Wprowadzenie do AI',
+    desc: 'Podstawy sztucznej inteligencji i automatyzacji.',
+    access: 'free'
+  },
+  {
+    id: 'basic-1',
+    title: 'Automatyzacja w biznesie',
+    desc: 'Praktyczne workflowy i narzędzia automatyzacji.',
+    access: 'basic'
+  },
+  {
+    id: 'pro-1',
+    title: 'Zaawansowane integracje API',
+    desc: 'Integracje systemów, webhooki, RPA.',
+    access: 'pro'
+  },
+];
+
+// Funkcja do pobrania poziomu dostępu użytkownika (free/basic/pro)
+async function getUserCourseAccessLevel() {
+  try {
+    const res = await fetch('auth.php?action=check_active_subscription', { credentials: 'include' });
+    const data = await res.json();
+    if (data.success && data.subscription && data.subscription.plan) {
+      const plan = (data.subscription.plan || '').toLowerCase();
+      if (plan.includes('pro')) return 'pro';
+      if (plan.includes('basic')) return 'basic';
+    }
+    return 'free';
+  } catch {
+    return 'free';
+  }
+}
+
+// Funkcja do pobrania kursów z backendu (np. z pliku PHP/JSON)
+async function fetchAllCoursesFromBackend() {
+  try {
+    const res = await fetch('/courses/courses.json', { credentials: 'omit', cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    // Oczekiwany format: [{title, desc, access, link}, ...]
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// Funkcja do renderowania kursów w sekcji "Moje kursy"
+async function renderUserCourses() {
+  const coursesSection = document.getElementById('section2-courses');
+  if (!coursesSection) return;
+  let container = document.getElementById('user-courses-list');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'user-courses-list';
+    coursesSection.appendChild(container);
+  }
+  container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px 0;">Ładowanie kursów...</div>';
+
+  // Jeśli użytkownik nie ma subskrypcji (niezalogowany lub brak suba), getUserCourseAccessLevel zwróci 'free'
+  const [accessLevel, allCourses] = await Promise.all([
+    getUserCourseAccessLevel(),
+    fetchAllCoursesFromBackend()
+  ]);
+
+  // Pokazuj zawsze kursy darmowe, nawet jeśli accessLevel to 'free'
+  const visibleCourses = allCourses.filter(course => {
+    if (course.access === 'free') return true;
+    if (course.access === 'basic' && (accessLevel === 'basic' || accessLevel === 'pro')) return true;
+    if (course.access === 'pro' && accessLevel === 'pro') return true;
+    return false;
+  });
+
+  if (visibleCourses.length === 0) {
+    container.innerHTML = '<div style="color:#ff5c5c;text-align:center;padding:30px 0;">Nie masz dostępu do żadnych kursów.<br><a href="../sub/subskrypcja.html" style="color:#0ff;text-decoration:underline;">Aktywuj subskrypcję</a></div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      ${visibleCourses.map(course => `
+        <div class="user-course-card" style="background:#181818;border-radius:12px;padding:18px 16px;box-shadow:0 2px 12px #0003;">
+          <div style="font-size:1.15em;font-weight:bold;color:#0ff;">${course.title}</div>
+          <div style="color:#ccc;margin:6px 0 10px 0;">${course.desc}</div>
+          <span class="user-course-badge" style="display:inline-block;padding:3px 12px;border-radius:8px;font-size:0.95em;background:${course.access==='pro' ? '#00ffae22' : course.access==='basic' ? '#ffd70022' : '#0ff2'};color:${course.access==='pro' ? '#00ffae' : course.access==='basic' ? '#FFD700' : '#0ff'};">
+            ${course.access === 'pro' ? 'PRO' : course.access === 'basic' ? 'BASIC' : 'DARMOWY'}
+          </span>
+          <div style="margin-top:12px;">
+            <a href="/courses/${course.link}" class="user-course-link-btn" style="background:#0ff;color:#181818;padding:8px 18px;border-radius:7px;font-weight:bold;text-decoration:none;transition:background 0.2s;">Przejdź do kursu</a>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
