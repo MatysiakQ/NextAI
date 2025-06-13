@@ -66,14 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const accessInfo = document.getElementById('courses-access-info');
   let userAccess = 'free'; // free | basic | pro
 
-  // Funkcja do pobrania statusu subskrypcji użytkownika
+  // Sprawdź uprawnienia użytkownika (czy ma subskrypcję)
   async function checkSubscription() {
     try {
-      const res = await fetch('../userpanel/auth.php?action=subscriptions', { credentials: 'include' });
+      const res = await fetch('../userpanel/auth.php?action=check_active_subscription', { credentials: 'include' });
       const data = await res.json();
-      if (data.success && data.subscription) {
-        if (data.subscription === 'pro') userAccess = 'pro';
-        else if (data.subscription === 'basic') userAccess = 'basic';
+      if (data.success && data.subscription && data.subscription.plan) {
+        const plan = (data.subscription.plan || '').toLowerCase();
+        if (plan.includes('pro')) userAccess = 'pro';
+        else if (plan.includes('basic')) userAccess = 'basic';
         else userAccess = 'free';
       } else {
         userAccess = 'free';
@@ -84,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAccessUI();
   }
 
-  // Blokowanie/odblokowanie kursów na podstawie uprawnień
+  // Odblokuj/blokuj kursy zgodnie z uprawnieniami
   function updateAccessUI() {
     // Komunikat
     if (userAccess === 'pro') {
@@ -100,13 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Kursy PRO
     document.querySelectorAll('.course-card[data-access="pro"]').forEach(card => {
-      card.dataset.locked = userAccess !== 'pro';
-      card.querySelector('.course-btn').disabled = userAccess !== 'pro';
+      const unlocked = userAccess === 'pro';
+      card.dataset.locked = !unlocked;
+      card.querySelector('.course-btn').disabled = !unlocked;
     });
     // Kursy BASIC
     document.querySelectorAll('.course-card[data-access="basic"]').forEach(card => {
-      card.dataset.locked = (userAccess !== 'pro' && userAccess !== 'basic');
-      card.querySelector('.course-btn').disabled = (userAccess !== 'pro' && userAccess !== 'basic');
+      const unlocked = userAccess === 'pro' || userAccess === 'basic';
+      card.dataset.locked = !unlocked;
+      card.querySelector('.course-btn').disabled = !unlocked;
     });
     // Kursy FREE
     document.querySelectorAll('.course-card[data-access="free"]').forEach(card => {
@@ -115,16 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Obsługa kliknięcia w kurs
+  // Obsługa kliknięcia w kurs – zawsze przekieruj na "coming soon"
   document.querySelectorAll('.course-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
       const card = this.closest('.course-card');
       if (card.dataset.locked === "true") {
         alert('Nie masz dostępu do tego kursu. Aktywuj odpowiednią subskrypcję!');
         return;
       }
-      // Przekierowanie do kursu (możesz podmienić na rzeczywiste linki)
-      window.location.href = this.dataset.link;
+      // Przekierowanie na stronę "Wkrótce dostępne"
+      window.location.href = "coming-soon.html";
     });
   });
 

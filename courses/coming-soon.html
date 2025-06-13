@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kursy NextAI – Wkrótce dostępne</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="courses.css" />
+  <link rel="icon" href="../nextai.jpg" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <style>
+    body {
+      background: #181a2b;
+      min-height: 100vh;
+      margin: 0;
+      color: #e0f7fa;
+      font-family: 'Source Code Pro', monospace;
+      display: flex;
+      flex-direction: column;
+    }
+    .coming-soon-main {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+    .coming-soon-icon {
+      font-size: 4.2rem;
+      color: #FFD700;
+      margin-bottom: 18px;
+      opacity: 0.85;
+      text-shadow: 0 0 12px #FFD70033;
+    }
+    .coming-soon-title {
+      font-size: 2rem;
+      color: #0ff;
+      font-weight: bold;
+      letter-spacing: 1.2px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #0ff6, 0 0 18px #FFD70022;
+    }
+    .coming-soon-desc {
+      font-size: 1.08em;
+      color: #FFD700;
+      margin: 18px 0 32px 0;
+      text-shadow: 0 0 4px #FFD70022;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+      opacity: 0.92;
+    }
+    .coming-soon-btn {
+      display: inline-block;
+      background: #232946;
+      color: #FFD700;
+      font-weight: bold;
+      border-radius: 12px;
+      font-size: 1em;
+      box-shadow: 0 2px 8px #0ff1;
+      letter-spacing: 0.5px;
+      border: 1px solid #FFD70055;
+      padding: 12px 30px;
+      cursor: pointer;
+      margin-top: 18px;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .coming-soon-btn:hover {
+      background: #FFD700;
+      color: #232946;
+      box-shadow: 0 2px 16px #FFD70044;
+      transform: scale(1.04);
+      text-decoration: none;
+    }
+    .coming-soon-footer {
+      margin-top: 48px;
+      color: #b8f6f6;
+      font-size: 1em;
+      opacity: 0.6;
+    }
+    @media (max-width: 600px) {
+      .coming-soon-title { font-size: 1.1rem; }
+      .coming-soon-desc { font-size: 0.98em; }
+      .coming-soon-icon { font-size: 2.2rem; }
+      .coming-soon-btn { font-size: 0.98em; padding: 9px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-grid"></div>
+  <main class="coming-soon-main">
+    <span class="coming-soon-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+    <h1 class="coming-soon-title">Kursy wkrótce dostępne</h1>
+    <div class="coming-soon-desc">
+      Pracujemy nad udostępnieniem kursów NextAI.<br>
+      Dziękujemy za zainteresowanie i cierpliwość!
+    </div>
+    <a href="courses.html" class="coming-soon-btn"><i class="fa-solid fa-arrow-left"></i> Powrót do kursów</a>
+    <div class="coming-soon-footer">
+      &copy; 2025 NextAI. Powered by NextAI.
+    </div>
+  </main>
+</body>
+</html>
