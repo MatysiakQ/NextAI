@@ -114,12 +114,3 @@ http_response_code(200);
 ob_end_clean();
 echo json_encode(['success' => true, 'message' => 'Post added', 'post' => $newPost]);
 exit;
-
-array_unshift($posts, $newPost);
-file_put_contents($postsFile, json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-// Odpowiedź
-http_response_code(200);
-ob_end_clean();
-echo json_encode(['success' => true, 'message' => 'Post added', 'post' => $newPost]);
-exit;
