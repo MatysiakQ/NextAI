@@ -85,8 +85,26 @@ if (!$title || !$content) {
     exit;
 }
 
-// --- Sprawdzenie uprawnień administratora ---
-if (!isset($_SESSION['user_email']) || empty($_SESSION['user_email']) || empty($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+// --- Sprawdzenie uprawnień administratora lub n8n ---
+$headers = [];
+foreach (getallheaders() as $k => $v) {
+    $headers[strtolower($k)] = $v;
+}
+
+// Pozwól na dodawanie postów z n8n jeśli jest specjalny nagłówek
+$isN8N = false;
+if (isset($headers['x-n8n-secret'])) {
+    // Usuń ewentualne białe znaki
+    $n8nSecret = trim($headers['x-n8n-secret']);
+    if ($n8nSecret === 'yb1pxxpdr*%4ihz3n6=$') { // <- ustaw swój sekret
+        $isN8N = true;
+    }
+}
+
+if (
+    !$isN8N &&
+    (!isset($_SESSION['user_email']) || empty($_SESSION['user_email']) || empty($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true)
+) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Tylko administrator może dodawać posty.']);
     exit;

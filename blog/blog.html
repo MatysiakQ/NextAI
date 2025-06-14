@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,6 +11,7 @@
   <link rel="icon" href="../nextai.jpg" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 </head>
+
 <body>
   <div class="background-grid"></div>
   <nav class="navbar">
@@ -45,69 +47,24 @@
   <main class="blog-main">
     <section class="blog-section">
       <h2 class="blog-section-title glitch" data-text="Najnowsze wpisy">Wyróżnione artykuły</h2>
-      <div class="blog-articles-grid">
-        <article class="blog-article-card">
-          <div class="blog-article-meta">
-            <span class="blog-article-date"><i class="fa-regular fa-calendar"></i> 2024-06-12</span>
-            <span class="blog-article-tag">AI</span>
-          </div>
-          <h3 class="blog-article-title">🤖 Chatboty w biznesie: Nowy standard obsługi klienta</h3>
-          <p class="blog-article-excerpt">
-            Poznaj realne wdrożenia, efektywność i trendy w automatyzacji kontaktu z klientem. Zobacz, jak chatboty wspierają rozwój firm i budują przewagę konkurencyjną.
-          </p>
-          <a href="#" class="blog-readmore-btn">Czytaj więcej</a>
-        </article>
-        <article class="blog-article-card">
-          <div class="blog-article-meta">
-            <span class="blog-article-date"><i class="fa-regular fa-calendar"></i> 2024-06-10</span>
-            <span class="blog-article-tag">Automatyzacja</span>
-          </div>
-          <h3 class="blog-article-title">⚡ Automatyzacja procesów: Przewodnik dla liderów</h3>
-          <p class="blog-article-excerpt">
-            Jak wybrać procesy do automatyzacji, wdrożyć pierwsze rozwiązania i zwiększyć efektywność operacyjną w firmie? Praktyczne porady dla menedżerów.
-          </p>
-          <a href="#" class="blog-readmore-btn">Czytaj więcej</a>
-        </article>
-        <article class="blog-article-card">
-          <div class="blog-article-meta">
-            <span class="blog-article-date"><i class="fa-regular fa-calendar"></i> 2024-06-05</span>
-            <span class="blog-article-tag">Biznes</span>
-          </div>
-          <h3 class="blog-article-title">📈 AI w liczbach: Wpływ na wyniki biznesowe</h3>
-          <p class="blog-article-excerpt">
-            Analiza case studies, ROI z wdrożeń AI oraz kluczowe wskaźniki sukcesu. Dowiedz się, jak mierzyć realny wpływ automatyzacji na rozwój firmy.
-          </p>
-          <a href="#" class="blog-readmore-btn">Czytaj więcej</a>
-        </article>
-        <article class="blog-article-card">
-          <div class="blog-article-meta">
-            <span class="blog-article-date"><i class="fa-regular fa-calendar"></i> 2024-06-01</span>
-            <span class="blog-article-tag">Edukacja</span>
-          </div>
-          <h3 class="blog-article-title">🎓 Kompetencje AI: Jak rozwijać zespół przyszłości?</h3>
-          <p class="blog-article-excerpt">
-            Przegląd kursów, narzędzi i źródeł wiedzy dla biznesu. Sprawdź, jak skutecznie budować kompetencje AI w organizacji i nie zostać w tyle.
-          </p>
-          <a href="#" class="blog-readmore-btn">Czytaj więcej</a>
-        </article>
-        <!-- ...kolejne wpisy można dodać analogicznie... -->
-      </div>
+      <div class="blog-articles-grid"></div>
       <div class="blog-add-topic">
-        <a href="mailto:kontakt@next-ai.pl" class="blog-add-topic-btn"><i class="fa-solid fa-lightbulb"></i> Zaproponuj temat biznesowy</a>
+        <a href="mailto:kontakt@next-ai.pl" class="blog-add-topic-btn"><i class="fa-solid fa-lightbulb"></i> Zaproponuj
+          temat biznesowy</a>
       </div>
     </section>
   </main>
-  <footer class="site-footer">
-    <p>&copy; 2025 NextAI. Wszelkie prawa zastrzeżone.</p>
-    <a href="http://next-ai.pl"><p>Powered by NextAI</p></a>
-    <a href="#" id="terms-link"> Regulamin usług NextAI</a>
-  </footer>
+  
   <!-- SOCIAL PANEL (naprawiony, poprawna struktura) -->
   <div class="social-panel">
-    <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon"><i class="fa-brands fa-square-instagram"></i></a>
-    <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon"><i class="fa-brands fa-square-facebook"></i></a>
-    <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank" class="social-icon"><i class="fa-brands fa-linkedin"></i></a>
-    <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
+    <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon"><i
+        class="fa-brands fa-square-instagram"></i></a>
+    <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon"><i
+        class="fa-brands fa-square-facebook"></i></a>
+    <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank"
+      class="social-icon"><i class="fa-brands fa-linkedin"></i></a>
+    <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon"><i
+        class="fa-brands fa-tiktok"></i></a>
   </div>
   <button id="chat-toggle" aria-label="Otwórz czat">💬</button>
   <div id="chat-widget">
@@ -141,4 +98,58 @@
   <script src="blog.js" defer></script>
   <script src="/main/main.js" defer></script>
 </body>
+
+</html>
+</main>
+<footer class="site-footer">
+  <p>&copy; 2025 NextAI. Wszelkie prawa zastrzeżone.</p>
+  <a href="http://next-ai.pl">
+    <p>Powered by NextAI</p>
+  </a>
+  <a href="#" id="terms-link"> Regulamin usług NextAI</a>
+</footer>
+<!-- SOCIAL PANEL (naprawiony, poprawna struktura) -->
+<div class="social-panel">
+  <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon"><i
+      class="fa-brands fa-square-instagram"></i></a>
+  <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon"><i
+      class="fa-brands fa-square-facebook"></i></a>
+  <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank"
+    class="social-icon"><i class="fa-brands fa-linkedin"></i></a>
+  <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon"><i
+      class="fa-brands fa-tiktok"></i></a>
+</div>
+<button id="chat-toggle" aria-label="Otwórz czat">💬</button>
+<div id="chat-widget">
+  <div id="chat-header">
+    <span class="chatbot-avatar"><i class="fa-solid fa-robot"></i></span>
+    <span class="chatbot-title">NextAI Asystent</span>
+    <span class="powered-by"><a href="http://next-ai.pl">Powered by NextAI</a></span>
+    <button id="chat-close" aria-label="Zamknij czat">&times;</button>
+  </div>
+  <div id="chat-body"></div>
+  <div id="chat-input">
+    <input type="text" id="chat-question" placeholder="Zadaj pytanie..." autocomplete="off" />
+    <button id="chat-send" aria-label="Wyślij wiadomość"><i class="fa fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<!-- MODAL BLOGA -->
+<div id="blog-modal" class="modal hidden">
+  <div class="modal-content" id="blog-modal-content">
+    <span class="close-button" id="close-blog-modal">&times;</span>
+    <div id="blog-modal-inner"></div>
+  </div>
+</div>
+<!-- MODAL: Wylogowano -->
+<div id="logout-modal" class="modal hidden">
+  <div class="modal-content glitch" data-text="Wylogowano!">
+    <span class="close-button" onclick="document.getElementById('logout-modal').classList.add('hidden')">×</span>
+    <p>Zostałeś pomyślnie wylogowany.</p>
+  </div>
+</div>
+<script src="blog.js" defer></script>
+<script src="/main/main.js" defer></script>
+</body>
+
 </html>

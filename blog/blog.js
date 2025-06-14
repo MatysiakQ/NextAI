@@ -49,26 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const blogModalInner = document.getElementById('blog-modal-inner');
   const closeBlogModal = document.getElementById('close-blog-modal');
 
-  function setupModalTriggers(posts) {
-    document.querySelectorAll('.blog-readmore-btn').forEach((btn, idx) => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        const post = posts[idx];
-        if (!post) return;
-        blogModalInner.innerHTML = `
-          <div class="modal-meta">
-            <span><i class="fa-regular fa-calendar"></i> ${post.date}</span>
-            <span style="color:#FFD700;font-weight:bold;">${post.tag}</span>
-          </div>
-          <span class="modal-glitch-title" data-text="${post.title}">${post.title}</span>
-          <div class="modal-body">${post.content}</div>
-        `;
-        blogModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-      });
-    });
-  }
-
   closeBlogModal?.addEventListener('click', () => {
     blogModal.classList.add('hidden');
     document.body.classList.remove('modal-open');
@@ -106,11 +86,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!container) return;
     container.innerHTML = '';
     posts.forEach((post, idx) => {
+      // Poprawne parsowanie daty (obsługa formatu "YYYY-MM-DD" i "YYYY-MM-DD HH:MM:SS")
+      let dateStr = '';
+      if (post.date) {
+        // Zamień "YYYY-MM-DD" na "YYYY-MM-DDT00:00:00" jeśli nie ma T
+        let dateVal = post.date;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+          dateVal += 'T00:00:00';
+        } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateVal)) {
+          dateVal = dateVal.replace(' ', 'T');
+        }
+        const d = new Date(dateVal);
+        dateStr = isNaN(d.getTime()) ? post.date : d.toLocaleDateString('pl-PL');
+      }
       const card = document.createElement('article');
       card.className = 'blog-article-card';
       card.innerHTML = `
         <div class="blog-article-meta">
-          <span class="blog-article-date"><i class="fa-regular fa-calendar"></i> ${post.date ? new Date(post.date).toLocaleDateString('pl-PL') : ''}</span>
+          <span class="blog-article-date"><i class="fa-regular fa-calendar"></i> ${dateStr}</span>
           <span class="blog-article-tag">${post.tag || ''}</span>
         </div>
         <h3 class="blog-article-title">${post.title || ''}</h3>
