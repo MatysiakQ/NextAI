@@ -160,3 +160,71 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// --- FORMULARZ DODAWANIA NOWEGO WPISU ---
+// Dodaj funkcję sprawdzającą uprawnienia admina
+async function isAdmin() {
+  try {
+    const res = await fetch('/userpanel/auth.php?action=user_data', { credentials: 'include' });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!(data.user && data.user.is_admin);
+  } catch {
+    return false;
+  }
+}
+
+const addFormHtml = `
+  <form id="add-blog-form" style="margin:32px 0;display:none;flex-direction:column;gap:10px;">
+    <input type="text" id="blog-title" placeholder="Tytuł" required style="padding:8px;border-radius:6px;">
+    <input type="text" id="blog-tag" placeholder="Tag (np. AI, Biznes)">
+    <textarea id="blog-content" placeholder="Treść wpisu" required style="padding:8px;border-radius:6px;"></textarea>
+    <input type="text" id="blog-author" placeholder="Autor (opcjonalnie)">
+    <button type="submit" style="padding:8px 18px;border-radius:8px;background:#FFD700;color:#232946;font-weight:bold;">Dodaj wpis</button>
+  </form>
+  <button id="show-add-form-btn" style="margin:18px 0 0 0;padding:8px 18px;border-radius:8px;background:#0ff;color:#232946;font-weight:bold;">Dodaj nowy wpis</button>
+`;
+(async () => {
+  const section = document.querySelector('.blog-section');
+  if (section && await isAdmin()) {
+    section.insertAdjacentHTML('beforeend', addFormHtml);
+    const addForm = document.getElementById('add-blog-form');
+    const showBtn = document.getElementById('show-add-form-btn');
+    showBtn.addEventListener('click', () => {
+      addForm.style.display = addForm.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    addForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('blog-title').value.trim();
+      const content = document.getElementById('blog-content').value.trim();
+      const tag = document.getElementById('blog-tag').value.trim();
+      const author = document.getElementById('blog-author').value.trim();
+      if (!title || !content) {
+        alert('Tytuł i treść są wymagane!');
+        return;
+      }
+      // Pobierz token z pliku ebv (tylko backend, tu wpisz ręcznie lub pobierz z backendu)
+      const token = window.BLOG_API_TOKEN || ''; // <- ustaw w main.js lub przez backend
+      try {
+        const res = await fetch('blog/api/api_post.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ title, content, tag, author })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Dodano wpis!');
+          location.reload();
+        } else {
+          alert('Błąd: ' + (data.message || 'Nie udało się dodać wpisu'));
+        }
+      } catch (err) {
+        alert('Błąd sieci: ' + err.message);
+      }
+    });
+  }
+})();

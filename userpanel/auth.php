@@ -467,7 +467,7 @@ switch ($action) {
             exit;
         }
 
-        $stmt = $pdo->prepare("SELECT username, email FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT username, email, is_admin FROM users WHERE email = ?");
         $stmt->execute([$_SESSION['user_email']]);
         $user = $stmt->fetch();
 
@@ -488,6 +488,8 @@ switch ($action) {
         }
         if ($user) {
             $user['avatar'] = $avatar;
+            // Dodaj do sesji is_admin, jeśli nie ma
+            $_SESSION['is_admin'] = !empty($user['is_admin']) && $user['is_admin'] == 1;
             echo json_encode(['success' => true, 'user' => $user]);
         } else {
             http_response_code(404);
@@ -532,7 +534,8 @@ switch ($action) {
         $userEmail = $_SESSION['user_email'];
 
         // MAPOWANIE price_id na nazwę planu
-        function mapPriceIdToPlanNameAndPeriod($priceIdOrPlan) {
+        function mapPriceIdToPlanNameAndPeriod($priceIdOrPlan)
+        {
             $map = [
                 // price_id => [plan_name, period]
                 'price_1RQpnDFQBh6Vdz2pKIXTtsV4' => ['basic', 'monthly'],
