@@ -45,25 +45,43 @@ document.querySelectorAll('.video-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const videoSrc = btn.getAttribute('data-video');
     const modal = document.getElementById('videoModal');
-    const video = document.getElementById('videoPlayer');
-    // Zamiast video wyświetl komunikat o produkcji filmu
-    modal.querySelector('.video-modal-content').innerHTML = `
-      <span class="close-btn">&times;</span>
-      <div style="padding:40px 0;text-align:center;">
-        <i class="fa-solid fa-video-slash" style="font-size:3em;color:#FFD700;margin-bottom:18px;"></i>
-        <h3 style="color:#0ff;margin-bottom:16px;">Filmik w trakcie produkcji</h3>
-        <p style="color:#b8f6f6;font-size:1.15em;">Zapraszamy niebawem do obejrzenia prezentacji tego wdrożenia!</p>
-      </div>
-    `;
+    const modalContent = modal.querySelector('.video-modal-content');
+
+
+    if (!videoSrc || videoSrc === "null" || videoSrc.trim() === "") {
+      // Wyświetl komunikat o produkcji filmu
+      modalContent.innerHTML = `
+        <span class="close-btn">&times;</span>
+        <div style="padding:40px 0;text-align:center;">
+          <i class="fa-solid fa-video-slash" style="font-size:3em;color:#FFD700;margin-bottom:18px;"></i>
+          <h3 style="color:#0ff;margin-bottom:16px;">Filmik w trakcie produkcji</h3>
+          <p style="color:#b8f6f6;font-size:1.15em;">Zapraszamy za niedługo do obejrzenia prezentacji tego wdrożenia!</p>
+        </div>
+      `;
+    } else if (videoSrc.includes('youtube.com') || videoSrc.includes('youtu.be')) {
+      // Zamień youtu.be na youtube.com/embed jeśli trzeba
+      let embedUrl = videoSrc;
+      if (videoSrc.includes('youtu.be/')) {
+        embedUrl = 'https://www.youtube.com/embed/' + videoSrc.split('youtu.be/')[1];
+      } else if (videoSrc.includes('watch?v=')) {
+        embedUrl = videoSrc.replace('watch?v=', 'embed/');
+      }
+      modalContent.innerHTML = `
+        <span class="close-btn">&times;</span>
+        <iframe id="videoFrame" width="100%" height="480" src="${embedUrl}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="border-radius:12px;background:#000;width:100%;max-height:70vh;"></iframe>
+      `;
+    };
+    
+
     modal.style.display = 'flex';
     setTimeout(() => {
       modal.querySelector('.close-btn')?.focus();
     }, 100);
+
     // Obsługa zamknięcia
     modal.querySelector('.close-btn').onclick = () => {
       modal.style.display = 'none';
-      // Przywróć oryginalną zawartość video po zamknięciu
-      modal.querySelector('.video-modal-content').innerHTML = `
+      modalContent.innerHTML = `
         <span class="close-btn">&times;</span>
         <video id="videoPlayer" width="100%" controls autoplay>
           <source src="" type="video/mp4" />
@@ -71,12 +89,11 @@ document.querySelectorAll('.video-btn').forEach(btn => {
         </video>
       `;
     };
-    // Dodaj obsługę zamykania po kliknięciu poza modal-content
+    // Zamknięcie po kliknięciu poza modal-content
     modal.onclick = (e) => {
       if (e.target === modal) {
         modal.style.display = 'none';
-        // Przywróć oryginalną zawartość video po zamknięciu
-        modal.querySelector('.video-modal-content').innerHTML = `
+        modalContent.innerHTML = `
           <span class="close-btn">&times;</span>
           <video id="videoPlayer" width="100%" controls autoplay>
             <source src="" type="video/mp4" />
@@ -92,7 +109,10 @@ document.querySelectorAll('.video-btn').forEach(btn => {
 document.addEventListener('keydown', (e) => {
   const modal = document.getElementById('videoModal');
   if (modal && modal.style.display === 'flex' && e.key === 'Escape') {
-    document.getElementById('videoFrame').src = '';
+    const iframe = modal.querySelector('#videoFrame');
+    if (iframe) iframe.src = '';
+    const video = modal.querySelector('#videoPlayer');
+    if (video) video.pause();
     modal.style.display = 'none';
   }
 });

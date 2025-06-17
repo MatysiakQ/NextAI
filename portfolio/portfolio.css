@@ -916,3 +916,22 @@
 .about-section .about-title.glitch::after {
   display: none;
 }
+
+.portfolio-cards-row {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  justify-content: center;
+  align-items: stretch;
+  margin-top: 48px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+@media (max-width: 1200px) {
+  .portfolio-cards-row {
+    flex-direction: column;
+    gap: 32px;
+    align-items: stretch;
+  }
+}
