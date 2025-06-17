@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearErrors(loginForm);
       const email = loginForm.querySelector('input[name="email"]');
       const password = loginForm.querySelector('input[name="password"]');
+      const rememberMe = loginForm.querySelector('#rememberMe')?.checked;
       const errorBox = document.getElementById("login-error");
       errorBox.textContent = "";
 
@@ -44,11 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let data;
       try {
+        const body = `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}${recaptcha ? `&g-recaptcha-response=${encodeURIComponent(recaptcha)}` : ""}&rememberMe=${rememberMe ? "1" : "0"}`;
         const res = await fetch("auth.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           credentials: "include",
-          body: `action=login&email=${encodeURIComponent(email.value.trim())}&password=${encodeURIComponent(password.value)}${recaptcha ? `&g-recaptcha-response=${encodeURIComponent(recaptcha)}` : ""}`
+          body
         });
         if (!res.ok) {
           errorBox.textContent = "Błąd połączenia z serwerem.";
@@ -68,6 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (data.success) {
+        // Zapamiętaj sesję
+        if (rememberMe) {
+          localStorage.setItem("nextai_remember", "1");
+        } else {
+          localStorage.removeItem("nextai_remember");
+        }
         const redirect = localStorage.getItem("afterLoginRedirect");
         if (redirect) {
           localStorage.removeItem("afterLoginRedirect");
@@ -226,6 +234,20 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = "login.html";
         });
       };
+    }
+  }
+
+  // Automatyczne wylogowanie jeśli nie "zapamiętaj mnie"
+  if (window.location.pathname.endsWith("user_panel.html")) {
+    // Sprawdź czy użytkownik wybrał "zapamiętaj mnie"
+    if (!localStorage.getItem("nextai_remember")) {
+      // Po zamknięciu i ponownym otwarciu strony wyloguj użytkownika
+      window.addEventListener("load", () => {
+        // Jeśli nie ma "nextai_remember", wyloguj i przekieruj
+        fetch("auth.php?action=logout", { credentials: "include" }).then(() => {
+          window.location.href = "login.html";
+        });
+      });
     }
   }
 

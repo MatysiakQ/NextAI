@@ -548,6 +548,34 @@ body {
   z-index: 1;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.blog-main {
+  flex: 1 0 auto; /* Rozciąga main na całą dostępną wysokość */
+}
+
+/* Dla stopki */
+.site-footer {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 1em 0;
+  color: #aaa;
+  background: none; /* lub jak chcesz */
+  font-size: 1em;
+}
+
+
+
 @keyframes fireWave {
   0% {
     background-position-x: 0;

@@ -38,34 +38,51 @@
       </ul>
     </div>
   </nav>
+  
   <header class="blog-hero-section">
     <div class="blog-hero-content">
       <h1 class="blog-title glitch" data-text="Blog NextAI">Nasze </h1>
       <p class="blog-subtitle">Inspiracje, strategie i praktyczne wskazówki dla biznesu w erze AI i automatyzacji</p>
     </div>
   </header>
+
   <main class="blog-main">
     <section class="blog-section">
       <h2 class="blog-section-title glitch" data-text="Najnowsze wpisy">Wyróżnione artykuły</h2>
       <div class="blog-articles-grid"></div>
       <div class="blog-add-topic">
-        <a href="mailto:kontakt@next-ai.pl" class="blog-add-topic-btn"><i class="fa-solid fa-lightbulb"></i> Zaproponuj
-          temat biznesowy</a>
+        <a href="mailto:kontakt@next-ai.pl" class="blog-add-topic-btn">
+          <i class="fa-solid fa-lightbulb"></i> Zaproponuj temat biznesowy
+        </a>
       </div>
     </section>
   </main>
-  
-  <!-- SOCIAL PANEL (naprawiony, poprawna struktura) -->
+
+  <footer class="site-footer">
+    <p>&copy; 2025 NextAI. Wszelkie prawa zastrzeżone.</p>
+    <a href="http://next-ai.pl">
+      <p>Powered by NextAI</p>
+    </a>
+    <a href="#" id="terms-link">Regulamin usług NextAI</a>
+  </footer>
+
+  <!-- SOCIAL PANEL (tylko raz, poprawiona struktura) -->
   <div class="social-panel">
-    <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon"><i
-        class="fa-brands fa-square-instagram"></i></a>
-    <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon"><i
-        class="fa-brands fa-square-facebook"></i></a>
-    <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank"
-      class="social-icon"><i class="fa-brands fa-linkedin"></i></a>
-    <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon"><i
-        class="fa-brands fa-tiktok"></i></a>
+    <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon">
+      <i class="fa-brands fa-square-instagram"></i>
+    </a>
+    <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon">
+      <i class="fa-brands fa-square-facebook"></i>
+    </a>
+    <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank" class="social-icon">
+      <i class="fa-brands fa-linkedin"></i>
+    </a>
+    <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon">
+      <i class="fa-brands fa-tiktok"></i>
+    </a>
   </div>
+
+  <!-- CHAT WIDGET (tylko raz) -->
   <button id="chat-toggle" aria-label="Otwórz czat">💬</button>
   <div id="chat-widget">
     <div id="chat-header">
@@ -88,6 +105,7 @@
       <div id="blog-modal-inner"></div>
     </div>
   </div>
+  
   <!-- MODAL: Wylogowano -->
   <div id="logout-modal" class="modal hidden">
     <div class="modal-content glitch" data-text="Wylogowano!">
@@ -95,61 +113,9 @@
       <p>Zostałeś pomyślnie wylogowany.</p>
     </div>
   </div>
+  
   <script src="blog.js" defer></script>
   <script src="/main/main.js" defer></script>
-</body>
-
-</html>
-</main>
-<footer class="site-footer">
-  <p>&copy; 2025 NextAI. Wszelkie prawa zastrzeżone.</p>
-  <a href="http://next-ai.pl">
-    <p>Powered by NextAI</p>
-  </a>
-  <a href="#" id="terms-link"> Regulamin usług NextAI</a>
-</footer>
-<!-- SOCIAL PANEL (naprawiony, poprawna struktura) -->
-<div class="social-panel">
-  <a href="https://www.instagram.com/nextai.twojpartnerai/" target="_blank" class="social-icon"><i
-      class="fa-brands fa-square-instagram"></i></a>
-  <a href="https://www.facebook.com/profile.php?id=61575977610668" target="_blank" class="social-icon"><i
-      class="fa-brands fa-square-facebook"></i></a>
-  <a href="https://www.linkedin.com/in/nextai-tw%C3%B3j-cyfrowy-partner-4a5aa8365/" target="_blank"
-    class="social-icon"><i class="fa-brands fa-linkedin"></i></a>
-  <a href="https://www.tiktok.com/@nextai_twojpartnerai?lang=pl-PL" target="_blank" class="social-icon"><i
-      class="fa-brands fa-tiktok"></i></a>
-</div>
-<button id="chat-toggle" aria-label="Otwórz czat">💬</button>
-<div id="chat-widget">
-  <div id="chat-header">
-    <span class="chatbot-avatar"><i class="fa-solid fa-robot"></i></span>
-    <span class="chatbot-title">NextAI Asystent</span>
-    <span class="powered-by"><a href="http://next-ai.pl">Powered by NextAI</a></span>
-    <button id="chat-close" aria-label="Zamknij czat">&times;</button>
-  </div>
-  <div id="chat-body"></div>
-  <div id="chat-input">
-    <input type="text" id="chat-question" placeholder="Zadaj pytanie..." autocomplete="off" />
-    <button id="chat-send" aria-label="Wyślij wiadomość"><i class="fa fa-paper-plane"></i></button>
-  </div>
-</div>
-
-<!-- MODAL BLOGA -->
-<div id="blog-modal" class="modal hidden">
-  <div class="modal-content" id="blog-modal-content">
-    <span class="close-button" id="close-blog-modal">&times;</span>
-    <div id="blog-modal-inner"></div>
-  </div>
-</div>
-<!-- MODAL: Wylogowano -->
-<div id="logout-modal" class="modal hidden">
-  <div class="modal-content glitch" data-text="Wylogowano!">
-    <span class="close-button" onclick="document.getElementById('logout-modal').classList.add('hidden')">×</span>
-    <p>Zostałeś pomyślnie wylogowany.</p>
-  </div>
-</div>
-<script src="blog.js" defer></script>
-<script src="/main/main.js" defer></script>
 </body>
 
 </html>

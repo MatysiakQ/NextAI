@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
   <meta charset="UTF-8">
   <title>Zaloguj się – NextAI</title>
@@ -10,10 +11,10 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <?php
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
-    $dotenv->load();
-    $clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? '';
+  require_once __DIR__ . '/../vendor/autoload.php';
+  $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+  $dotenv->load();
+  $clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? '';
   ?>
   <meta name="google-client-id" content="<?= htmlspecialchars($clientId) ?>">
   <style>
@@ -36,6 +37,11 @@
       <label for="password">Hasło</label>
       <input type="password" id="password" name="password" autocomplete="current-password" required>
 
+      <label style="display:flex;align-items:center;gap:8px;margin:8px 0 0 0;">
+        <input type="checkbox" id="rememberMe" name="rememberMe" style="width:auto;margin-right:6px;">
+        Zapamiętaj mnie
+      </label>
+
       <div class="g-recaptcha" data-sitekey="6LcLGFgrAAAAAGj4rbYnbm78B8K8rFUioIgTSPuG"></div>
 
       <div class="button-wrapper" style="display:flex;justify-content:center;">
@@ -44,20 +50,11 @@
       <div id="login-error" style="color:#ff5c5c;margin-top:10px;"></div>
       <!-- Google Login -->
       <div style="display:flex; justify-content:center; margin-top:20px;">
-        <div id="g_id_onload"
-          data-client_id="<?= htmlspecialchars($clientId) ?>"
-          data-context="signin"
-          data-ux_mode="popup"
-          data-callback="handleGoogleCredential"
-          data-auto_prompt="false">
+        <div id="g_id_onload" data-client_id="<?= htmlspecialchars($clientId) ?>" data-context="signin"
+          data-ux_mode="popup" data-callback="handleGoogleCredential" data-auto_prompt="false">
         </div>
-        <div class="g_id_signin"
-          data-type="standard"
-          data-shape="rectangular"
-          data-theme="outline"
-          data-text="sign_in_with"
-          data-size="large"
-          data-logo_alignment="left">
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+          data-text="sign_in_with" data-size="large" data-logo_alignment="left">
         </div>
       </div>
 
@@ -79,22 +76,22 @@
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "token=" + encodeURIComponent(response.credential)
       })
-      .then(async res => {
-        const text = await res.text();
-        try {
-          const data = JSON.parse(text);
-          if (res.ok && data.success) {
-            window.location.href = data.redirect || "user_panel.html";
-          } else {
-            alert(data.message || "Błąd logowania Google.");
+        .then(async res => {
+          const text = await res.text();
+          try {
+            const data = JSON.parse(text);
+            if (res.ok && data.success) {
+              window.location.href = data.redirect || "user_panel.html";
+            } else {
+              alert(data.message || "Błąd logowania Google.");
+            }
+          } catch {
+            alert("Błąd połączenia z serwerem:\n" + text);
           }
-        } catch {
-          alert("Błąd połączenia z serwerem:\n" + text);
-        }
-      })
-      .catch((err) => {
-        alert("Błąd sieci:\n" + (err.message || err));
-      });
+        })
+        .catch((err) => {
+          alert("Błąd sieci:\n" + (err.message || err));
+        });
     }
 
     // Obsługa klasycznego logowania
@@ -111,7 +108,7 @@
           if (typeof grecaptcha !== "undefined") {
             recaptchaToken = grecaptcha.getResponse();
           }
-        } catch {}
+        } catch { }
         if (!recaptchaToken) {
           errorBox.textContent = "Potwierdź, że nie jesteś robotem.";
           return;
@@ -121,7 +118,7 @@
           const res = await fetch("auth.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `action=login&email=${encodeURIComponent(form.email.value)}&password=${encodeURIComponent(form.password.value)}&g-recaptcha-response=${encodeURIComponent(recaptchaToken)}`
+            body: `action=login&email=${encodeURIComponent(form.email.value)}&password=${encodeURIComponent(form.password.value)}&rememberMe=${form.rememberMe.checked}&g-recaptcha-response=${encodeURIComponent(recaptchaToken)}`
           });
           if (res.status === 401) {
             errorBox.textContent = "Błędny login lub hasło.";
@@ -148,4 +145,5 @@
     });
   </script>
 </body>
+
 </html>

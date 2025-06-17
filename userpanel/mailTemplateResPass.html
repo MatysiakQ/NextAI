@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Odzyskiwanie hasła</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #f4f6fa;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 410px;
+      margin: 60px auto 0 auto;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 28px #23294618;
+      padding: 36px 28px 28px 28px;
+      border: 1px solid #d4af37;
+      text-align: center;
+    }
+    .logo img {
+      max-height: 44px;
+      margin-bottom: 18px;
+      filter: grayscale(0.2) contrast(1.1) brightness(0.93);
+    }
+    h2 {
+      color: #232946;
+      margin-bottom: 12px;
+      font-size: 1.35em;
+      letter-spacing: 0.3px;
+      font-weight: 700;
+    }
+    .desc {
+      color: #232946;
+      font-size: 1.06em;
+      margin-bottom: 24px;
+    }
+    .recovery-code {
+      display: inline-block;
+      letter-spacing: 0.14em;
+      font-size: 1.43em;
+      font-weight: bold;
+      color: #232946;
+      background: #f7f6ef;
+      border: 1.5px dashed #d4af37;
+      border-radius: 9px;
+      padding: 13px 34px;
+      margin-bottom: 22px;
+      box-shadow: 0 1px 10px #d4af3733;
+      user-select: all;
+    }
+    .info {
+      color: #7c86a3;
+      font-size: 0.97em;
+      margin-bottom: 10px;
+    }
+    .footer {
+      color: #b3b3bc;
+      font-size: 0.96em;
+      border-top: 1px solid #ececec;
+      padding-top: 14px;
+      margin-top: 28px;
+      letter-spacing: 0.5px;
+    }
+    @media (max-width: 500px) {
+      .container {
+        padding: 18px 7vw 18px 7vw;
+      }
+      .recovery-code {
+        font-size: 1.13em;
+        padding: 10px 12vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <!-- Możesz podmienić na swoje logo -->
+      <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="Logo firmy">
+    </div>
+    <h2>Kod do odzyskiwania hasła</h2>
+    <div class="desc">
+      Skopiuj poniższy kod i wklej go w formularzu na stronie, aby ustawić nowe hasło.
+    </div>
+    <div class="recovery-code">
+      <!-- Podmień na swój dynamiczny kod -->
+      <span id="code">AB12-CD34</span>
+    </div>
+    <div class="info">
+      Kod jest ważny przez 10 minut.<br>
+      Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość.
+    </div>
+    <div class="footer">
+      © 2025 NextAi &bull; Wszelkie prawa zastrzeżone
+    </div>
+  </div>
+</body>
+</html>
