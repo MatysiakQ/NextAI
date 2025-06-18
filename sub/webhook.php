@@ -118,12 +118,13 @@ try {
 
         // Ustal plan na podstawie Stripe (product/price)
         $plan = 'unknown';
-        if (!empty($stripeSubscription->items->data[0]->price->id)) {
-            $priceId = $stripeSubscription->items->data[0]->price->id ?? null;
-            $plan = mapPriceIdToPlan($priceId);
-        } elseif (!empty($data->metadata->plan)) {
-            $plan = $data->metadata->plan;
-        }
+        $priceId = null;
+            if (!empty($stripeSubscription->items->data[0]->price->id)) {
+                $priceId = $stripeSubscription->items->data[0]->price->id;
+                $plan = mapPriceIdToPlan($priceId);
+            } elseif (!empty($data->metadata->plan)) {
+                $plan = $data->metadata->plan;
+            }       
 
 
         $status = $stripeSubscription->status;
@@ -132,35 +133,36 @@ try {
         $cancelAtPeriodEnd = $stripeSubscription->cancel_at_period_end ? 1 : 0;
 
         // Wstaw lub zaktualizuj subskrypcję z pełnymi danymi
-        $stmt = $pdo->prepare("
-        INSERT INTO subscriptions (
-            email, user_id, stripe_customer_id, stripe_subscription_id, 
-            plan, status, current_period_start, current_period_end, 
-            cancel_at_period_end, created_at
-        ) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        ON DUPLICATE KEY UPDATE 
-            status = VALUES(status),
-            plan = VALUES(plan),
-            current_period_start = VALUES(current_period_start),
-            current_period_end = VALUES(current_period_end),
-            cancel_at_period_end = VALUES(cancel_at_period_end),
-            updated_at = NOW()
-    ");
+       $stmt = $pdo->prepare("
+    INSERT INTO subscriptions (
+        email, user_id, stripe_customer_id, stripe_subscription_id, 
+        plan, price_id, status, current_period_start, current_period_end, 
+        cancel_at_period_end, created_at
+    ) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    ON DUPLICATE KEY UPDATE 
+        status = VALUES(status),
+        plan = VALUES(plan),
+        price_id = VALUES(price_id),
+        current_period_start = VALUES(current_period_start),
+        current_period_end = VALUES(current_period_end),
+        cancel_at_period_end = VALUES(cancel_at_period_end),
+        updated_at = NOW()
+");
 
-        error_log("[WEBHOOK DEBUG] plan do bazy: $plan", 3, $logFile);
+$stmt->execute([
+    $email,
+    $userId,
+    $customerId,
+    $subscriptionId,
+    $plan,
+    $priceId,
+    $status,
+    $currentPeriodStart,
+    $currentPeriodEnd,
+    $cancelAtPeriodEnd
+]);
 
-        $stmt->execute([
-            $email,
-            $userId,
-            $customerId,
-            $subscriptionId,
-            $plan,
-            $status,
-            $currentPeriodStart,
-            $currentPeriodEnd,
-            $cancelAtPeriodEnd
-        ]);
 
         error_log("[WEBHOOK] Subscription created/updated: $subscriptionId for $email with full details", 3, $logFile);
     }
@@ -232,4 +234,4 @@ try {
     http_response_code(500);
     exit();
 }
-?>
+?>  

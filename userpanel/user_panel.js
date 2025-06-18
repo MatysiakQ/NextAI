@@ -45,16 +45,14 @@ Object.entries(navBtns2).forEach(([key, btn]) => {
 // Mapowanie Stripe price_id na nazwę planu
 function mapPriceIdToPlan(priceId) {
   switch (priceId) {
-    case 'price_1RQpnDFQBh6Vdz2pKIXTtsV4':
-      return 'Basic';
-    case 'price_1RRFwiFQBh6Vdz2pXy7d20TI':
-      return 'Pro';
+    case 'price_1RbQ02FQCBNi0t61Gl869ydi':
     case 'price_1RW3LMFQBh6Vdz2pOsrR6BQ9':
-      return 'Basic Roczny';
+      return 'Basic';
+    case 'price_1RbQ0jFQCBNi0t61XPqAvRW6':
     case 'price_1RW3M4FQBh6Vdz2pQKmpJGmW':
-      return 'Pro Roczny';
+      return 'Pro';
     default:
-      return priceId || 'Nieznany plan';
+      return 'Nieznany plan';
   }
 }
 
@@ -75,18 +73,21 @@ function loadActivePackageInfo() {
     .then(data => {
       if (data.success && data.subscription) {
         const sub = data.subscription;
-        // Użyj plan_name jeśli jest, fallback na plan
-        let planName = sub.plan_name || sub.plan;
-        // Wyznacz datę odnowienia na podstawie typu subskrypcji
+        // Użyj mapPriceIdToPlan jeśli jest price_id, fallback na plan_name lub plan
+        let planName = sub.price_id ? mapPriceIdToPlan(sub.price_id) : (sub.plan_name || sub.plan);
+        // Wyznacz datę odnowienia na podstawie current_period_end
         let renewDate = 'N/A';
         if (sub.current_period_end) {
-          const end = new Date(sub.current_period_end);
-          if (planName && planName.toLowerCase().includes('roczny')) {
-            end.setFullYear(end.getFullYear() + 1);
+          // Obsłuż różne formaty daty (ISO lub timestamp)
+          let endDate = sub.current_period_end;
+          if (/^\d+$/.test(endDate)) {
+            endDate = new Date(parseInt(endDate) * 1000);
           } else {
-            end.setMonth(end.getMonth() + 1);
+            endDate = new Date(endDate);
           }
-          renewDate = end.toLocaleDateString('pl-PL');
+          if (!isNaN(endDate.getTime())) {
+            renewDate = endDate.toLocaleDateString('pl-PL');
+          }
         }
 
         const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
@@ -236,16 +237,15 @@ function loadSubscriptions() {
       }
       return res.json();
     })
-    .then(data => { // <-- poprawka: brakowało nawiasów wokół argumentu
-      // Pokaż tylko NAJNOWSZĄ subskrypcję (tę na górze) i ukryj pozostałe
+    .then(data => {
       if (data.success && data.subscriptions && data.subscriptions.length > 0) {
         list.innerHTML = '';
         noActiveSubscriptionShown = false;
 
         let sub = data.subscriptions.find(s => s.status === 'active' || s.status === 'trialing') || data.subscriptions[0];
 
-        // Użyj plan_name jeśli jest, fallback na plan
-        let planName = sub.plan_name || sub.plan;
+        // Użyj mapPriceIdToPlan jeśli jest price_id, fallback na plan_name lub plan
+        let planName = sub.price_id ? mapPriceIdToPlan(sub.price_id) : (sub.plan_name || sub.plan || 'Nieznany plan');
 
         const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
         const statusClass = getStatusClass(sub.status, sub.cancel_at_period_end);
@@ -1059,17 +1059,17 @@ async function renderUserCourses() {
   container.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;">
       ${visibleCourses.map(course => {
-        // Kolor i tekst badge
-        let badgeColor = '#0ff', badgeBg = '#0ff1', badgeText = 'DARMOWY';
-        if (course.access === 'basic') { badgeColor = '#FFD700'; badgeBg = '#ffd70022'; badgeText = 'BASIC'; }
-        if (course.access === 'pro') { badgeColor = '#00ffae'; badgeBg = '#00ffae22'; badgeText = 'PRO'; }
-        if (course.access === 'enterprise') { badgeColor = '#ff5c5c'; badgeBg = '#ff5c5c22'; badgeText = 'ENTERPRISE'; }
-        // Status ukończenia
-        const status = userCourseStatus[course.id] || 'notstarted';
-        let statusLabel = '';
-        if (status === 'started') statusLabel = `<span class="course-status started" style="background:#ffd70022;color:#FFD700;border-radius:6px;padding:2px 10px;margin-left:8px;font-size:0.93em;">Rozpoczęty</span>`;
-        if (status === 'completed') statusLabel = `<span class="course-status completed" style="background:#00ffae22;color:#00ffae;border-radius:6px;padding:2px 10px;margin-left:8px;font-size:0.93em;">Ukończony</span>`;
-        return `
+    // Kolor i tekst badge
+    let badgeColor = '#0ff', badgeBg = '#0ff1', badgeText = 'DARMOWY';
+    if (course.access === 'basic') { badgeColor = '#FFD700'; badgeBg = '#ffd70022'; badgeText = 'BASIC'; }
+    if (course.access === 'pro') { badgeColor = '#00ffae'; badgeBg = '#00ffae22'; badgeText = 'PRO'; }
+    if (course.access === 'enterprise') { badgeColor = '#ff5c5c'; badgeBg = '#ff5c5c22'; badgeText = 'ENTERPRISE'; }
+    // Status ukończenia
+    const status = userCourseStatus[course.id] || 'notstarted';
+    let statusLabel = '';
+    if (status === 'started') statusLabel = `<span class="course-status started" style="background:#ffd70022;color:#FFD700;border-radius:6px;padding:2px 10px;margin-left:8px;font-size:0.93em;">Rozpoczęty</span>`;
+    if (status === 'completed') statusLabel = `<span class="course-status completed" style="background:#00ffae22;color:#00ffae;border-radius:6px;padding:2px 10px;margin-left:8px;font-size:0.93em;">Ukończony</span>`;
+    return `
         <div class="user-course-card" style="background:linear-gradient(120deg,#181818 80%,#232946 100%);border-radius:18px;padding:22px 20px 20px 20px;box-shadow:0 2px 18px #0005;position:relative;overflow:hidden;transition:box-shadow 0.2s;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
             <span class="user-course-badge" style="display:inline-block;padding:4px 16px;border-radius:12px;font-size:1em;font-weight:bold;background:${badgeBg};color:${badgeColor};box-shadow:0 1px 6px ${badgeBg};letter-spacing:1px;">
@@ -1085,7 +1085,7 @@ async function renderUserCourses() {
           </div>
         </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 

@@ -47,17 +47,17 @@ if ($email !== $_SESSION['user_email']) {
     exit;
 }
 
-// Konfiguracja planów
+// Konfiguracja planów - podaj prawdziwe price_id z panelu Stripe!
 $planConfig = [
     'basic' => [
-        'name' => 'NextAI Basic',
-        'monthly_price' => 59900, // 599 zł w groszach
-        'yearly_price' => 48000,  // 480 zł w groszach
+        'name' => 'Plan Basic',
+        'monthly_price_id' => 'price_1RbQ02FQCBNi0t61Gl869ydi',
+        'yearly_price_id' => 'price_1RW3LMFQBh6Vdz2pOsrR6BQ9',
     ],
     'pro' => [
-        'name' => 'NextAI Pro',
-        'monthly_price' => 119900, // 1199 zł w groszach
-        'yearly_price' => 91000,   // 910 zł w groszach
+        'name' => 'Plan Pro',
+        'monthly_price_id' => 'price_1RbQ0jFQCBNi0t61XPqAvRW6',
+        'yearly_price_id' => 'price_1RW3M4FQBh6Vdz2pQKmpJGmW',
     ]
 ];
 
@@ -66,9 +66,13 @@ if (!isset($planConfig[$plan])) {
     exit;
 }
 
+// Upewnij się, że price_id jest ustawione i nie jest puste
 $selectedPlan = $planConfig[$plan];
-$price = $billingType === 'yearly' ? $selectedPlan['yearly_price'] : $selectedPlan['monthly_price'];
-$interval = $billingType === 'yearly' ? 'year' : 'month';
+$price_id = $billingType === 'yearly' ? $selectedPlan['yearly_price_id'] : $selectedPlan['monthly_price_id'];
+if (empty($price_id)) {
+    echo json_encode(['success' => false, 'message' => 'Brak price_id dla wybranego planu. Skontaktuj się z administratorem.']);
+    exit;
+}
 
 try {
     // Sprawdź czy klient już istnieje
@@ -85,16 +89,7 @@ try {
         'customer_email' => $customerId ? null : $email,
         'payment_method_types' => ['card'],
         'line_items' => [[
-            'price_data' => [
-                'currency' => 'pln',
-                'product_data' => [
-                    'name' => $selectedPlan['name'],
-                ],
-                'unit_amount' => $price,
-                'recurring' => [
-                    'interval' => $interval,
-                ],
-            ],
+            'price' => $price_id,
             'quantity' => 1,
         ]],
         'mode' => 'subscription',

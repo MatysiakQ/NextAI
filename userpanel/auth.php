@@ -542,7 +542,7 @@ switch ($action) {
                 'price_1RRFwiFQBh6Vdz2pXy7d20TI' => ['pro', 'monthly'],
                 'price_1RW3LMFQBh6Vdz2pOsrR6BQ9' => ['basic', 'yearly'],
                 'price_1RW3M4FQBh6Vdz2pQKmpJGmW' => ['pro', 'yearly'],
-                'price_1RZcpVFQBh6Vdz2pWJambttr' => ['basic', 'monthly'], // lub 'yearly' jeśli to roczny
+                'price_1RZcpVFQBh6Vdz2pWJambttr' => ['basic', 'monthly'],
             ];
             if (in_array(strtolower($priceIdOrPlan), ['basic', 'pro', 'enterprise'])) {
                 return [strtolower($priceIdOrPlan), 'monthly'];
@@ -563,24 +563,35 @@ switch ($action) {
                 exit;
             }
 
+            // Pobierz NAJNOWSZĄ aktywną subskrypcję (po current_period_end, potem created_at)
             $stmt = $pdo->prepare("
                 SELECT plan, status, created_at, current_period_end, stripe_subscription_id, cancel_at_period_end, price_id
                 FROM subscriptions
                 WHERE email = ? AND (status = 'active' OR status = 'trialing')
-                ORDER BY created_at DESC
+                ORDER BY current_period_end DESC, created_at DESC
                 LIMIT 1
             ");
             $stmt->execute([$userEmail]);
             $subscription = $stmt->fetch();
 
             if ($subscription) {
-                // Mapuj plan na nazwę
+                // Uzupełnij brakujące pola, aby frontend zawsze miał komplet
                 $planRaw = $subscription['plan'] ?? '';
                 $priceId = $subscription['price_id'] ?? '';
                 list($planName, $planPeriod) = mapPriceIdToPlanNameAndPeriod($priceId ?: $planRaw);
 
                 $subscription['plan_name'] = $planName;
                 $subscription['plan_period'] = $planPeriod;
+                $subscription['price_id'] = $priceId;
+                $subscription['plan'] = $planRaw;
+
+                // Upewnij się, że current_period_end i created_at są w formacie ISO (dla JS Date)
+                if (!empty($subscription['current_period_end']) && strtotime($subscription['current_period_end'])) {
+                    $subscription['current_period_end'] = date('Y-m-d\TH:i:s', strtotime($subscription['current_period_end']));
+                }
+                if (!empty($subscription['created_at']) && strtotime($subscription['created_at'])) {
+                    $subscription['created_at'] = date('Y-m-d\TH:i:s', strtotime($subscription['created_at']));
+                }
 
                 // ...istniejący kod Stripe API sync...
                 if (!empty($_ENV['STRIPE_SECRET_KEY']) && $subscription['stripe_subscription_id']) {
@@ -606,7 +617,7 @@ switch ($action) {
 
                             $subscription['status'] = $stripeSubscription->status;
                             $subscription['cancel_at_period_end'] = $stripeSubscription->cancel_at_period_end;
-                            $subscription['current_period_end'] = date('Y-m-d H:i:s', $stripeSubscription->current_period_end);
+                            $subscription['current_period_end'] = date('Y-m-d\TH:i:s', $stripeSubscription->current_period_end);
                         }
                     } catch (Exception $e) {
                         error_log("Stripe API Error in check_active_subscription: " . $e->getMessage(), 3, $pdoErrorLogFile);
