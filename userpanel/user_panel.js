@@ -46,11 +46,13 @@ Object.entries(navBtns2).forEach(([key, btn]) => {
 function mapPriceIdToPlan(priceId) {
   switch (priceId) {
     case 'price_1RbQ02FQCBNi0t61Gl869ydi':
-    case 'price_1RW3LMFQBh6Vdz2pOsrR6BQ9':
       return 'Basic';
+    case 'price_1RbV2BFQCBNi0t615CjJRRpM':
+      return 'Basic (roczny)';
     case 'price_1RbQ0jFQCBNi0t61XPqAvRW6':
-    case 'price_1RW3M4FQBh6Vdz2pQKmpJGmW':
       return 'Pro';
+    case 'price_1RbV3UFQCBNi0t618JCyqgzV':
+      return 'Pro (roczny)';
     default:
       return 'Nieznany plan';
   }

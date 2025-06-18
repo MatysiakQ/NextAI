@@ -10,11 +10,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const originalOptions = [
     { value: "basic", text: "Basic – 599 zł / msc" },
-    { value: "pro", text: "Pro – 1199 zł / msc" }
+    { value: "pro", text: "Pro – 1499 zł / msc" }
   ];
   const yearlyOptions = [
     { value: "basic", text: "Basic – 480 zł / msc (Z zoobowiązaniem rocznym)" },
-    { value: "pro", text: "Pro – 910 zł / msc (Z zoobowiązaniem rocznym)" }
+    { value: "pro", text: "Pro – 1299 zł / msc (Z zoobowiązaniem rocznym)" }
   ];
 
   let isYearly = false;
@@ -117,8 +117,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       billingTypeInput.value = isYearly ? "yearly" : "monthly";
 
-      const options = isYearly ? yearlyOptions : originalOptions;
+      // --- ZAPAMIĘTAJ OBECNY PLAN PRZED ZMIANĄ OPCJI ---
       const currentValue = planSelect.value;
+
+      // --- USTAW OPCJE DLA SELECTA ---
+      const options = isYearly ? yearlyOptions : originalOptions;
       planSelect.innerHTML = "";
       options.forEach(opt => {
         const option = document.createElement("option");
@@ -126,7 +129,13 @@ document.addEventListener("DOMContentLoaded", function () {
         option.textContent = opt.text;
         planSelect.appendChild(option);
       });
-      planSelect.value = currentValue;
+
+      // --- PRZYWRÓĆ WYBRANY PLAN JEŚLI ISTNIEJE W OPCJACH ---
+      if ([...planSelect.options].some(opt => opt.value === currentValue)) {
+        planSelect.value = currentValue;
+      } else {
+        planSelect.selectedIndex = 0;
+      }
     });
   }
 
@@ -137,6 +146,9 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // --- POBIERZ PLAN Z SELECTA DOKŁADNIE W MOMENCIE SUBMIT ---
+    const plan = planSelect.value;
+    const billingType = billingTypeInput.value;
     const email = emailInput.value;
 
     const isLoggedIn = await checkLoginStatus();
@@ -156,9 +168,6 @@ document.addEventListener("DOMContentLoaded", function () {
       loader.classList.add("hidden");
       return;
     }
-
-    const plan = planSelect.value;
-    const billingType = billingTypeInput.value;
 
     const formData = new URLSearchParams({ email, plan, billing_type: billingType });
 

@@ -31,6 +31,12 @@ $email = $_POST['email'] ?? '';
 $plan = $_POST['plan'] ?? '';
 $billingType = $_POST['billing_type'] ?? 'monthly';
 
+// --- DODAJ: Wymuś pobranie planu i billing_type z POST, GET i sprawdź JS ---
+// (jeśli Twój frontend wysyła przez JS, sprawdź czy na pewno wysyła plan=pro gdy wybierasz pro)
+
+// --- DEBUG: Zapisz do loga co przychodzi ---
+file_put_contents(__DIR__ . '/checkout_debug.log', date('c') . " plan=$plan billingType=$billingType email=$email\n", FILE_APPEND);
+
 if (empty($email) || empty($plan)) {
     echo json_encode(['success' => false, 'message' => 'Wszystkie pola są wymagane.']);
     exit;
@@ -52,23 +58,29 @@ $planConfig = [
     'basic' => [
         'name' => 'Plan Basic',
         'monthly_price_id' => 'price_1RbQ02FQCBNi0t61Gl869ydi',
-        'yearly_price_id' => 'price_1RW3LMFQBh6Vdz2pOsrR6BQ9',
+        'yearly_price_id' => 'price_1RbV2BFQCBNi0t615CjJRRpM',
     ],
     'pro' => [
         'name' => 'Plan Pro',
         'monthly_price_id' => 'price_1RbQ0jFQCBNi0t61XPqAvRW6',
-        'yearly_price_id' => 'price_1RW3M4FQBh6Vdz2pQKmpJGmW',
+        'yearly_price_id' => 'price_1RbV3UFQCBNi0t618JCyqgzV',
     ]
 ];
 
-if (!isset($planConfig[$plan])) {
-    echo json_encode(['success' => false, 'message' => 'Nieprawidłowy plan.']);
+// --- DODAJ: Sprawdź czy $plan jest dokładnie 'pro' lub 'basic' ---
+if (!in_array($plan, ['basic', 'pro'])) {
+    echo json_encode(['success' => false, 'message' => 'Nieprawidłowy plan przekazany do backendu: ' . htmlspecialchars($plan)]);
     exit;
 }
 
-// Upewnij się, że price_id jest ustawione i nie jest puste
+// Upewnij się, że billingType jest ustawione poprawnie (tylko 'monthly' lub 'yearly')
+$billingType = ($billingType === 'yearly') ? 'yearly' : 'monthly';
+
+// --- DEBUG: Zapisz price_id do loga ---
 $selectedPlan = $planConfig[$plan];
 $price_id = $billingType === 'yearly' ? $selectedPlan['yearly_price_id'] : $selectedPlan['monthly_price_id'];
+file_put_contents(__DIR__ . '/checkout_debug.log', date('c') . " price_id=$price_id\n", FILE_APPEND);
+
 if (empty($price_id)) {
     echo json_encode(['success' => false, 'message' => 'Brak price_id dla wybranego planu. Skontaktuj się z administratorem.']);
     exit;
