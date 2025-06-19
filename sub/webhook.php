@@ -119,21 +119,52 @@ try {
         // Ustal plan na podstawie Stripe (product/price)
         $plan = 'unknown';
         $priceId = null;
-            if (!empty($stripeSubscription->items->data[0]->price->id)) {
-                $priceId = $stripeSubscription->items->data[0]->price->id;
-                $plan = mapPriceIdToPlan($priceId);
-            } elseif (!empty($data->metadata->plan)) {
-                $plan = $data->metadata->plan;
-            }       
-
+        if (!empty($stripeSubscription->items->data[0]->price->id)) {
+            $priceId = $stripeSubscription->items->data[0]->price->id;
+            $plan = mapPriceIdToPlan($priceId);
+        } elseif (!empty($data->metadata->plan)) {
+            $plan = $data->metadata->plan;
+        }
 
         $status = $stripeSubscription->status;
-        $currentPeriodStart = date('Y-m-d H:i:s', $stripeSubscription->current_period_start);
-        $currentPeriodEnd = date('Y-m-d H:i:s', $stripeSubscription->current_period_end);
+
+        // --- USTAWIANIE current_period_start i current_period_end ---
+        // Ustaw zawsze wartości (nie null!) nawet jeśli Stripe nie zwraca
+        $now = new DateTime();
+        $currentPeriodStart = null;
+        $currentPeriodEnd = null;
+
+        if (!empty($stripeSubscription->current_period_start) && $stripeSubscription->current_period_start > 0) {
+            $currentPeriodStart = date('Y-m-d H:i:s', $stripeSubscription->current_period_start);
+        }
+        if (!empty($stripeSubscription->current_period_end) && $stripeSubscription->current_period_end > 0) {
+            $currentPeriodEnd = date('Y-m-d H:i:s', $stripeSubscription->current_period_end);
+        }
+
+        // Fallback jeśli Stripe nie zwraca dat (np. testowe subskrypcje)
+        if (!$currentPeriodStart) {
+            $currentPeriodStart = $now->format('Y-m-d H:i:s');
+        }
+        if (!$currentPeriodEnd) {
+            $end = clone $now;
+            $yearlyPriceIds = [
+                'price_1RW3LMFQBh6Vdz2pOsrR6BQ9',
+                'price_1RbV2BFQCBNi0t615CjJRRpM',
+                'price_1RW3M4FQBh6Vdz2pQKmpJGmW',
+                'price_1RbV3UFQCBNi0t618JCyqgzV',
+            ];
+            if ($priceId && in_array($priceId, $yearlyPriceIds)) {
+                $end->modify('+1 year');
+            } else {
+                $end->modify('+1 month');
+            }
+            $currentPeriodEnd = $end->format('Y-m-d H:i:s');
+        }
+        // --- KONIEC USTAWIANIA ---
+
         $cancelAtPeriodEnd = $stripeSubscription->cancel_at_period_end ? 1 : 0;
 
-        // Wstaw lub zaktualizuj subskrypcję z pełnymi danymi
-       $stmt = $pdo->prepare("
+        $stmt = $pdo->prepare("
     INSERT INTO subscriptions (
         email, user_id, stripe_customer_id, stripe_subscription_id, 
         plan, price_id, status, current_period_start, current_period_end, 
@@ -149,20 +180,18 @@ try {
         cancel_at_period_end = VALUES(cancel_at_period_end),
         updated_at = NOW()
 ");
-
-$stmt->execute([
-    $email,
-    $userId,
-    $customerId,
-    $subscriptionId,
-    $plan,
-    $priceId,
-    $status,
-    $currentPeriodStart,
-    $currentPeriodEnd,
-    $cancelAtPeriodEnd
-]);
-
+        $stmt->execute([
+            $email,
+            $userId,
+            $customerId,
+            $subscriptionId,
+            $plan,
+            $priceId,
+            $status,
+            $currentPeriodStart,
+            $currentPeriodEnd,
+            $cancelAtPeriodEnd
+        ]);
 
         error_log("[WEBHOOK] Subscription created/updated: $subscriptionId for $email with full details", 3, $logFile);
     }
@@ -234,4 +263,4 @@ $stmt->execute([
     http_response_code(500);
     exit();
 }
-?>  
+?>

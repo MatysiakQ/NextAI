@@ -58,6 +58,24 @@ function mapPriceIdToPlan(priceId) {
   }
 }
 
+function parseDateSafe(dateVal) {
+  // Obsłuż ISO string, timestamp (sekundy), timestamp (milisekundy)
+  if (!dateVal) return null;
+  if (typeof dateVal === 'number') {
+    // Jeśli liczba, sprawdź czy to sekundy czy ms
+    if (dateVal > 1000000000000) return new Date(dateVal);
+    return new Date(dateVal * 1000);
+  }
+  if (typeof dateVal === 'string') {
+    // Jeśli ISO string
+    if (!isNaN(Date.parse(dateVal))) return new Date(dateVal);
+    // Jeśli liczba jako string
+    if (/^\d{10}$/.test(dateVal)) return new Date(parseInt(dateVal, 10) * 1000);
+    if (/^\d{13}$/.test(dateVal)) return new Date(parseInt(dateVal, 10));
+  }
+  return null;
+}
+
 // Funkcja do ładowania informacji o aktywnym pakiecie
 function loadActivePackageInfo() {
   const activePackageDiv = document.getElementById('active-package-info');
@@ -77,18 +95,13 @@ function loadActivePackageInfo() {
         const sub = data.subscription;
         // Użyj mapPriceIdToPlan jeśli jest price_id, fallback na plan_name lub plan
         let planName = sub.price_id ? mapPriceIdToPlan(sub.price_id) : (sub.plan_name || sub.plan);
-        // Wyznacz datę odnowienia na podstawie current_period_end
+
+        // --- POPRAWNE PARSOWANIE DATY ODNOWIENIA ---
         let renewDate = 'N/A';
         if (sub.current_period_end) {
-          // Obsłuż różne formaty daty (ISO lub timestamp)
-          let endDate = sub.current_period_end;
-          if (/^\d+$/.test(endDate)) {
-            endDate = new Date(parseInt(endDate) * 1000);
-          } else {
-            endDate = new Date(endDate);
-          }
-          if (!isNaN(endDate.getTime())) {
-            renewDate = endDate.toLocaleDateString('pl-PL');
+          const parsedDate = parseDateSafe(sub.current_period_end);
+          if (parsedDate && !isNaN(parsedDate.getTime()) && parsedDate.getFullYear() > 1971) {
+            renewDate = parsedDate.toLocaleDateString('pl-PL');
           }
         }
 
@@ -251,8 +264,23 @@ function loadSubscriptions() {
 
         const statusText = getStatusText(sub.status, sub.cancel_at_period_end);
         const statusClass = getStatusClass(sub.status, sub.cancel_at_period_end);
-        const currentPeriodEnd = sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pl-PL') : 'N/A';
-        const createdAt = sub.created_at ? new Date(sub.created_at).toLocaleDateString('pl-PL') : 'N/A';
+
+        // --- POPRAWNE PARSOWANIE DATY ---
+        let currentPeriodEnd = 'N/A';
+        if (sub.current_period_end) {
+          const parsedDate = parseDateSafe(sub.current_period_end);
+          if (parsedDate && !isNaN(parsedDate.getTime()) && parsedDate.getFullYear() > 1971) {
+            currentPeriodEnd = parsedDate.toLocaleDateString('pl-PL');
+          }
+        }
+
+        let createdAt = 'N/A';
+        if (sub.created_at) {
+          const parsedDate = parseDateSafe(sub.created_at);
+          if (parsedDate && !isNaN(parsedDate.getTime()) && parsedDate.getFullYear() > 1971) {
+            createdAt = parsedDate.toLocaleDateString('pl-PL');
+          }
+        }
 
         list.innerHTML = `
           <div class="subscription2-card">
@@ -804,7 +832,7 @@ let courseFilters = {
   search: ''
 };
 
-// Przykładowy status ukończenia kursów (w praktyce pobierz z backendu/usera)
+// Przykładowy status ukończenia kursów (w praktyce pobierz z backendu)
 let userCourseStatus = {}; // { [courseId]: 'started' | 'completed' }
 
 // Funkcja do pobrania statusów kursów użytkownika (tu: localStorage demo)
