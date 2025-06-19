@@ -126,13 +126,14 @@ try {
             $plan = $data->metadata->plan;
         }
 
-        $status = $stripeSubscription->status;
+        $status = 'active'; // zawsze startuje jako active
+        $currentPeriodStart = null;
+        $currentPeriodEnd = null;
+        $cancelAtPeriodEnd = 0;
 
         // --- USTAWIANIE current_period_start i current_period_end ---
         // Ustaw zawsze wartości (nie null!) nawet jeśli Stripe nie zwraca
         $now = new DateTime();
-        $currentPeriodStart = null;
-        $currentPeriodEnd = null;
 
         if (!empty($stripeSubscription->current_period_start) && $stripeSubscription->current_period_start > 0) {
             $currentPeriodStart = date('Y-m-d H:i:s', $stripeSubscription->current_period_start);
@@ -199,12 +200,19 @@ try {
 
     if ($type === 'customer.subscription.updated') {
         $subId = $data->id;
-        $status = $data->status;
+        $stripeStatus = $data->status;
         $currentStart = date('Y-m-d H:i:s', $data->current_period_start);
         $currentEnd = date('Y-m-d H:i:s', $data->current_period_end);
         $cancelAtPeriodEnd = $data->cancel_at_period_end ? 1 : 0;
 
-        // Ustal plan na podstawie Stripe (product/price)
+        // Mapuj status Stripe na status w bazie
+        $status = 'active';
+        if ($cancelAtPeriodEnd) {
+            $status = 'pending_cancellation';
+        } elseif ($stripeStatus === 'canceled' || $stripeStatus === 'cancelled') {
+            $status = 'canceled';
+        }
+
         $plan = null;
         if (!empty($data->items->data[0]->price->id)) {
             $plan = mapPriceIdToPlan($data->items->data[0]->price->id ?? null);
@@ -234,9 +242,13 @@ try {
 
     if ($type === 'customer.subscription.deleted') {
         $subId = $data->id;
-
-        $stmt = $pdo->prepare("UPDATE subscriptions SET status = 'canceled', updated_at = NOW() WHERE stripe_subscription_id = ?");
-        $stmt->execute([$subId]);
+        $currentPeriodEnd = null;
+        if (!empty($data->current_period_end) && $data->current_period_end > 0) {
+            $currentPeriodEnd = date('Y-m-d H:i:s', $data->current_period_end);
+        }
+        // Po zakończeniu okresu rozliczeniowego status = canceled
+        $stmt = $pdo->prepare("UPDATE subscriptions SET status = 'canceled', cancel_at_period_end = 1, current_period_end = ?, updated_at = NOW() WHERE stripe_subscription_id = ?");
+        $stmt->execute([$currentPeriodEnd, $subId]);
 
         error_log("[WEBHOOK] Subscription canceled: $subId", 3, $logFile);
     }

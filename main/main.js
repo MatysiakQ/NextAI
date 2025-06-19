@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let packageType = 'basic';
       if (card && card.classList.contains('premium')) packageType = 'pro';
       if (card && card.classList.contains('enterprise')) {
-        window.open('enterpirse_form.html', '_blank');
+        window.open('enterprise_form.html', '_blank');
         return;
       }
       // Sprawdź czy na stronie jest aktywna płatność roczna
