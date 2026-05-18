@@ -24,9 +24,6 @@
 ### 💻 GitHub Repository
 🔗 https://github.com/MatysiakQ/NextAI
 
-### 👨‍💻 Portfolio
-🔗 https://adamjastrzebski.bio/
-
 </div>
 
 ---
