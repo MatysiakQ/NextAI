@@ -283,6 +283,3 @@ https://next-ai.pl/
 
 ### GitHub Repository
 https://github.com/MatysiakQ/NextAI
-
-### Portfolio
-https://adamjastrzebski.bio/
